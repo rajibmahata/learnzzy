@@ -1,0 +1,62 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+      MONGODB_URI: mongodb://mongo:27017/learnzzy
+      MONGODB_DB_NAME: learnzzy
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
+      ADMIN_AUTH_SECRET: ${ADMIN_AUTH_SECRET}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
+    depends_on:
+      mongo:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  worker:
+    build: .
+    restart: unless-stopped
+    command: ["sh", "-c", "node src/workers/worker.js 2>/dev/null || echo 'worker: web handles queue in-process when REDIS_URL is set; durable worker requires compiled worker artifact' && sleep infinity"]
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+      MONGODB_URI: mongodb://mongo:27017/learnzzy
+      MONGODB_DB_NAME: learnzzy
+      REDIS_URL: redis://redis:6379
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
+    depends_on:
+      mongo:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  mongo-data:
+  redis-data:

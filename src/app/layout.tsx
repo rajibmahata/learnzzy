@@ -1,0 +1,53 @@
+import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import "../styles/globals.css";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ToastProvider } from "@/components/ui/Toast";
+
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["500", "700", "800"] });
+
+export const metadata: Metadata = {
+  title: "Learnzzy — Play. Think. Learn.",
+  description:
+    "Tiny games. Big learning. Simple educational adventures designed for curious kids.",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/icon-192.png",
+  },
+  openGraph: {
+    title: "Learnzzy — Play. Think. Learn.",
+    description: "Tiny games. Big learning.",
+    type: "website",
+  },
+  keywords: ["kids", "learning", "educational games", "addition", "subtraction", "puzzle", "PWA"],
+  authors: [{ name: "Learnzzy" }],
+  robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f8f9ff",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={jakarta.className}>
+      <head />
+      <body className="pt-safe pb-safe min-h-screen">
+        <ErrorBoundary>
+          <ToastProvider>
+            <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:p-2 focus:bg-white">
+              Skip to content
+            </a>
+            <main id="main">{children}</main>
+            <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}` }} />
+          </ToastProvider>
+        </ErrorBoundary>
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,34 @@
+/* Learnzzy design tokens — Playful Wonder (single source of truth for Tailwind + CSS) */
+:root {
+  --color-background: #f8f9ff;
+  --color-cream: #fdfbf7;
+  --color-surface: #ffffff;
+  --color-surface-low: #eff4ff;
+  --color-surface-container: #e6eeff;
+  --color-surface-high: #dce9ff;
+  --color-surface-highest: #d5e3fc;
+  --color-primary: #0058be;
+  --color-primary-container: #2170e4;
+  --color-primary-fixed: #d8e2ff;
+  --color-on-primary: #ffffff;
+  --color-secondary-container: #fea619;
+  --color-tertiary-fixed: #6ffbbe;
+  --color-tertiary: #006947;
+  --color-error-container: #ffdad6;
+  --color-text: #0d1c2e;
+  --color-muted: #424754;
+  --color-stroke: #e7e0d2;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-pill: 9999px;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1.25rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --touch-min: 56px;
+  --touch-lg: 68px;
+  --shadow-pillow: 0 4px 0 #e2dac8, 0 8px 16px rgba(180, 160, 130, 0.12);
+}

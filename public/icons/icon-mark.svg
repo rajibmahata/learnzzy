@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Learnzzy rainbow mark">
+  <rect width="512" height="512" fill="#FDFBF7"/>
+  <!-- Rainbow arcs -->
+  <path d="M106 330 C 106 180, 406 180, 406 330" stroke="#F43F5E" stroke-width="34" stroke-linecap="round" fill="none"/>
+  <path d="M136 330 C 136 210, 376 210, 376 330" stroke="#FBBF24" stroke-width="30" stroke-linecap="round" fill="none"/>
+  <path d="M166 330 C 166 240, 346 240, 346 330" stroke="#10B981" stroke-width="26" stroke-linecap="round" fill="none"/>
+  <path d="M196 330 C 196 270, 316 270, 316 330" stroke="#3B82F6" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <!-- Cloud puffs -->
+  <circle cx="96" cy="330" r="44" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="10"/>
+  <circle cx="132" cy="306" r="52" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="10"/>
+  <circle cx="380" cy="306" r="52" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="10"/>
+  <circle cx="416" cy="330" r="44" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="10"/>
+  <!-- Sparkles -->
+  <path d="M256 92 L263 117 L288 124 L263 131 L256 156 L249 131 L224 124 L249 117 Z" fill="#F59E0B"/>
+  <circle cx="148" cy="118" r="14" fill="#FBBF24"/>
+</svg>
