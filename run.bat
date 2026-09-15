@@ -216,17 +216,23 @@ echo [INFO] This builds web + mongo + redis ^(first build downloads images, be p
 docker compose up --build
 if errorlevel 1 (
   echo.
-  echo [ERROR] Docker Compose exited with an error. Common causes:
-  echo   - Port 3000/27018/6379 already in use ^(see container list below^)
+  echo [ERROR] Docker Compose exited with an error. Live diagnosis:
+  echo.
+  echo --- our containers ---
+  docker compose ps
+  echo.
+  echo --- last service logs ^(the real error is usually here^) ---
+  docker compose logs --tail=25 --no-log-prefix web mongo redis
+  echo.
+  echo --- docker disk usage ---
+  docker system df
+  echo.
+  echo [INFO] Common causes:
+  echo   - Port 3000/27018/6379 already in use by another container/program
+  echo     ^(stop it with 'docker stop NAME', or free the port^)
   echo   - Image pull blocked by proxy/VPN ^(retry or pull manually^)
-  echo   - Not enough disk for images ^(docker system prune frees space^)
-  echo.
-  echo [INFO] Running containers right now:
-  docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-  echo.
-  echo [INFO] If another container owns a needed port, either stop it
-  echo   ^(docker stop NAME^) or change our host port in docker-compose.yml
-  echo   ^(and match MONGODB_URI/REDIS_URL in .env.local^).
+  echo   - Disk full ^('docker system prune -a' frees space, removes unused images^)
+  echo   If it still fails, share the lines above ^(^'docker compose logs'^) for help.
   pause
   exit /b 1
 )
