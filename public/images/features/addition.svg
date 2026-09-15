@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400" role="img" aria-label="Number Adventure — addition game">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff8a5c"/>
+      <stop offset="1" stop-color="#ff3d68"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="32" fill="url(#g)"/>
+  <circle cx="710" cy="50" r="130" fill="#ffffff" opacity="0.12"/>
+  <circle cx="80" cy="360" r="95" fill="#ffffff" opacity="0.10"/>
+  <circle cx="640" cy="330" r="45" fill="#ffffff" opacity="0.14"/>
+  <text x="170" y="225" font-size="150" text-anchor="middle" dominant-baseline="central">🔢</text>
+  <text x="330" y="175" font-size="54" font-weight="800" fill="#ffffff" font-family="'Plus Jakarta Sans',system-ui,sans-serif">Number Adventure</text>
+  <text x="332" y="228" font-size="27" fill="#ffffff" opacity="0.92" font-family="'Plus Jakarta Sans',system-ui,sans-serif">Count apples · add within 20</text>
+  <rect x="332" y="258" width="190" height="46" rx="23" fill="#ffffff" opacity="0.22"/>
+  <text x="427" y="289" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="'Plus Jakarta Sans',system-ui,sans-serif">▶ Play now</text>
+</svg>

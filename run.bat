@@ -152,21 +152,61 @@ call npm start
 goto :END
 
 :DOCKER
-where docker >nul 2>&1
+echo [INFO] Checking Docker...
+docker --version >nul 2>&1
 if errorlevel 1 (
-  echo [ERROR] Docker not found. Install Docker Desktop from https://www.docker.com/products/docker-desktop/
+  echo [ERROR] Docker CLI not found or not runnable.
+  echo   1. Install Docker Desktop from https://www.docker.com/products/docker-desktop/
+  echo   2. If Docker Desktop IS installed but this persists, a stray file
+  echo      C:\windows\system32\docker may be shadowing docker.exe.
+  echo      From an elevated prompt run: del C:\windows\system32\docker
+  echo      Then restart your terminal and try again.
   pause
   exit /b 1
 )
+docker info >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] Docker CLI works but the daemon is not reachable.
+  echo   Start Docker Desktop and wait until it shows green/running,
+  echo   then run this option again.
+  pause
+  exit /b 1
+)
+docker compose version >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] 'docker compose' plugin not found. Update Docker Desktop to a
+  echo   recent version ^(Compose v2 is bundled since 2021^), then retry.
+  pause
+  exit /b 1
+)
+echo [OK] Docker daemon reachable.
 call :ENSURE_ENV
 echo [INFO] MONGODB_URI and REDIS_URL are provided by Docker containers:
 echo   - mongo:27017  -^> host 127.0.0.1:27017  ^(exposed in docker-compose.yml)
 echo   - redis:6379   -^> host 127.0.0.1:6379   ^(exposed in docker-compose.yml)
-echo   - Inside Docker: web/worker use mongodb://mongo:27017/learnzzy and redis://redis:6379
+echo   - Inside Docker: web uses mongodb://mongo:27017/learnzzy and redis://redis:6379
+echo     ^(agent jobs run in-process in web; see docker-compose.yml note^)
 echo   - Outside Docker: npm run dev uses mongodb://127.0.0.1:27017/learnzzy_dev and redis://127.0.0.1:6379
+echo [INFO] Validating compose file...
+docker compose config >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] docker-compose.yml failed validation. Run 'docker compose config'
+  echo   manually to see details.
+  pause
+  exit /b 1
+)
 echo [INFO] Starting Docker Compose - http://localhost:3000
-echo [INFO] This builds web + worker + mongo + redis.
+echo [INFO] This builds web + mongo + redis ^(first build downloads images, be patient^).
 docker compose up --build
+if errorlevel 1 (
+  echo.
+  echo [ERROR] Docker Compose exited with an error. Common causes:
+  echo   - Port 3000/27017/6379 already in use ^(stop local servers first^)
+  echo   - Image pull blocked by proxy/VPN ^(retry or pull manually^)
+  echo   - Not enough disk for images ^(docker system prune frees space^)
+  pause
+  exit /b 1
+)
 goto :END
 
 :SEED
@@ -200,7 +240,7 @@ if "%ADMINPW%"=="" (
   pause
   goto :MENU
 )
-call node scripts/admin-setup.mjs %ADMINPW%
+call node scripts/admin-setup.mjs "%ADMINPW%"
 echo.
 echo [INFO] Copy the 3 lines above into your .env.local (append, don't replace existing MONGODB_URI/REDIS_URL)
 echo [INFO] Example .env.local after append:

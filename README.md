@@ -7,13 +7,22 @@ asynchronous AI/agent workforce operating behind the scenes.
 > Intelligence (AI, personalization, educational knowledge, agents) stays
 > server-side and never blocks gameplay.
 
-## Games
+## Features
+
+| | | |
+|---|---|---|
+| ![Number Adventure](public/images/features/addition.svg) | ![Fly Away](public/images/features/subtraction.svg) | ![Clean Up](public/images/features/clean-up.svg) |
+| ![Picture Puzzle](public/images/features/puzzle.svg) | ![Shadow Sketch](public/images/features/sketch.svg) | ![Adaptive Learning](public/images/features/adaptive.svg) |
+| ![Parent Dashboard](public/images/features/parents.svg) | ![Command Center](public/images/features/admin.svg) | |
 
 1. **Number Adventure** — addition through pictures
 2. **Fly Away** — subtraction by counting what remains
 3. **Clean Up** — spot-and-clean scenes
 4. **Picture Puzzle** — drag/tap spatial puzzles
 5. **Shadow Sketch** — tracing with forgiving evaluation
+6. **Adaptive Learning** — levels, plans, stars, stickers
+7. **Parent Dashboard** — progress, insights, pairing
+8. **Command Center** — agents, pools, provider health (admin)
 
 ## Stack
 

@@ -18,27 +18,21 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
     depends_on:
       mongo:
-        condition: service_started
+        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
 
-  worker:
-    build: .
-    restart: unless-stopped
-    command: ["sh", "-c", "node src/workers/worker.js 2>/dev/null || echo 'worker: web handles queue in-process when REDIS_URL is set; durable worker requires compiled worker artifact' && sleep infinity"]
-    environment:
-      NODE_ENV: production
-      APP_ENV: production
-      MONGODB_URI: mongodb://mongo:27017/learnzzy
-      MONGODB_DB_NAME: learnzzy
-      REDIS_URL: redis://redis:6379
-      AI_API_KEY: ${AI_API_KEY:-}
-      AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
-    depends_on:
-      mongo:
-        condition: service_started
-      redis:
-        condition: service_started
+  # NOTE: no separate worker service. The web process registers BullMQ
+  # workers in-process when REDIS_URL is set (see src/queue/queue.ts), so
+  # background agent jobs run durably without a second container. Scale by
+  # adding web replicas; a standalone worker requires a compiled worker
+  # artifact (src/workers/worker.ts is TypeScript with path aliases).
 
   mongo:
     image: mongo:7
@@ -47,6 +41,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   redis:
     image: redis:7-alpine
@@ -56,6 +56,12 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   mongo-data:

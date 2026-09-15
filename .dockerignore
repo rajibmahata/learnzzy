@@ -1,1 +1,15 @@
 node_modules
+.next
+out
+.dev
+.git
+.env
+.env*.local
+*.log
+.DS_Store
+test-results/
+playwright-report/
+playwright/.cache/
+tsconfig.tsbuildinfo
+e2e/
+coverage/
