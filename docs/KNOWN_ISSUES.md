@@ -71,6 +71,8 @@ At the time this document was created, no implementation-specific defect should 
 | KI-014 | Stale dev/prod servers on :3000 poison Playwright runs via reuseExistingServer | P2 | RESOLVED | QA | Kill stale node processes before e2e; health-check-only reuse documented in playwright.config |
 | KI-015 | Redis outage hung API requests (ioredis infinite reconnect + never-settling init promises) | P1 | RESOLVED | Resilience | Fail-fast clients (no reconnect, 500ms–1s ping probe, op timeouts) + 10s negative-result caching in limiter, education cache, queue bootstrap |
 | KI-016 | Secure session cookies broke all logins over local Docker HTTP | P1 | RESOLVED | Auth | `COOKIE_SECURE=false` in base compose for local HTTP; `"true"` in prod override; Secure stays the default |
+| KI-017 | `scene.events.once` on unbooted scenes crashed all 5 Phaser games silently (white stages, zero console output) | P0 | RESOLVED | Games | Readiness via Game `ready` event; catch now warns; `e2e/canvas.spec.ts` guards regression. See `SKETCH_DOCKER_ROOT_CAUSE.md` |
+| KI-018 | `$` delimiters in password hashes corrupted by compose dotenv + Next dotenv-expand (`$VAR` interpolation) | P1 | RESOLVED | Auth | Hash format changed to `scrypt:<salt>:<hex>`; old hashes invalid |
 
 **Important:** KI-002 through KI-010 are scope/decision limitations, not confirmed software bugs.
 

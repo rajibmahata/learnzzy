@@ -7,7 +7,7 @@ if (!password || password.length < 12) {
   process.exit(1);
 }
 const salt = "learnzzy-admin-v1";
-const hash = `scrypt$${salt}$${scryptSync(password, salt, 64).toString("hex")}`;
+const hash = `scrypt:${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
 console.log("Add these lines to .env.local (never commit):");
 console.log("ADMIN_EMAIL=admin@learnzzy.local");
 console.log(`ADMIN_PASSWORD_HASH=${hash}`);

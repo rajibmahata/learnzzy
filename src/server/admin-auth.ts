@@ -21,7 +21,9 @@ function sign(payload: string): string {
 
 export function hashPassword(password: string): string {
   const salt = "learnzzy-admin-v1";
-  return `scrypt$${salt}$${scryptSync(password, salt, 64).toString("hex")}`;
+  // Delimiters are ':' (never '$'): env files (compose dotenv, Next.js
+  // dotenv-expand) interpolate $VAR, which would corrupt the stored hash.
+  return `scrypt:${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
 }
 
 export function verifyPassword(password: string, expected: string): boolean {

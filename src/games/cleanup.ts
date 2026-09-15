@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { mulberry32, type GameDefinition } from "./framework";
+import { mulberry32, type GameDefinition } from "./framework.ts";
 
 // BR-050..055 — Clean Up: defined targets, valid hit areas, decorations never
 // count, complete only when all targets collected.

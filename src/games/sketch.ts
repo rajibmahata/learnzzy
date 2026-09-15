@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { mulberry32, type GameDefinition } from "./framework";
-import { hashSeed } from "./cleanup";
+import { mulberry32, type GameDefinition } from "./framework.ts";
+import { hashSeed } from "./cleanup.ts";
 
 // BR-070..073 — tracing: valid outline asset (guide path), deterministic
 // geometry evaluation, no pixel-perfect requirement, positive feedback.

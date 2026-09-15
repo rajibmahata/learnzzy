@@ -9,6 +9,7 @@ export interface SketchSceneApi {
   clear: () => void;
   getDrawing: () => { x: number; y: number }[][];
   onStrokeStart: (cb: () => void) => void;
+  setInkColor: (hex: number) => void;
 }
 
 const W = 720;
@@ -27,6 +28,7 @@ export function createSketchScene(P: typeof Phaser) {
     private last: { x: number; y: number } | null = null;
     private strokeCb: (() => void) | null = null;
     private drawing = false;
+    private inkColor = 0x0058be;
 
     constructor() {
       super({ key: "sketch" });
@@ -44,13 +46,13 @@ export function createSketchScene(P: typeof Phaser) {
       this.input.on("pointermove", (p: Phaser.Input.Pointer) => {
         if (!this.drawing || !p.isDown || !this.current || !this.last) return;
         if (Math.hypot(p.x - this.last.x, p.y - this.last.y) < 4) return;
-        this.ink.lineStyle(12, 0x0058be, 1);
+        this.ink.lineStyle(12, this.inkColor, 1);
         this.ink.beginPath();
         this.ink.moveTo(this.last.x, this.last.y);
         this.ink.lineTo(p.x, p.y);
         this.ink.strokePath();
         // Round the joints with dots.
-        this.ink.fillStyle(0x0058be, 1);
+        this.ink.fillStyle(this.inkColor, 1);
         this.ink.fillCircle(p.x, p.y, 6);
         this.current.push({ x: fromX(p.x), y: fromY(p.y) });
         this.last = { x: p.x, y: p.y };
@@ -69,6 +71,11 @@ export function createSketchScene(P: typeof Phaser) {
 
     onStrokeStart(cb: () => void) {
       this.strokeCb = cb;
+    }
+
+    setInkColor(hex: number) {
+      // Cosmetic only — evaluation (coverage/tolerance) never sees color.
+      if (Number.isInteger(hex) && hex >= 0 && hex <= 0xffffff) this.inkColor = hex;
     }
 
     showGuide(def: SketchDef) {

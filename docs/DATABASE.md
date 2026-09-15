@@ -1026,7 +1026,7 @@ Parent accounts. Children never sign in here.
   "parentId": "parent_...",
   "email": "parent@example.com",
   "name": "Optional",
-  "passwordHash": "scrypt$learnzzy-parent-v1$...",
+  "passwordHash": "scrypt:learnzzy-parent-v1:...",
   "status": "active",
   "createdAt": "Date",
   "updatedAt": "Date",

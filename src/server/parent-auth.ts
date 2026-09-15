@@ -24,7 +24,8 @@ function sign(payload: string): string {
 }
 
 export function hashParentPassword(password: string): string {
-  return `scrypt$${SALT}$${scryptSync(password, SALT, 64).toString("hex")}`;
+  // ':' delimiters (never '$') — same env-interpolation reason as admin-auth.
+  return `scrypt:${SALT}:${scryptSync(password, SALT, 64).toString("hex")}`;
 }
 
 export function verifyParentPassword(password: string, expected: string): boolean {

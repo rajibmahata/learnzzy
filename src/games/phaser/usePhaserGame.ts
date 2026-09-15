@@ -33,10 +33,6 @@ export function usePhaserGame<Api>(args: {
       const Klass = createSceneClass.current(PhaserLib);
       const scene = new Klass();
       apiRef.current = scene;
-      // Scene emits 'create' after create() finishes — then API calls are safe.
-      scene.events.once("create", () => {
-        if (!cancelled) setReady(true);
-      });
       game = new PhaserLib.Game({
         type: PhaserLib.AUTO,
         parent: container,
@@ -52,9 +48,18 @@ export function usePhaserGame<Api>(args: {
         },
         scene: [scene],
       });
-    })().catch(() => {
-      // WebGL/canvas unavailable: the DOM pills still convey the quantities,
-      // so gameplay degrades gracefully instead of breaking.
+      // Readiness via the Game 'ready' event: it fires after boot completes
+      // and the scene's create() has run, so API calls are safe. (Never use
+      // scene.events before boot — the emitter is attached by the
+      // SceneManager during boot, and touching it earlier throws.)
+      game.events.once("ready", () => {
+        if (!cancelled) setReady(true);
+      });
+    })().catch((err: unknown) => {
+      // Gameplay degrades gracefully (DOM fallback conveys the activity), but
+      // the failure must be VISIBLE: a silent catch here once hid a total
+      // engine outage across all five games with zero console output.
+      console.warn("[learnzzy] Phaser boot failed, using DOM fallback", err);
     });
     return () => {
       cancelled = true;

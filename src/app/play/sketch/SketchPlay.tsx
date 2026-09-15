@@ -15,6 +15,14 @@ import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 
+const INK_COLORS = [
+  { name: "Blue", hex: 0x0058be, css: "#0058be" },
+  { name: "Red", hex: 0xd7263d, css: "#d7263d" },
+  { name: "Green", hex: 0x1f9d55, css: "#1f9d55" },
+  { name: "Orange", hex: 0xf4890a, css: "#f4890a" },
+  { name: "Purple", hex: 0x7b2fbe, css: "#7b2fbe" },
+] as const;
+
 export default function SketchPlay() {
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
@@ -22,6 +30,7 @@ export default function SketchPlay() {
   const [done, setDone] = React.useState(false);
   const [result, setResult] = React.useState<"idle" | "good" | "retry">("idle");
   const [startedAt, setStartedAt] = React.useState<number | null>(null);
+  const [inkColor, setInkColor] = React.useState<(typeof INK_COLORS)[number]>(INK_COLORS[0]);
   const apiRef = React.useRef<SketchSceneApi | null>(null);
   const retryRounds = React.useRef<Set<number>>(new Set());
 
@@ -55,6 +64,11 @@ export default function SketchPlay() {
   function clear() {
     apiRef.current?.clear();
     setResult("idle");
+  }
+
+  function pickColor(c: (typeof INK_COLORS)[number]) {
+    setInkColor(c);
+    apiRef.current?.setInkColor(c.hex);
   }
 
   function finish() {
@@ -124,6 +138,19 @@ export default function SketchPlay() {
         <SketchStage sketch={sketch} onStrokeStart={strokeStart} apiRef={apiRef} />
       </div>
       <p className="mt-2 text-center text-sm font-bold text-on-surface-variant">✏️ Draw here</p>
+      <div className="mt-2 flex items-center justify-center gap-3" role="group" aria-label="Pick a crayon color">
+        {INK_COLORS.map((c) => (
+          <button
+            key={c.name}
+            type="button"
+            aria-label={`${c.name} crayon`}
+            aria-pressed={inkColor.name === c.name}
+            onClick={() => pickColor(c)}
+            className={`h-12 w-12 rounded-full border-4 shadow-card transition-transform active:scale-95 ${inkColor.name === c.name ? "border-on-surface scale-110" : "border-white"}`}
+            style={{ backgroundColor: c.css }}
+          />
+        ))}
+      </div>
       <div className="mt-2 flex gap-3">
         <Button variant="outline" size="lg" className="flex-1" onClick={clear}>
           Clear
