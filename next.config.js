@@ -1,3 +1,5 @@
+const { withSentryConfig } = require("@sentry/nextjs");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -27,4 +29,8 @@ const nextConfig = {
   // PWA headers for installability are set via manifest + SW.
 };
 
-module.exports = nextConfig;
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  // No auth token in repo/CI: skip sourcemap upload, keep runtime monitoring.
+  sourcemaps: { disable: true },
+});

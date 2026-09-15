@@ -6,7 +6,7 @@ import { enqueue } from "@/queue/queue";
 import { ensureWorkers } from "@/workers/ensure";
 import { audit } from "@/server/audit";
 import { classify } from "@/server/ai";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const CommandSchema = z.object({ command: z.string().min(3).max(500) });
 
@@ -60,7 +60,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const auth = requireAdmin();
   if (!auth.ok) return auth.response;
-  const rl = take(`admin-cmd:${clientIp(req)}:${auth.admin.id}`, 20, 60_000);
+  const rl = await takeAsync(`admin-cmd:${clientIp(req)}:${auth.admin.id}`, 20, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many commands." } }, { status: 429 });
   const parsed = CommandSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return badRequest("Command is required.");

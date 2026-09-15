@@ -43,9 +43,11 @@ personalization engine + learning plans, learner setup/plan/sticker UI, admin
 learner-insights/levels/QA endpoints, Education Gateway with Tutor/OER/NCERT
 adapters (mock-first, disabled by default), concept model, advisory-only
 planner hook, OER content grounding with provenance, parent auth + pairing +
-parent/child dashboards, and admin education diagnostics) are implemented and
-verified with lint, typecheck, 87 automated tests, 52 Playwright specs,
-production build, and local API smoke checks.
+parent/child dashboards, admin education diagnostics, Sentry wiring, Redis-backed
+rate limiting, prod deploy assets, backup script, and QA instructions) are
+implemented and verified with lint, typecheck, 92 automated tests, 52 Playwright
+specs, production build, Docker-stack smoke checks, and a live pairing-chain
+proof.
 Remaining backlog items are production-hardening or explicitly listed in
 `NEXT_SESSION.md`.
 

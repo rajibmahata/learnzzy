@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { getLearner } from "@/repositories/learners";
 import { buildPlan, savePlan } from "@/services/personalizationService";
 import { getDb } from "@/db/mongodb";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
-function limited(req: Request): NextResponse | null {
-  const rl = take(`learner:plan:${clientIp(req)}`, 30, 60_000);
+async function limited(req: Request): Promise<NextResponse | null> {
+  const rl = await takeAsync(`learner:plan:${clientIp(req)}`, 30, 60_000);
   if (!rl.allowed) {
     return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many plan requests." } }, { status: 429 });
   }
@@ -13,7 +13,7 @@ function limited(req: Request): NextResponse | null {
 }
 
 export async function GET(req: Request, { params }: { params: { learnerId: string } }) {
-  const blocked = limited(req);
+  const blocked = await limited(req);
   if (blocked) return blocked;
   const learner = await getLearner(params.learnerId);
   if (!learner) return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: "Learner not found." } }, { status: 404 });
@@ -28,7 +28,7 @@ export async function GET(req: Request, { params }: { params: { learnerId: strin
 }
 
 export async function POST(req: Request, { params }: { params: { learnerId: string } }) {
-  const blocked = limited(req);
+  const blocked = await limited(req);
   if (blocked) return blocked;
   const learner = await getLearner(params.learnerId);
   if (!learner) return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: "Learner not found." } }, { status: 404 });

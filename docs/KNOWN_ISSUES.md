@@ -69,6 +69,8 @@ At the time this document was created, no implementation-specific defect should 
 | KI-012 | Playwright browser download fails on small disks (ENOSPC) | P2 | MITIGATED | QA | e2e runs on system Chrome via channel (`PLAYWRIGHT_CHROME_PATH` override supported) |
 | KI-013 | Live Tutor/OER/NCERT servers not deployed; gateway uses deterministic mocks | P2 | MITIGATED | Integrations | All providers disabled by default; mocks implement the same validated interfaces; wire URLs/keys to go live |
 | KI-014 | Stale dev/prod servers on :3000 poison Playwright runs via reuseExistingServer | P2 | RESOLVED | QA | Kill stale node processes before e2e; health-check-only reuse documented in playwright.config |
+| KI-015 | Redis outage hung API requests (ioredis infinite reconnect + never-settling init promises) | P1 | RESOLVED | Resilience | Fail-fast clients (no reconnect, 500ms–1s ping probe, op timeouts) + 10s negative-result caching in limiter, education cache, queue bootstrap |
+| KI-016 | Secure session cookies broke all logins over local Docker HTTP | P1 | RESOLVED | Auth | `COOKIE_SECURE=false` in base compose for local HTTP; `"true"` in prod override; Secure stays the default |
 
 **Important:** KI-002 through KI-010 are scope/decision limitations, not confirmed software bugs.
 

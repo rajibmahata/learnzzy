@@ -3,7 +3,7 @@ import { z } from "zod";
 import { confirmPairingCode } from "@/repositories/parents";
 import { getLearner } from "@/repositories/learners";
 import { audit } from "@/server/audit";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const ConfirmSchema = z.object({
   code: z.string().trim().min(5).max(12),
@@ -14,7 +14,7 @@ const ConfirmSchema = z.object({
 // Creates a PENDING link — the parent must still approve. Rate-limited hard
 // against guessing (6-char space + 5 tries/hour/IP).
 export async function POST(req: Request) {
-  const rate = take(`pairing-confirm:${clientIp(req)}`, 5, 60 * 60 * 1000);
+  const rate = await takeAsync(`pairing-confirm:${clientIp(req)}`, 5, 60 * 60 * 1000);
   if (!rate.allowed) {
     return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many attempts. Try again later." } }, { status: 429 });
   }

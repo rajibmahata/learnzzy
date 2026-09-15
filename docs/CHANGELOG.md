@@ -16,6 +16,10 @@
 - Parent experience: scrypt auth + HttpOnly sessions, single-use expiring pairing codes, active-link authorization, child summaries/insights/activity/progress/plan APIs, 10 parent pages, 5 public parent pages, child `/link` page, landing footer links.
 - Admin education diagnostics (`providers/health/provenance`) + command-center providers panel.
 - 37 gateway/parent/pairing unit tests; 52 Playwright specs across 4 viewports on system Chrome.
+- Sentry SDK wired (client/server/edge configs, ErrorBoundary reporting; inert without DSN).
+- Redis-backed fixed-window rate limiting on all 16 write/auth endpoints with instant memory fallback.
+- Production deploy assets: `docker-compose.prod.yml` (loopback-only web, log rotation), `deploy/nginx.prod.conf` (TLS example), `npm run backup` driver-based JSON dumps, completed QA agent instructions.
+- Resilience fixes (live-verified): fail-fast Redis clients + 10s negative-result caching in limiter, education cache, and BullMQ bootstrap (Redis outage previously hung requests); `COOKIE_SECURE` escape for local Docker HTTP auth while production stays Secure; `PARENT_AUTH_SECRET` plumbed through compose with `.env` auto-generation via `scripts/docker-env.mjs`.
 
 ### Changed
 - `/api/games` now exposes all five MVP games as active.

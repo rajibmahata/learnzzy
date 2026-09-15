@@ -74,7 +74,10 @@ export function setParentSessionCookie(token: string) {
     opts: {
       httpOnly: true,
       sameSite: "lax" as const,
-      secure: process.env.NODE_ENV === "production",
+      // Secure cookies require HTTPS. Local Docker runs plain HTTP, so the
+      // base compose sets COOKIE_SECURE=false; production (TLS) leaves the
+      // default, keeping cookies Secure.
+      secure: process.env.NODE_ENV === "production" && process.env.COOKIE_SECURE !== "false",
       path: "/",
       maxAge: SESSION_TTL_MS / 1000,
     },

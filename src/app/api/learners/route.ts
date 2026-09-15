@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createLearner, AGE_BANDS } from "@/repositories/learners";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const CreateSchema = z.object({
   nickname: z.string().trim().min(1).max(20).optional().or(z.literal("")),
@@ -10,7 +10,7 @@ const CreateSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const rl = take(`learners:create:${clientIp(req)}`, 20, 60_000);
+  const rl = await takeAsync(`learners:create:${clientIp(req)}`, 20, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests." } }, { status: 429 });
   let body: unknown;
   try {

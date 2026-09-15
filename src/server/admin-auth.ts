@@ -73,7 +73,8 @@ export function setSessionCookie(token: string): { name: string; value: string; 
     opts: {
       httpOnly: true,
       sameSite: "lax" as const,
-      secure: process.env.NODE_ENV === "production",
+      // See parent-auth.ts: COOKIE_SECURE=false allows local Docker over HTTP.
+      secure: process.env.NODE_ENV === "production" && process.env.COOKIE_SECURE !== "false",
       path: "/",
       maxAge: SESSION_TTL_MS / 1000,
     },

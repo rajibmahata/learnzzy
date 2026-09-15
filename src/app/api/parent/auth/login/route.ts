@@ -3,12 +3,12 @@ import { z } from "zod";
 import { getParentByEmail, touchParentLogin } from "@/repositories/parents";
 import { verifyParentPassword, issueParentSession, setParentSessionCookie } from "@/server/parent-auth";
 import { audit } from "@/server/audit";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const LoginSchema = z.object({ email: z.string().email().max(120), password: z.string().min(1).max(128) });
 
 export async function POST(req: Request) {
-  const rate = take(`parent-login:${clientIp(req)}`, 8, 15 * 60 * 1000);
+  const rate = await takeAsync(`parent-login:${clientIp(req)}`, 8, 15 * 60 * 1000);
   if (!rate.allowed) {
     return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Try again later." } }, { status: 429, headers: { "Retry-After": String(Math.ceil(rate.retryAfterMs / 1000)) } });
   }

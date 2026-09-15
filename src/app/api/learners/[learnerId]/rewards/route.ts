@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getLearner, addLearnerStars } from "@/repositories/learners";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const RewardSchema = z.object({ gameId: z.string().min(1).max(30), stars: z.number().int().min(1).max(10).default(3), stickerId: z.string().max(50).optional(), stickerEmoji: z.string().max(10).optional() });
 
@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: { params: { learnerId: stri
 }
 
 export async function POST(req: Request, { params }: { params: { learnerId: string } }) {
-  const rl = take(`learner:rewards:${clientIp(req)}`, 20, 60_000);
+  const rl = await takeAsync(`learner:rewards:${clientIp(req)}`, 20, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests." } }, { status: 429 });
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ success: false, error: { code: "INVALID_REQUEST", message: "Invalid JSON." } }, { status: 400 }); }

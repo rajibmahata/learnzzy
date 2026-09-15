@@ -3,7 +3,7 @@ import { z } from "zod";
 import { approvePairing, createPairingCode, listLinksForParent, pendingPairings, revokeLink } from "@/repositories/parents";
 import { requireParent } from "@/server/parent-auth";
 import { audit } from "@/server/audit";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 // GET: pending pairings + link overview. POST: create code / approve / revoke.
 const ApproveSchema = z.object({ action: z.literal("approve"), learnerId: z.string().min(1).max(100) });
@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const auth = requireParent();
   if (!auth.ok) return auth.response;
-  const rate = take(`parent-pairing:${clientIp(req)}:${auth.parent.id}`, 10, 60 * 60 * 1000);
+  const rate = await takeAsync(`parent-pairing:${clientIp(req)}:${auth.parent.id}`, 10, 60 * 60 * 1000);
   if (!rate.allowed) {
     return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many pairing attempts." } }, { status: 429 });
   }

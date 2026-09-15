@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSession } from "@/repositories/sessions";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const CreateSessionSchema = z.object({
   deviceType: z.string().max(30).optional(),
@@ -13,7 +13,7 @@ const CreateSessionSchema = z.object({
 // returns an ephemeral session so gameplay continues (BR-221).
 export async function POST(req: Request) {
   const requestId = `req_${Date.now().toString(36)}`;
-  const rl = take(`sessions:${clientIp(req)}`, 30, 60_000);
+  const rl = await takeAsync(`sessions:${clientIp(req)}`, 30, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests.", requestId } }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
   let body: unknown = {};
   try {

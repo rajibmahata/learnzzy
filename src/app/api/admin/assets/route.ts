@@ -6,7 +6,7 @@ import { createTask } from "@/server/agent-store";
 import { enqueue } from "@/queue/queue";
 import { ensureWorkers } from "@/workers/ensure";
 import { audit } from "@/server/audit";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const GenerateSchema = z.object({ type: z.string().min(1).max(40), theme: z.string().min(1).max(30), games: z.array(z.string().min(1).max(30)).min(1).max(5).default(["addition"]) });
 
@@ -31,7 +31,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const auth = requireAdmin();
   if (!auth.ok) return auth.response;
-  const rl = take(`admin-asset:${clientIp(req)}:${auth.admin.id}`, 10, 60_000);
+  const rl = await takeAsync(`admin-asset:${clientIp(req)}:${auth.admin.id}`, 10, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many asset requests." } }, { status: 429 });
   const parsed = GenerateSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return badRequest("Invalid asset generation request.");

@@ -16,19 +16,62 @@ let misses = 0;
 let redis: { get(k: string): Promise<string | null>; set(k: string, v: string, mode: string, ttl: number): Promise<unknown> } | null = null;
 let redisInit: Promise<void> | null = null;
 
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("redis timeout")), ms);
+    p.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      }
+    );
+  });
+}
+
+let redisDownUntil = 0;
+const REDIS_RETRY_COOLDOWN_MS = 10_000;
+
 async function redisClient() {
   if (!process.env.REDIS_URL) return null;
+  // Negative-result caching: instant memory fallback while Redis is down.
+  if (Date.now() < redisDownUntil) return null;
   if (!redisInit) {
+    let client: { disconnect(): void; on(e: string, h: () => void): void; ping(): Promise<string> } | null = null;
     redisInit = (async () => {
       try {
         const { default: IORedis } = await import("ioredis");
-        const client = new IORedis(process.env.REDIS_URL as string, { maxRetriesPerRequest: 1, enableReadyCheck: false });
+        // Fail fast when Redis is down: no retry storms, no unhandled error
+        // events, no hung cache lookups. Memory tier covers the miss.
+        client = new IORedis(process.env.REDIS_URL as string, {
+          maxRetriesPerRequest: 1,
+          enableReadyCheck: false,
+          retryStrategy: () => null,
+          reconnectOnError: () => false,
+          lazyConnect: true,
+        });
+        client.on("error", () => null);
+        await withTimeout(client.ping(), 500).catch(() => {
+          throw new Error("redis unreachable");
+        });
+        const c = client as unknown as {
+          get(k: string): Promise<string | null>;
+          set(k: string, v: string, mode: string, ttl: number): Promise<unknown>;
+        };
         redis = {
-          get: (k) => client.get(k),
-          set: (k, v, mode, ttl) => client.set(k, v, mode as never, ttl as never),
+          get: (k) => withTimeout(c.get(k), 500),
+          set: (k, v, mode, ttl) => withTimeout(c.set(k, v, mode, ttl), 500),
         };
       } catch {
+        try {
+          client?.disconnect();
+        } catch { /* ignore */ }
         redis = null;
+        redisInit = null; // allow a later retry (e.g. Redis came up)
+        redisDownUntil = Date.now() + REDIS_RETRY_COOLDOWN_MS;
       }
     })();
   }

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { BatchEventsSchema } from "@/lib/validation";
 import { ingestEvents } from "@/repositories/events";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 // POST /api/game-events/batch — validated, idempotent, persists when Mongo is up,
 // degrades gracefully when down (BR-221). Never trusts client score (BR-022).
 export async function POST(req: Request) {
   const requestId = `req_${Date.now().toString(36)}`;
-  const rl = take(`events:${clientIp(req)}`, 60, 60_000);
+  const rl = await takeAsync(`events:${clientIp(req)}`, 60, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests.", requestId } }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
   let body: unknown;
   try {

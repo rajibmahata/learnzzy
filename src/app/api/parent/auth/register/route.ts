@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createParent } from "@/repositories/parents";
 import { hashParentPassword, issueParentSession, setParentSessionCookie } from "@/server/parent-auth";
 import { audit } from "@/server/audit";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const RegisterSchema = z.object({
   email: z.string().email().max(120),
@@ -12,7 +12,7 @@ const RegisterSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const rate = take(`parent-register:${clientIp(req)}`, 5, 60 * 60 * 1000);
+  const rate = await takeAsync(`parent-register:${clientIp(req)}`, 5, 60 * 60 * 1000);
   if (!rate.allowed) {
     return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many registrations. Try again later." } }, { status: 429 });
   }

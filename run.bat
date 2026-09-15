@@ -115,6 +115,20 @@ if not exist ".env.local" (
 )
 exit /b 0
 
+:ENSURE_DOCKER_ENV
+if not exist ".env" (
+  echo [INFO] Creating local .env for Docker Compose interpolation...
+  call node scripts/docker-env.mjs
+  if errorlevel 1 (
+    echo [ERROR] Could not create .env for Docker Compose.
+    pause
+    exit /b 1
+  )
+) else (
+  echo [OK] .env present for Docker Compose.
+)
+exit /b 0
+
 :DEV
 call :CHECK_NODE || exit /b 1
 call :ENSURE_DEPS || exit /b 1
@@ -181,6 +195,7 @@ if errorlevel 1 (
 )
 echo [OK] Docker daemon reachable.
 call :ENSURE_ENV
+call :ENSURE_DOCKER_ENV
 echo [INFO] MONGODB_URI and REDIS_URL are provided by Docker containers:
 echo   - mongo:27017  -^> host 127.0.0.1:27018  ^(host port 27018 avoids clashes
 echo     with other local MongoDB instances on default 27017^)

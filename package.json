@@ -12,9 +12,11 @@
     "test": "node --test tests/*.test.js tests/*.test.ts",
     "test:e2e": "playwright test",
     "seed": "node scripts/seed.mjs",
+    "backup": "node scripts/backup.mjs",
     "worker": "node --loader ts-node/esm src/workers/worker.ts 2>&1 || node -r ts-node/register src/workers/worker.ts 2>&1 || echo 'worker requires ts-node or compiled output; in Docker use next build + node .next worker bootstrap'"
   },
   "dependencies": {
+    "@sentry/nextjs": "^8.55.2",
     "bullmq": "^6.3.4",
     "ioredis": "^6.0.0",
     "mongodb": "^7.6.0",

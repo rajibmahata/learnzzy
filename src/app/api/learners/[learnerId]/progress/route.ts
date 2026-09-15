@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getLearner, addLearnerStars } from "@/repositories/learners";
 import { maybePromote } from "@/services/levelService";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 const ProgressSchema = z.object({
   gameId: z.string().min(1).max(30),
@@ -12,7 +12,7 @@ const ProgressSchema = z.object({
 });
 
 export async function POST(req: Request, { params }: { params: { learnerId: string } }) {
-  const rl = take(`learner:progress:${clientIp(req)}`, 30, 60_000);
+  const rl = await takeAsync(`learner:progress:${clientIp(req)}`, 30, 60_000);
   if (!rl.allowed) return NextResponse.json({ success: false, error: { code: "RATE_LIMITED", message: "Too many requests." } }, { status: 429 });
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ success: false, error: { code: "INVALID_REQUEST", message: "Invalid JSON." } }, { status: 400 }); }

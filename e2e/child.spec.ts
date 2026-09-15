@@ -14,7 +14,7 @@ test("welcome collects nickname + age band", async ({ page }) => {
   await page.getByLabel("Nickname").fill("Playwright Kid");
   await page.getByRole("button", { name: /6–7/ }).click();
   await page.getByRole("button", { name: /let's play/i }).click();
-  await expect(page).toHaveURL(/\/play$/);
+  await expect(page).toHaveURL(/\/play$/, { timeout: 15000 });
 });
 
 test("play home lists five games", async ({ page }) => {

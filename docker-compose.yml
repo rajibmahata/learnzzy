@@ -14,8 +14,12 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH}
       ADMIN_AUTH_SECRET: ${ADMIN_AUTH_SECRET}
+      PARENT_AUTH_SECRET: ${PARENT_AUTH_SECRET:-}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_BASE_URL: ${AI_BASE_URL:-https://api.openai.com/v1}
+      # Local Docker serves plain HTTP: allow non-Secure session cookies.
+      # Production (TLS) overrides this to "true" in docker-compose.prod.yml.
+      COOKIE_SECURE: "false"
     depends_on:
       mongo:
         condition: service_healthy

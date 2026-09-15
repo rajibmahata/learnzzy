@@ -14,15 +14,47 @@ export function registerHandler(queue: string, fn: Handler): void {
   handlers.set(queue, fn);
 }
 
+let bullDownUntil = 0;
+const BULL_RETRY_COOLDOWN_MS = 10_000;
+
 async function bullAvailable(): Promise<boolean> {
   if (!process.env.REDIS_URL) return false;
+  // Negative-result caching: don't pay a ping timeout per enqueue while down.
+  if (Date.now() < bullDownUntil) return false;
   if (!bullReady) {
     bullReady = (async () => {
       const [{ Queue, Worker }, { default: IORedis }] = await Promise.all([
         import("bullmq"),
         import("ioredis"),
       ]);
-      const connection = new IORedis(process.env.REDIS_URL as string, { maxRetriesPerRequest: null });
+      // Fail fast when Redis is down: unlimited retries would hang every
+      // enqueue behind a never-settling promise. In-process fallback covers it.
+      const connection = new IORedis(process.env.REDIS_URL as string, {
+        maxRetriesPerRequest: 1,
+        enableReadyCheck: false,
+        retryStrategy: () => null,
+        reconnectOnError: () => false,
+        lazyConnect: true,
+      });
+      connection.on("error", () => null);
+      await new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error("redis unreachable")), 1000);
+        connection
+          .ping()
+          .then(() => {
+            clearTimeout(timer);
+            resolve();
+          })
+          .catch((e: unknown) => {
+            clearTimeout(timer);
+            reject(e instanceof Error ? e : new Error("redis unreachable"));
+          });
+      }).catch((e: unknown) => {
+        try {
+          connection.disconnect();
+        } catch { /* ignore */ }
+        throw e;
+      });
       for (const [queue, fn] of handlers) {
         const q = new Queue(queue, { connection });
         bullQueues.set(queue, q);
@@ -37,6 +69,8 @@ async function bullAvailable(): Promise<boolean> {
       }
     })().catch(() => {
       bullQueues = new Map();
+      bullReady = null; // allow a later retry (e.g. Redis came up)
+      bullDownUntil = Date.now() + BULL_RETRY_COOLDOWN_MS;
     });
   }
   await bullReady;

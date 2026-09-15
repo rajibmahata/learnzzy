@@ -1,0 +1,47 @@
+# Production override: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`
+# Differences from local dev:
+# - mongo/redis NOT bound to host ports (internal only; no 27018/6379 exposure)
+# - container log rotation (10 MiB x 3 files per service)
+# - production env expectations documented below (compose cannot enforce secrets)
+#
+# Required on the VPS before first deploy (never commit values):
+#   ADMIN_EMAIL, ADMIN_PASSWORD_HASH, ADMIN_AUTH_SECRET,
+#   AI_API_KEY (optional), SENTRY_DSN (optional),
+#   NEXT_PUBLIC_APP_URL=https://<production-domain>
+services:
+  web:
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      APP_ENV: production
+      # TLS is mandatory in production (see deploy/nginx.prod.conf), so
+      # session cookies stay Secure. Never set this to "false" in prod.
+      COOKIE_SECURE: "true"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  mongo:
+    ports: []
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    ports: []
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

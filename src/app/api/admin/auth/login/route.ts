@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { adminConfigured, issueSession, setSessionCookie, verifyPassword } from "@/server/admin-auth";
 import { audit } from "@/server/audit";
-import { clientIp, take } from "@/lib/rate-limit";
+import { clientIp, takeAsync } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
-  const rate = take(`admin-login:${clientIp(req)}`, 8, 15 * 60 * 1000);
+  const rate = await takeAsync(`admin-login:${clientIp(req)}`, 8, 15 * 60 * 1000);
   if (!rate.allowed) {
     return NextResponse.json(
       { success: false, error: { code: "RATE_LIMITED", message: "Try again later." } },
