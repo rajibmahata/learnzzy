@@ -99,12 +99,12 @@ if not exist ".env.local" (
   if exist ".env.example" (
     copy /Y ".env.example" ".env.local" >nul
     echo [INFO] Created .env.local from .env.example:
-    echo   - MONGODB_URI=mongodb://127.0.0.1:27017/learnzzy_dev  ^(host -^> Docker mongo via 27017:27017)
+    echo   - MONGODB_URI=mongodb://127.0.0.1:27018/learnzzy_dev  ^(host -^> Docker mongo via 27018:27017)
     echo   - REDIS_URL=redis://127.0.0.1:6379                     ^(host -^> Docker redis via 6379:6379)
     echo   - Inside Docker, web/worker use mongo:27017 / redis:6379 automatically ^(see docker-compose.yml)
     echo   - ADMIN_* credentials - run: run.bat and choose 5 or run node scripts/admin-setup.mjs YourPassword123
   ) else (
-    echo MONGODB_URI=mongodb://127.0.0.1:27017/learnzzy_dev> ".env.local"
+    echo MONGODB_URI=mongodb://127.0.0.1:27018/learnzzy_dev> ".env.local"
     echo MONGODB_DB_NAME=learnzzy_dev>> ".env.local"
     echo REDIS_URL=redis://127.0.0.1:6379>> ".env.local"
     echo [INFO] Created minimal .env.local with Docker-mapped ports
@@ -182,11 +182,12 @@ if errorlevel 1 (
 echo [OK] Docker daemon reachable.
 call :ENSURE_ENV
 echo [INFO] MONGODB_URI and REDIS_URL are provided by Docker containers:
-echo   - mongo:27017  -^> host 127.0.0.1:27017  ^(exposed in docker-compose.yml)
+echo   - mongo:27017  -^> host 127.0.0.1:27018  ^(host port 27018 avoids clashes
+echo     with other local MongoDB instances on default 27017^)
 echo   - redis:6379   -^> host 127.0.0.1:6379   ^(exposed in docker-compose.yml)
 echo   - Inside Docker: web uses mongodb://mongo:27017/learnzzy and redis://redis:6379
 echo     ^(agent jobs run in-process in web; see docker-compose.yml note^)
-echo   - Outside Docker: npm run dev uses mongodb://127.0.0.1:27017/learnzzy_dev and redis://127.0.0.1:6379
+echo   - Outside Docker: npm run dev uses mongodb://127.0.0.1:27018/learnzzy_dev and redis://127.0.0.1:6379
 echo [INFO] Validating compose file...
 docker compose config >nul 2>&1
 if errorlevel 1 (
@@ -201,9 +202,16 @@ docker compose up --build
 if errorlevel 1 (
   echo.
   echo [ERROR] Docker Compose exited with an error. Common causes:
-  echo   - Port 3000/27017/6379 already in use ^(stop local servers first^)
+  echo   - Port 3000/27018/6379 already in use ^(see container list below^)
   echo   - Image pull blocked by proxy/VPN ^(retry or pull manually^)
   echo   - Not enough disk for images ^(docker system prune frees space^)
+  echo.
+  echo [INFO] Running containers right now:
+  docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+  echo.
+  echo [INFO] If another container owns a needed port, either stop it
+  echo   ^(docker stop NAME^) or change our host port in docker-compose.yml
+  echo   ^(and match MONGODB_URI/REDIS_URL in .env.local^).
   pause
   exit /b 1
 )
@@ -244,7 +252,7 @@ call node scripts/admin-setup.mjs "%ADMINPW%"
 echo.
 echo [INFO] Copy the 3 lines above into your .env.local (append, don't replace existing MONGODB_URI/REDIS_URL)
 echo [INFO] Example .env.local after append:
-echo   MONGODB_URI=mongodb://127.0.0.1:27017/learnzzy_dev
+echo   MONGODB_URI=mongodb://127.0.0.1:27018/learnzzy_dev
 echo   MONGODB_DB_NAME=learnzzy_dev
 echo   REDIS_URL=redis://127.0.0.1:6379
 echo   ADMIN_EMAIL=admin@learnzzy.local

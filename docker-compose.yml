@@ -38,7 +38,10 @@ services:
     image: mongo:7
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      # Host side is 27018 (not 27017): the default MongoDB port is commonly
+      # taken by other local instances/containers. Container side stays 27017,
+      # so in-Docker URIs are unchanged (mongodb://mongo:27017/...).
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
     healthcheck:
