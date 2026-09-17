@@ -6,6 +6,7 @@ import { handleAssetTask } from "@/agents/asset";
 import { handleAnalyticsTask } from "@/agents/analytics";
 import { handleDifficultyTask } from "@/agents/difficulty";
 import { handlePersonalizationTask } from "@/agents/personalization";
+import { handleAcademicTask } from "@/agents/academic";
 import { handleQaTask } from "@/agents/qa";
 
 // Worker wiring: agent queue → handler. Imported (for side effects) by every
@@ -23,5 +24,6 @@ export function ensureWorkers(): void {
   registerHandler(byId["analytics-agent"], handleAnalyticsTask);
   registerHandler(byId["difficulty-agent"], handleDifficultyTask);
   registerHandler(byId["personalization-agent"], handlePersonalizationTask);
+  registerHandler(byId["academic-agent"], handleAcademicTask);
   registerHandler(byId["qa-agent"], handleQaTask);
 }

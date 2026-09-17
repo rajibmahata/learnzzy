@@ -10,7 +10,9 @@ import { createSketchActivity } from "@/games/sketch";
 import { validateCandidate } from "@/agents/quality";
 
 const THEMES = ["jungle", "ocean", "garden", "farm", "space"];
-const OBJECTS = ["apple", "banana", "fish", "balloon", "bird"];
+// Dynamic visual themes (§11): the emoji/object varies per round while the
+// Difficulty Engine owns the numbers — theme changes never alter the answer.
+const OBJECTS = ["teddy", "apple", "mango", "star", "car", "fish", "balloon", "butterfly", "puppy", "rocket"];
 
 // Deterministic candidate generator — the reliable MVP engine. AI output (when
 // available) is validated identically; both paths converge on proven-safe items.

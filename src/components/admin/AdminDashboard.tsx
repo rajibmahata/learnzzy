@@ -82,9 +82,10 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
   const [contentRows, setContentRows] = useState<ContentRow[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState<ContentDetail | null>(null);
+  const [academic, setAcademic] = useState<{ plans: { planId: string; learnerId: string; concept: string; stage: string; source: string; reason: string }[]; voiceAssets: { cacheKey: string; characterId: string; event: string; locale: string; status: string }[]; signals: number; failedRecommendations: number } | null>(null);
 
   async function refresh() {
-    const [a, t, p, analytics, h, edu, hist, content] = await Promise.all([
+    const [a, t, p, analytics, h, edu, hist, content, acad] = await Promise.all([
       getJson<Agent[]>("/api/admin/agents"),
       getJson<Task[]>("/api/admin/tasks?limit=8"),
       getJson<Pool[]>("/api/admin/pools"),
@@ -93,9 +94,10 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
       getJson<{ providers: { provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number }[] }>("/api/admin/education/health").catch(() => ({ providers: [] })),
       getJson<Task[]>("/api/admin/commands").catch(() => []),
       getJson<ContentRow[]>("/api/admin/content?limit=20").catch(() => []),
+      getJson<{ plans: { planId: string; learnerId: string; concept: string; stage: string; source: string; reason: string }[]; voiceAssets: { cacheKey: string; characterId: string; event: string; locale: string; status: string }[]; signals: number; failedRecommendations: number }>("/api/admin/academic/plans").catch(() => null),
     ]);
     setAgents(a); setTasks(t); setPools(p); setStats(analytics.stats); setHealth(h); setProviders(edu.providers);
-    setHistory(hist); setContentRows(content);
+    setHistory(hist); setContentRows(content); setAcademic(acad);
   }
 
   useEffect(() => { refresh().catch((err) => setMessage(err.message)); }, []);
@@ -191,6 +193,19 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
         </Panel>
         <Panel title="Education providers" kicker="TUTOR · OER · NCERT">
           {providers.length === 0 ? <p className="admin-empty">Provider status unavailable.</p> : <div className="agent-list">{providers.map((pr) => <div className="agent-row" key={pr.provider}><span className={`agent-dot ${pr.enabled && pr.status === "healthy" ? "" : "offline"}`} /><div><strong>{pr.provider}</strong><small>{pr.enabled ? pr.status : "disabled"} · {pr.latencyMs ?? "-"} ms · {pr.errorCount24h} errors/24h</small></div><code>{pr.enabled ? "on" : "off"}</code></div>)}</div>}
+        </Panel>
+        <Panel title="Academic engine" kicker="PLANS · VOICE · SIGNALS">
+          {!academic ? <p className="admin-empty">Academic data unavailable.</p> : (
+            <div className="task-list">
+              <div className="task-row"><div><strong>{academic.plans.length} plans</strong><small>{academic.signals} learning signals · {academic.failedRecommendations} failures</small></div><span>{academic.voiceAssets.length} voice</span></div>
+              {academic.plans.slice(0, 5).map((pl) => (
+                <div className="task-row" key={pl.planId}><div><strong>{pl.concept}</strong><small>{pl.learnerId} · {pl.stage} · {pl.source}</small></div><small>{pl.reason.slice(0, 40)}</small></div>
+              ))}
+              {academic.voiceAssets.slice(0, 3).map((v) => (
+                <div className="task-row" key={v.cacheKey}><div><strong>{v.characterId} · {v.event}</strong><small>{v.locale} · {v.status}</small></div></div>
+              ))}
+            </div>
+          )}
         </Panel>
         <Panel title="Command history" kicker="STRUCTURED · AUDITED">
           {history.length === 0 ? <p className="admin-empty">No admin commands yet. Run one above.</p> : <div className="task-list">{history.slice(0, 8).map((task) => <div className="task-row" key={task.taskId}><div><strong>{task.type}</strong><small>{task.agentId} · {task.taskId}</small></div><span className={`task-${task.status}`}>{task.status}</span></div>)}</div>}

@@ -31,6 +31,7 @@ export async function GET(_req: Request, { params }: { params: { childId: string
       strengths: summary.strengths,
       practiceOpportunities: summary.practiceOpportunities,
       journey: buildLearningJourney(learner),
+      academic: summary.academic,
     },
   });
 }

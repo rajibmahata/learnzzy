@@ -53,6 +53,10 @@ const MOCK_SUMMARIES: Record<string, { name: string; domain: string; summary: st
   "spatial.part-whole": { name: "Part–whole relationships", domain: "spatial", summary: "Seeing how small pieces fit into a bigger picture. Start with 4 large pieces, then 6, then 9." },
   "geometry.shapes": { name: "Shape recognition", domain: "mathematics", summary: "Naming circles, squares, triangles, and stars by their sides and corners. Trace before drawing freehand." },
   "motor.tracing": { name: "Tracing and control", domain: "fine-motor", summary: "Following a dotted path slowly with a finger or stylus. Big shapes first, then smaller." },
+  "knowledge.world-discovery": { name: "World discovery", domain: "knowledge", summary: "Meeting animals, birds, fruits, and colors through show-then-find play. Name first, then recognize, then recall." },
+  "language.first-words": { name: "First words", domain: "language", summary: "Hearing and saying first words with pictures and voice. Repeat, echo, and celebrate every try." },
+  "birds.parrot": { name: "Parrot", domain: "knowledge", summary: "Parrots are colorful birds. Show the parrot, say hello, then find the parrot, then find all birds." },
+  "math.counting.objects": { name: "Counting objects", domain: "mathematics", summary: "Touching and counting up to 5 objects one by one. Count dogs, apples, or stars — the number stays the same." },
 };
 
 export class OerMockProvider implements EducationalKnowledgeProvider {

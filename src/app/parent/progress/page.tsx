@@ -27,6 +27,13 @@ interface ProgressData {
   strengths: string[];
   practiceOpportunities: string[];
   journey: { currentLevel: number; tracks: { id: string; title: string; levels: { level: number; status: string }[] }[] };
+  academic?: {
+    conceptsLearned: number;
+    conceptsMastered: number;
+    conceptsPracticing: number;
+    streakDays: number;
+    nextActivity: { game: string; concept: string; objective: string; reason: string } | null;
+  };
 }
 
 const TREND_LABEL: Record<string, string> = {
@@ -94,6 +101,15 @@ export default function ParentProgressPage() {
               <div className="mb-3 rounded-lg bg-surface-low p-3">
                 {progress.strengths?.length > 0 && <p className="text-sm"><strong>Strengths:</strong> {progress.strengths.join(" · ")}</p>}
                 {progress.practiceOpportunities?.length > 0 && <p className="mt-1 text-sm"><strong>Practice next:</strong> {progress.practiceOpportunities.join(" · ")}</p>}
+              </div>
+            )}
+            {progress.academic && (
+              <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Learning progress">
+                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Learning · streak {progress.academic.streakDays} {progress.academic.streakDays === 1 ? "day" : "days"}</p>
+                <p className="mt-1 text-sm">{progress.academic.conceptsLearned} learned · {progress.academic.conceptsMastered} mastered · {progress.academic.conceptsPracticing} practicing</p>
+                {progress.academic.nextActivity && (
+                  <p className="mt-1 text-sm"><strong>Next:</strong> {progress.academic.nextActivity.reason}</p>
+                )}
               </div>
             )}
             <div className="mb-3 rounded-lg bg-surface-low p-3">

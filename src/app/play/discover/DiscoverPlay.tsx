@@ -9,7 +9,7 @@ import {
   pickDiscoverSet,
   type KnowledgeConcept,
 } from "@/lib/knowledge";
-import { speak as speakAudio } from "@/lib/audio";
+import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
 import { getWindowSeed, shuffleWithSeed } from "@/lib/windowSeed";
 import { getCachedProfile } from "@/lib/learner";
 import { getSessionId, queueEvent } from "@/lib/events";
@@ -52,6 +52,19 @@ export default function DiscoverPlay() {
   const gameStart = React.useRef(Date.now());
   const profile = React.useMemo(() => getCachedProfile(), []);
   const learnerId = profile?.learnerId;
+  // Academic friend: best-effort character from the Validated Learning Plan.
+  // Falls back to Teddy; voice failure never blocks play.
+  const [characterId, setCharacterId] = React.useState("teddy");
+  React.useEffect(() => {
+    if (!learnerId) return;
+    fetch(`/api/learners/${learnerId}/academic/recommendation`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => {
+        const c = b?.data?.characterId;
+        if (typeof c === "string" && CHARACTER_VOICES[c]) setCharacterId(c);
+      })
+      .catch(() => null);
+  }, [learnerId]);
 
   // One deterministic activity set per window: learn → recognize → find.
   const steps = React.useMemo<Step[]>(() => {
@@ -101,7 +114,17 @@ export default function DiscoverPlay() {
   }
 
   function hear(text: string) {
-    speakAudio(text);
+    const v = CHARACTER_VOICES[characterId] ?? CHARACTER_VOICES.teddy;
+    speakWithCharacter(text, { lang: "en-US", rate: v.rate, pitch: v.pitch });
+  }
+
+  function reportAcademicResult(accuracy: number) {
+    if (!learnerId) return;
+    fetch(`/api/learners/${learnerId}/academic/result`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ gameId: "discover", accuracy, attempts: totalQuiz, hintsUsed: hintOpens.current, complexity: 1 }),
+    }).catch(() => null);
   }
 
   function advance() {
@@ -112,6 +135,7 @@ export default function DiscoverPlay() {
       setDone(true);
       queueEvent({ event: "game_completed", gameId: "discover", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
       reportGameCompletion({ gameId: "discover", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
+      reportAcademicResult(accuracy);
       try {
         const ids = steps.map((s) => s.concept.id);
         localStorage.setItem(RECENT_KEY, JSON.stringify([...readRecent(), ...ids].slice(-12)));

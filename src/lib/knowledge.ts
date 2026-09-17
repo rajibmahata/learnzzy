@@ -37,6 +37,8 @@ export const CATEGORIES: KnowledgeCategory[] = [
   { id: "nature", title: "Nature Forest", icon: "🌳", description: "Sun, trees and rivers." },
   { id: "body", title: "My Body", icon: "👀", description: "Eyes, ears and more." },
   { id: "objects", title: "Everyday Things", icon: "📕", description: "Things around you." },
+  { id: "numbers", title: "Number Garden", icon: "🔢", description: "Count and play with numbers." },
+  { id: "words", title: "Word Meadow", icon: "💬", description: "First words and sounds." },
 ];
 
 type C = [id: string, en: string, emoji: string, fact: string, level: 1 | 2 | 3];
@@ -174,9 +176,43 @@ export const CONCEPTS: KnowledgeConcept[] = [
     ["pencil", "Pencil", "✏️", "Pencils help us draw.", 2],
     ["clock", "Clock", "🕐", "Clocks tell the time.", 3],
   ]),
+  ...entries("numbers", [
+    ["one", "One", "1️⃣", "One sun in the sky.", 1],
+    ["two", "Two", "2️⃣", "Two eyes to see.", 1],
+    ["three", "Three", "3️⃣", "Three wheels on a tricycle.", 1],
+    ["four", "Four", "4️⃣", "Four legs on a table.", 2],
+    ["five", "Five", "5️⃣", "Five fingers on a hand.", 2],
+    ["six", "Six", "6️⃣", "Six sides on a honeycomb.", 3],
+    ["seven", "Seven", "7️⃣", "Seven colors in a rainbow.", 3],
+    ["eight", "Eight", "8️⃣", "Eight legs on a spider.", 3],
+  ]),
+  ...entries("words", [
+    ["hello", "Hello", "👋", "We say hello to friends.", 1],
+    ["mama", "Mama", "👩", "Mama loves you.", 1],
+    ["papa", "Papa", "👨", "Papa plays with you.", 1],
+    ["bird", "Bird", "🐦", "Birds can fly.", 1],
+    ["fish", "Fish", "🐟", "Fish swim in water.", 2],
+    ["sun", "Sun", "☀️", "The sun is warm.", 2],
+    ["book", "Book", "📕", "We read books.", 2],
+    ["play", "Play", "🧸", "Play and learn every day.", 3],
+  ]),
 ];
 
 const byId = new Map(CONCEPTS.map((c) => [c.id, c]));
+// Prepared per-language display names (never live-translated in gameplay).
+const LOCALIZED_NAMES: Record<string, Partial<Record<Locale, string>>> = {
+  "birds.parrot": { hi: "तोता", bn: "টিয়া পাখি", ta: "கிளி", te: "చిలుక" },
+  "birds.sparrow": { hi: "गौरैया", bn: "চড়ুই" },
+  "birds.duck": { hi: "बत्तख", bn: "হাঁস" },
+  "animals.dog": { hi: "कुत्ता", bn: "কুকুর" },
+  "animals.cat": { hi: "बिल्ली", bn: "বিড়াল" },
+  "fruits.apple": { hi: "सेब", bn: "আপেল" },
+  "fruits.mango": { hi: "आम", bn: "আম" },
+};
+for (const [id, names] of Object.entries(LOCALIZED_NAMES)) {
+  const c = byId.get(id);
+  if (c) c.names = { ...c.names, ...names };
+}
 const byCategory = new Map<string, KnowledgeConcept[]>();
 for (const c of CONCEPTS) {
   const arr = byCategory.get(c.category) ?? [];

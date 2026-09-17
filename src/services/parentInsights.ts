@@ -58,6 +58,13 @@ export interface ChildSummary {
     needsReview: number;
     categories: CategoryProgress[];
   };
+  academic?: {
+    conceptsLearned: number;
+    conceptsMastered: number;
+    conceptsPracticing: number;
+    streakDays: number;
+    nextActivity: { game: string; concept: string; objective: string; reason: string } | null;
+  };
 }
 
 const GAME_NAMES: Record<string, string> = {
@@ -173,6 +180,55 @@ export async function buildChildSummary(learner: LearnerDoc): Promise<ChildSumma
     needsReview: categories.reduce((s, c) => s + c.needsReview, 0),
     categories: categories.filter((c) => c.learned > 0),
   };
+  // Academic rollup: validated plans + mastery counts + streak (parent-safe
+  // summaries only, never chain-of-thought or provider internals).
+  const flat = flattenMasteryMap(learner.conceptMastery);
+  const masteryVals = Object.values(flat);
+  const conceptsLearned = masteryVals.filter((m) => m.status && m.status !== "new").length;
+  const conceptsMastered = masteryVals.filter((m) => m.status === "mastered").length;
+  const conceptsPracticing = masteryVals.filter((m) => m.status === "practicing" || m.status === "learning" || m.status === "needs_review").length;
+  let academicNext: ChildSummary["academic"] extends infer A ? A extends { nextActivity: infer N } ? N : never : never = null;
+  let streakDays = 0;
+  if (db) {
+    try {
+      const aplan = await db
+        .collection("academicPlans")
+        .findOne({ learnerId: learner.learnerId }, { sort: { createdAtDb: -1 } })
+        .catch(() => null);
+      if (aplan) {
+        const { parentReasonText } = await import("@/lib/academic");
+        const { getConceptDef } = await import("@/lib/concepts");
+        const { getConcept } = await import("@/lib/knowledge");
+        const cname = getConceptDef(String(aplan.concept))?.name ?? getConcept(String(aplan.concept))?.names.en ?? String(aplan.concept);
+        academicNext = {
+          game: String(aplan.game),
+          concept: String(aplan.concept),
+          objective: String(aplan.objective),
+          reason: parentReasonText(aplan.reasonCode, cname),
+        };
+      }
+      // Streak: consecutive days with game completions (events), capped at 30.
+      const days = await db
+        .collection("gameEvents")
+        .aggregate([
+          { $match: { sessionId: learner.sessionId } },
+          { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$serverTimestamp" } } } },
+          { $sort: { _id: -1 } },
+          { $limit: 30 },
+        ])
+        .toArray()
+        .catch(() => []);
+      const daySet = new Set((days as { _id: string }[]).map((d) => d._id));
+      const today = new Date();
+      for (let i = 0; i < 30; i++) {
+        const key = new Date(today.getTime() - i * 86400000).toISOString().slice(0, 10);
+        if (daySet.has(key)) streakDays++;
+        else if (i > 0) break;
+      }
+    } catch {
+      // Parent summary degrades gracefully.
+    }
+  }
   return {
     learnerId: learner.learnerId,
     nickname: learner.nickname,
@@ -188,6 +244,13 @@ export async function buildChildSummary(learner: LearnerDoc): Promise<ChildSumma
     skills,
     lastResult,
     discovery,
+    academic: {
+      conceptsLearned,
+      conceptsMastered,
+      conceptsPracticing,
+      streakDays,
+      nextActivity: academicNext,
+    },
   };
 }
 

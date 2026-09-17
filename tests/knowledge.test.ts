@@ -35,11 +35,16 @@ describe("knowledge taxonomy (real code)", () => {
       assert.ok(conceptsInCategory(cat.id).length >= 5, `${cat.id} depth`);
     }
   });
-  test("locale names fall back to English, never empty", () => {
+  test("locale names use prepared translations, fall back to English", () => {
     const parrot = getConcept("birds.parrot");
     assert.ok(parrot);
     assert.equal(conceptName(parrot!, "en"), "Parrot");
-    assert.equal(conceptName(parrot!, "hi"), "Parrot");
+    assert.equal(conceptName(parrot!, "hi"), "तोता");
+    assert.equal(conceptName(parrot!, "bn"), "টিয়া পাখি");
+    // Untranslated concepts still fall back to English, never empty.
+    const crow = getConcept("birds.crow");
+    assert.ok(crow);
+    assert.equal(conceptName(crow!, "hi"), crow!.names.en);
     assert.equal(getConcept("nope.nothing"), null);
   });
 });

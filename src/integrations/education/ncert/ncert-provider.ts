@@ -45,16 +45,47 @@ export class NcertHttpProvider implements CurriculumProvider {
 }
 
 // ---------- Curriculum mock (dev/test/disabled) ----------
-// Returns prerequisite chains from Learnzzy's own concept graph — the same
-// data the planner already uses. No external curriculum implied.
+// Foundational-stage mapping (NEP 2020 Balvatika / Grades 1–2 scope only):
+// counting, shapes, and first words. Explicitly NOT a full CBSE mapping —
+// the young-learner MVP never implies grade-level certification.
+const FOUNDATIONAL_MAP: { match: string[]; grade: number; subject: string; topic: string; chapter?: string; conceptId: string; bloomLevel: string }[] = [
+  { match: ["count", "number", "addition", "gin", "jod"], grade: 1, subject: "Mathematics", topic: "Counting and addition within 10", chapter: "Numbers", conceptId: "math.addition.within10", bloomLevel: "remember" },
+  { match: ["subtract", "take away", "ghata"], grade: 1, subject: "Mathematics", topic: "Subtraction within 10", chapter: "Numbers", conceptId: "math.subtraction.within10", bloomLevel: "understand" },
+  { match: ["shape", "circle", "square", "triangle", "aakar"], grade: 1, subject: "Mathematics", topic: "Shape recognition", chapter: "Shapes", conceptId: "geometry.shapes", bloomLevel: "remember" },
+  { match: ["sort", "tidy", "color", "rang"], grade: 1, subject: "EVS", topic: "Sorting familiar objects", chapter: "My World", conceptId: "cognition.sorting", bloomLevel: "apply" },
+  { match: ["bird", "animal", "parrot", "tota", "pakshi"], grade: 1, subject: "EVS", topic: "Bird recognition", chapter: "Animals Around Us", conceptId: "knowledge.world-discovery", bloomLevel: "remember" },
+  { match: ["word", "first word", "shabd"], grade: 1, subject: "English", topic: "First words", chapter: "Sounds", conceptId: "language.first-words", bloomLevel: "remember" },
+];
+
 export class NcertMockProvider implements CurriculumProvider {
   readonly name = "ncert-mcp" as const;
 
   async searchCurriculum(input: CurriculumSearchInput): Promise<CurriculumResult[]> {
-    // The young-learner MVP has no CBSE mapping; the mock is explicit about
-    // that instead of inventing curriculum alignment.
-    void input;
-    return [];
+    const q = input.query.toLowerCase();
+    const { buildProvenance } = await import("../provenance");
+    return FOUNDATIONAL_MAP.filter(
+      (m) =>
+        (input.grade === undefined || m.grade === input.grade) &&
+        (!input.subject || m.subject.toLowerCase().includes(input.subject.toLowerCase())) &&
+        m.match.some((k) => q.includes(k))
+    )
+      .slice(0, input.limit)
+      .map((m) =>
+        CurriculumResultSchema.parse({
+          grade: m.grade,
+          subject: m.subject,
+          topic: m.topic,
+          chapter: m.chapter,
+          conceptId: m.conceptId,
+          bloomLevel: m.bloomLevel,
+          provenance: buildProvenance({
+            provider: "learnzzy-native",
+            sourceId: `foundational:${m.conceptId}`,
+            license: "CC0",
+            attribution: "Learnzzy foundational mapping (dev/test only, not official CBSE alignment)",
+          }),
+        })
+      );
   }
 
   async getPrerequisites(input: PrerequisiteInput): Promise<Prerequisite[]> {

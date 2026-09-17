@@ -21,6 +21,7 @@ export async function GET(_req: Request, { params }: { params: { childId: string
       advisoryFocus: summary.advisoryFocus,
       concepts: summary.concepts,
       discovery: summary.discovery,
+      academic: summary.academic,
     },
   });
 }
