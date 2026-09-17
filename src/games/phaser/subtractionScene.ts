@@ -22,7 +22,7 @@ export function createSubtractionScene(P: typeof Phaser) {
     }
 
     preload() {
-      this.load.image("bird", "/assets/bird.svg");
+      this.load.svg("bird", "/assets/bird.svg", { width: 64, height: 64 });
     }
 
     create() {
@@ -30,7 +30,7 @@ export function createSubtractionScene(P: typeof Phaser) {
         typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (!this.textures.exists("bird")) {
-        this.load.image("bird", "/assets/bird.svg");
+        this.load.svg("bird", "/assets/bird.svg", { width: 64, height: 64 });
         this.load.start();
       }
       // Wooden perch the remaining birds sit on.

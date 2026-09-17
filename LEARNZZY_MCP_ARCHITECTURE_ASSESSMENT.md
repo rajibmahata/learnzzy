@@ -153,10 +153,12 @@ override file, no TLS, no registry image pins beyond `mongo:7`/`redis:7-alpine`.
 
 ## 16. Existing Stitch integration
 
-`docs/STITCH_INSTRUCTIONS.md` (7 screens; prompt's screens 10–11 absent
-locally) + `UI.md/UI_LIBRARY.md/UI_UX.md` patterns. **No Stitch MCP tool
-exists in this environment** — parent/learner screens were built from existing
-components + docs (logged KI-011). No Stitch URLs/assets were invented.
+`docs/STITCH_INSTRUCTIONS.md` now records the complete 11-reference inventory:
+architecture document, design system, brand, child home/games, admin screens,
+learner setup, and parent journey. **Live Stitch retrieval currently fails with
+`Incompatible auth server: does not support dynamic client registration`**;
+parent/learner screens therefore remain based on existing components + local
+UI documentation. No Stitch URLs/assets were invented.
 
 ## 17. Existing MCP integration
 

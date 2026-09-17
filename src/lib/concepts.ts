@@ -25,6 +25,8 @@ export const CONCEPTS: Concept[] = [
   { id: "spatial.rotation", domain: "spatial", name: "Mental rotation", ageBands: ["6-7", "8-9"], prerequisites: ["spatial.part-whole"], games: ["puzzle"] },
   { id: "motor.tracing", domain: "fine-motor", name: "Tracing and control", ageBands: ["4-5", "6-7", "8-9"], prerequisites: [], games: ["sketch"] },
   { id: "geometry.shapes", domain: "mathematics", name: "Shape recognition", ageBands: ["4-5", "6-7", "8-9"], prerequisites: ["cognition.visual-discrimination"], games: ["sketch", "puzzle"] },
+  { id: "knowledge.world-discovery", domain: "knowledge", name: "World discovery", ageBands: ["4-5", "6-7", "8-9"], prerequisites: ["cognition.visual-discrimination"], games: ["discover"] },
+  { id: "language.first-words", domain: "language", name: "First words", ageBands: ["4-5", "6-7", "8-9"], prerequisites: ["knowledge.world-discovery"], games: ["discover"] },
 ];
 
 const byId = new Map(CONCEPTS.map((c) => [c.id, c]));
@@ -57,6 +59,10 @@ export function conceptsForGame(gameId: string, level: number): string[] {
         : ["spatial.part-whole", "spatial.rotation", "geometry.shapes"];
     case "sketch":
       return lvl <= 2 ? ["motor.tracing", "geometry.shapes"] : ["motor.tracing", "geometry.shapes", "spatial.part-whole"];
+    case "discover":
+      return lvl <= 2
+        ? ["knowledge.world-discovery", "language.first-words"]
+        : ["knowledge.world-discovery", "language.first-words", "cognition.visual-discrimination"];
     default:
       return [];
   }

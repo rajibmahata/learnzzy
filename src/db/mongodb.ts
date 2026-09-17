@@ -19,9 +19,19 @@ export async function getDb(): Promise<Db | null> {
   if (!uri) return null;
   if (db) return db;
   const name = process.env.MONGODB_DB_NAME || "learnzzy_dev";
-  client ??= new MongoClient(uri, { maxPoolSize: 10 });
+  // Fail fast: gameplay/APIs must never hang 30s on an unreachable Mongo.
+  // Callers treat null as "no DB" and use deterministic fallbacks (BR-221).
+  client ??= new MongoClient(uri, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 2000,
+    connectTimeoutMS: 2000,
+    socketTimeoutMS: 5000,
+  });
   if (!connected) {
-    await client.connect();
+    await Promise.race([
+      client.connect(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("mongo connect timeout")), 3000)),
+    ]);
     connected = true;
   }
   db = client.db(name);

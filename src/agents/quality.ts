@@ -104,6 +104,18 @@ export async function validateCandidate(
     } else if (gameId === "sketch") {
       const path = (payload.guidePath ?? []) as unknown[];
       if (path.length < 8 || path.length > 200) reasons.push("guide path length invalid");
+      const taskType = payload.taskType as unknown;
+      if (taskType !== undefined && taskType !== "trace" && taskType !== "dots" && taskType !== "pattern") {
+        reasons.push("unknown sketch task type");
+      }
+      const instruction = payload.instruction as unknown;
+      if (instruction !== undefined && (typeof instruction !== "string" || instruction.length < 1 || instruction.length > 80)) {
+        reasons.push("instruction length invalid");
+      }
+      const hint = payload.hint as unknown;
+      if (hint !== undefined && (typeof hint !== "string" || hint.length < 1 || hint.length > 160)) {
+        reasons.push("hint length invalid");
+      }
     } else {
       reasons.push(`unknown game ${gameId}`);
     }

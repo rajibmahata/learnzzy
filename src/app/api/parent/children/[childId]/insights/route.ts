@@ -20,6 +20,7 @@ export async function GET(_req: Request, { params }: { params: { childId: string
       recommendedNext: summary.recommendedNext,
       advisoryFocus: summary.advisoryFocus,
       concepts: summary.concepts,
+      discovery: summary.discovery,
     },
   });
 }

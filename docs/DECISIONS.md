@@ -1413,6 +1413,24 @@ Unless explicitly superseded by a future approved decision:
 
 ---
 
+## DEC-182 - Per-Skill Adaptive Levels
+
+**Decision:**
+Each game/skill carries its own adaptive level (`gameLevels` on the learner
+doc, defaulting to foundation level 1). The global learner `level` remains
+the journey/unlock authority; per-skill levels drive content complexity only.
+
+**Reason:**
+- Strength in one skill must never inflate or punish an unrelated skill.
+- A result must never promote twice (global + skill) in a single step.
+- Rolling history (3+ completions at 80%+ to promote, repeated weakness to
+  reduce, +1/-1 steps, floor 1, ceiling 5) keeps adaptation forgiving and
+  deterministic.
+
+**Status:** Active (2026-09-16)
+
+---
+
 # 27. Decision Ownership
 
 The decision log should be reviewed whenever:

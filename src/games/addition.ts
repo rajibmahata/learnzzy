@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { DIFFICULTY_RANGES, mulberry32, type GameDefinition } from "./framework";
+import { DIFFICULTY_RANGES, mulberry32, type GameDefinition } from "./framework.ts";
 
 // BR-030..033 — addition is deterministic: correctAnswer = a + b.
 export const AdditionContentSchema = z.object({
-  a: z.number().int().min(0).max(20),
-  b: z.number().int().min(0).max(20),
+  a: z.number().int().min(0).max(40),
+  b: z.number().int().min(0).max(40),
   answers: z.array(z.number().int()).min(3).max(4),
   correctAnswer: z.number().int(),
 });
@@ -27,6 +27,25 @@ export function buildAnswers(a: number, b: number, rand: () => number): number[]
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// Short, rotating instructions/hints derived deterministically from the
+// operands — copy varies per round without any pool/model change.
+const ADD_INSTRUCTIONS = [
+  "How many altogether?",
+  "Count them all together!",
+  "Add them up — how many?",
+] as const;
+
+export function addInstruction(a: number, b: number): string {
+  return ADD_INSTRUCTIONS[(a + b) % ADD_INSTRUCTIONS.length];
+}
+
+export function addHint(a: number, b: number): string {
+  const hi = Math.max(a, b);
+  const lo = Math.min(a, b);
+  if (lo === 0) return `Just count ${hi}.`;
+  return `Start at ${hi} and count ${lo} more.`;
 }
 
 export const additionGame: GameDefinition<AdditionContent> = {

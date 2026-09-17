@@ -7,17 +7,34 @@
 
 Stitch is the visual/design reference for the screens listed below. Learnzzy project documentation remains authoritative for architecture, business rules, security, privacy, performance, accessibility, and implementation decisions.
 
-## Screens
+## References
 
 | # | Screen | Stitch ID |
 |---|---|---|
-| 1 | Learnzzy Brand Logo | `a649bb71b93447dba952b91096531210` |
-| 2 | Learnzzy Admin — Content Agent Inspector & Logs | `d447ddc3a76d440e8b2255142f1013f1` |
-| 3 | Learnzzy Admin — Agent Fleet & Orchestration | `4adf5f0ccc04426995828b347546a083` |
+| 1 | Learnzzy Architecture Document | `0f86b7644a2f4435b5e070dffb41ae92` |
+| 2 | Design System | `asset-stub-assets_d9763c62c3a749b290362bd7535f768d` |
+| 3 | Learnzzy Brand Logo | `a649bb71b93447dba952b91096531210` |
 | 4 | Learnzzy Child Playground Home | `94140a548156490da36a7ea50609708c` |
 | 5 | Number Adventure — Addition Game | `ff9f32f8720b4cd79c61ae60c0ee43dd` |
 | 6 | Fly Away — Subtraction Game | `1120c83d47414ff09ad1245b5b84998c` |
 | 7 | Learnzzy Agentic Admin Command Center | `b4c164b06e914c1ea263c2ccd6b7e41d` |
+| 8 | Learnzzy Admin — Content Agent Inspector & Logs | `d447ddc3a76d440e8b2255142f1013f1` |
+| 9 | Learnzzy Admin — Agent Fleet & Orchestration | `4adf5f0ccc04426995828b347546a083` |
+| 10 | Learnzzy Child — Learner Setup & Parent Link | `a4492672347341efa5505f0e03e704be` |
+| 11 | Learnzzy Parent — Learning Journey & Personalization Plan | `80ccc6fb054d4be4ad7c625b3f92b4e9` |
+
+The architecture document and design system are references rather than child
+screens, but they are included here so implementation work uses the complete
+Stitch source set.
+
+**Retrieval status (2026-09-16):** hosted HTML/SVG references are downloaded
+under `docs/stitch_learnzzy_educational_kids_playground/` with screenshots for
+child-home, addition, subtraction, learner-setup, admin-command-center,
+admin-content-agent, and admin-agent-fleet. The parent-journey screenshot URL
+has expired (Google returned HTTP 400), so only `parent-journey.html` is kept
+locally; re-fetch the screenshot URL before claiming pixel parity for that
+screen. The parent-journey and architecture references remain visual references
+until re-verified live.
 
 ## Stitch MCP Workflow
 

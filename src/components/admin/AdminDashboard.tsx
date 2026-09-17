@@ -7,6 +7,8 @@ type Agent = { agentId: string; name: string; description: string; queue: string
 type Task = { taskId: string; agentId: string; type: string; status: string; attempts: number; createdAt: string; error?: string };
 type Pool = { gameId: string; difficulty: string; available: number; minimum: number; target: number; status: string };
 type Stats = { gameId: string; starts: number; completions: number; correct: number; incorrect: number; accuracy: number; completionRate: number };
+type ContentRow = { contentId: string; gameId: string; difficulty: string; status: string; updatedAt?: string };
+type ContentDetail = { content: ContentRow & Record<string, unknown>; versions: { version: number; changeReason: string; createdAt: string }[] };
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url, { cache: "no-store" });
@@ -75,17 +77,25 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
   const [providers, setProviders] = useState<{ provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number }[]>([]);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [command, setCommand] = useState("Refill the addition easy-content pool");
+  const [history, setHistory] = useState<Task[]>([]);
+  const [contentRows, setContentRows] = useState<ContentRow[]>([]);
+  const [selectedId, setSelectedId] = useState("");
+  const [detail, setDetail] = useState<ContentDetail | null>(null);
 
   async function refresh() {
-    const [a, t, p, analytics, h, edu] = await Promise.all([
+    const [a, t, p, analytics, h, edu, hist, content] = await Promise.all([
       getJson<Agent[]>("/api/admin/agents"),
       getJson<Task[]>("/api/admin/tasks?limit=8"),
       getJson<Pool[]>("/api/admin/pools"),
       getJson<{ stats: Stats[] }>("/api/admin/analytics"),
       getJson<Record<string, string | number>>("/api/admin/system-health"),
       getJson<{ providers: { provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number }[] }>("/api/admin/education/health").catch(() => ({ providers: [] })),
+      getJson<Task[]>("/api/admin/commands").catch(() => []),
+      getJson<ContentRow[]>("/api/admin/content?limit=20").catch(() => []),
     ]);
     setAgents(a); setTasks(t); setPools(p); setStats(analytics.stats); setHealth(h); setProviders(edu.providers);
+    setHistory(hist); setContentRows(content);
   }
 
   useEffect(() => { refresh().catch((err) => setMessage(err.message)); }, []);
@@ -97,6 +107,40 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
     setBusy(false);
     setMessage(res.ok ? `Generation queued: ${body.data.task.taskId}` : body?.error?.message ?? "Unable to queue generation");
     if (res.ok) refresh().catch(() => undefined);
+  }
+
+  async function sendCommand() {
+    if (!command.trim()) return;
+    setBusy(true); setMessage("");
+    const res = await fetch("/api/admin/commands", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ command: command.trim() }) });
+    const body = await res.json().catch(() => ({}));
+    setBusy(false);
+    // Natural language becomes a structured, authorized task — never raw DB
+    // access (BR-162/163). History below records the resulting task.
+    setMessage(res.ok ? `Queued ${body.data.intent.agentId} · ${body.data.intent.type} (${body.data.task.taskId})` : body?.error?.message ?? "Unable to queue command");
+    if (res.ok) refresh().catch(() => undefined);
+  }
+
+  async function review(contentId: string, action: "approve" | "reject" | "disable") {
+    setMessage("");
+    const res = await fetch(`/api/admin/content/${contentId}/${action}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(action === "reject" ? { reason: "Rejected by administrator" } : {}) });
+    const body = await res.json().catch(() => ({}));
+    setMessage(res.ok ? `${action} ok: ${contentId}` : body?.error?.message ?? `Unable to ${action}`);
+    if (res.ok) {
+      refresh().catch(() => undefined);
+      inspect(contentId);
+    }
+  }
+
+  async function inspect(contentId: string) {
+    if (!contentId) return;
+    setSelectedId(contentId);
+    try {
+      const d = await getJson<ContentDetail>(`/api/admin/content/${contentId}`);
+      setDetail(d);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Unable to load versions");
+    }
   }
 
   async function logout() {
@@ -119,6 +163,13 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
         <button onClick={generate} disabled={busy} className="admin-primary">{busy ? "Queueing..." : "Generate content"}</button>
       </section>
       {message && <div className="admin-notice">{message}</div>}
+      <section className="admin-panel" aria-label="Agent command input" style={{ maxWidth: 1180, margin: "0 auto 16px" }}>
+        <div className="admin-panel-heading"><div><span>COMMAND → STRUCTURED TASK</span><h3>What should Learnzzy do?</h3></div><i /></div>
+        <div className="admin-form" style={{ marginTop: 0 }}>
+          <label>Natural language (validated, authorized, audited)<input value={command} onChange={(e) => setCommand(e.target.value)} maxLength={500} placeholder="Refill the addition easy-content pool" /></label>
+          <button disabled={busy} type="button" onClick={sendCommand}>{busy ? "Queueing..." : "Run command"}</button>
+        </div>
+      </section>
       <section className="admin-metrics" aria-label="System summary">
         <Metric label="Pool health" value={`${healthyPools}/${totalPools || 0}`} detail="healthy queues" />
         <Metric label="Background work" value={String(runningTasks)} detail="queued or running" />
@@ -140,6 +191,33 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
         </Panel>
         <Panel title="Education providers" kicker="TUTOR · OER · NCERT">
           {providers.length === 0 ? <p className="admin-empty">Provider status unavailable.</p> : <div className="agent-list">{providers.map((pr) => <div className="agent-row" key={pr.provider}><span className={`agent-dot ${pr.enabled && pr.status === "healthy" ? "" : "offline"}`} /><div><strong>{pr.provider}</strong><small>{pr.enabled ? pr.status : "disabled"} · {pr.latencyMs ?? "-"} ms · {pr.errorCount24h} errors/24h</small></div><code>{pr.enabled ? "on" : "off"}</code></div>)}</div>}
+        </Panel>
+        <Panel title="Command history" kicker="STRUCTURED · AUDITED">
+          {history.length === 0 ? <p className="admin-empty">No admin commands yet. Run one above.</p> : <div className="task-list">{history.slice(0, 8).map((task) => <div className="task-row" key={task.taskId}><div><strong>{task.type}</strong><small>{task.agentId} · {task.taskId}</small></div><span className={`task-${task.status}`}>{task.status}</span></div>)}</div>}
+        </Panel>
+        <Panel title="Content review" kicker="APPROVE · REJECT · DISABLE">
+          {contentRows.length === 0 ? <p className="admin-empty">No content rows. Seed the pool or check Mongo.</p> : (
+            <div className="task-list">
+              {contentRows.slice(0, 10).map((row) => (
+                <div className="task-row" key={row.contentId}>
+                  <div><strong>{row.contentId}</strong><small>{row.gameId} · {row.difficulty} · {row.status}</small></div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button type="button" className="admin-quiet-button" onClick={() => inspect(row.contentId)}>Versions</button>
+                    <button type="button" className="admin-quiet-button" onClick={() => review(row.contentId, "approve")}>Approve</button>
+                    <button type="button" className="admin-quiet-button" onClick={() => review(row.contentId, "disable")}>Disable</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {detail && (
+            <div style={{ marginTop: 12 }}>
+              <strong style={{ fontSize: 12 }}>{selectedId} versions</strong>
+              {detail.versions.length === 0 ? <p className="admin-empty">No versions recorded.</p> : (
+                <div className="task-list">{detail.versions.map((v) => <div className="task-row" key={`${v.version}-${v.createdAt}`}><div><strong>v{v.version}</strong><small>{v.changeReason}</small></div><small>{v.createdAt}</small></div>)}</div>
+              )}
+            </div>
+          )}
         </Panel>
       </section>
     </main>

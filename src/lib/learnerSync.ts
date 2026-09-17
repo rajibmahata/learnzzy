@@ -13,6 +13,8 @@ export interface CompletionReport {
   stars: number;
   stickerId?: string;
   stickerEmoji?: string;
+  hintsUsed?: number;
+  durationMs?: number;
 }
 
 export function reportGameCompletion(r: CompletionReport): void {
@@ -29,11 +31,11 @@ export function reportGameCompletion(r: CompletionReport): void {
   if (!learnerId) return;
   void (async () => {
     try {
-      // 1. Progress (may trigger level promotion server-side)
+      // 1. Progress (may trigger global promotion + per-skill adjustment server-side)
       const pRes = await fetch(`/api/learners/${learnerId}/progress`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ gameId: r.gameId, accuracy: r.accuracy, stars: r.stars, stickerId: r.stickerId }),
+        body: JSON.stringify({ gameId: r.gameId, accuracy: r.accuracy, stars: r.stars, stickerId: r.stickerId, hintsUsed: r.hintsUsed ?? 0, durationMs: r.durationMs }),
       }).catch(() => null);
       if (pRes && pRes.ok) {
         const body = await pRes.json().catch(() => null);
@@ -42,6 +44,11 @@ export function reportGameCompletion(r: CompletionReport): void {
           queueEvent({ event: "level_unlocked", gameId: r.gameId, metadata: { level: promo.level } });
           const cur = getCachedProfile();
           if (cur) cacheProfile({ ...cur, level: promo.level });
+        }
+        // Per-skill adjustment is observable through the same event pipeline.
+        const skill = body?.data?.skill as { action?: string; level?: number; message?: string } | undefined;
+        if (skill && (skill.action === "promote" || skill.action === "reduce") && typeof skill.level === "number") {
+          queueEvent({ event: "level_unlocked", gameId: r.gameId, metadata: { level: skill.level, skill: true, action: skill.action } });
         }
       }
       // 2. Server reward mirror (idempotent by stickerId)

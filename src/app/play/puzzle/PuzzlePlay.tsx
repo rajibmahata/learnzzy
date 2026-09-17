@@ -11,6 +11,7 @@ import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
+import { LockedAdventure } from "@/components/child/LockedAdventure";
 
 export default function PuzzlePlay() {
   const [round, setRound] = React.useState(0);
@@ -18,7 +19,7 @@ export default function PuzzlePlay() {
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
   const [done, setDone] = React.useState(false);
 
-  const { rounds, reload } = useGameRounds<PuzzleDef>({
+  const { rounds, reload, locked } = useGameRounds<PuzzleDef>({
     gameId: "puzzle",
     difficulty: 1,
     total: GAME_ROUNDS,
@@ -72,6 +73,8 @@ export default function PuzzlePlay() {
       </div>
     );
   }
+
+  if (locked) return <LockedAdventure title="Picture Puzzle" />;
 
   if (!valid) {
     return (

@@ -11,6 +11,7 @@ import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
+import { LockedAdventure } from "@/components/child/LockedAdventure";
 
 export default function CleanupPlay() {
   const [round, setRound] = React.useState(0);
@@ -19,7 +20,7 @@ export default function CleanupPlay() {
   const [collected, setCollected] = React.useState<string[]>([]);
   const [done, setDone] = React.useState(false);
 
-  const { rounds, reload } = useGameRounds<CleanupSceneDef>({
+  const { rounds, reload, locked } = useGameRounds<CleanupSceneDef>({
     gameId: "clean-up",
     difficulty: 1,
     total: GAME_ROUNDS,
@@ -65,6 +66,8 @@ export default function CleanupPlay() {
       </div>
     );
   }
+
+  if (locked) return <LockedAdventure title="Clean Up" />;
 
   if (!scene) {
     return (

@@ -57,6 +57,13 @@ const STICKER_POOL: Record<string, { emoji: string; name: string }[]> = {
     { emoji: "🖍️", name: "Color Burst" },
     { emoji: "🏆", name: "Sketch Champion" },
   ],
+  discover: [
+    { emoji: "🧭", name: "Little Explorer" },
+    { emoji: "🦜", name: "Bird Buddy" },
+    { emoji: "🍎", name: "Fruit Finder" },
+    { emoji: "🎨", name: "Color Champion" },
+    { emoji: "🏆", name: "Discovery Star" },
+  ],
 };
 
 function load(): RewardsState {

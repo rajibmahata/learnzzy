@@ -228,8 +228,11 @@ GET /api/games/addition/content?difficulty=1&limit=5
 ```text
 difficulty
 limit
-theme
-exclude
+level (1..5, optional; defaults from difficulty)
+ageBand (optional, used for level configuration)
+learnerId (optional; required to enforce a learner's current unlock)
+seed (optional deterministic selection seed)
+recent (optional comma-separated recent content IDs)
 ```
 
 ### Response
@@ -272,6 +275,24 @@ For some game types, do not send the correct answer to the client if doing so cr
 For simple client-side games, answer validation may be local. For server-trusted scoring, send an answer verification token or validate server-side.
 
 ---
+
+# 9.2 Learner Journey and Progression
+
+```http
+GET /api/learners/{learnerId}/journey
+GET /api/learners/{learnerId}/plan
+POST /api/learners/{learnerId}/progress
+```
+
+The journey response is derived from the existing learner level and exposes
+the `numbers`, `creative`, and `visual` tracks with five levels each. Every
+level is marked `completed`, `current`, or `locked`. The existing promotion
+rule remains authoritative: three completions at 80%+ accuracy, one level at a
+time, capped at level 5.
+
+When `learnerId` and `level` are provided to the game-content endpoint, a
+future level returns `403 LEVEL_LOCKED`. The browser journey is presentation;
+the server remains the unlock authority.
 
 # 10. Game Event API
 

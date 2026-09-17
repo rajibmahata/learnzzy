@@ -25,7 +25,9 @@ export function createAdditionScene(P: typeof Phaser) {
 
     preload() {
       // Local asset ensures the animation is visible even without emoji fonts or network CDN.
-      this.load.image("apple", "/assets/apple.svg");
+      // SVG must load via the SVG loader with explicit raster size; `load.image`
+      // on SVG yields 0x0 textures on some browsers (invisible sprites / white stage).
+      this.load.svg("apple", "/assets/apple.svg", { width: 64, height: 64 });
     }
 
     create() {
@@ -45,7 +47,7 @@ export function createAdditionScene(P: typeof Phaser) {
       // so gameplay never blocks (BR-221).
       if (!this.textures.exists("apple")) {
         // Defensive: allow a retry on next showGroups if preload was skipped.
-        this.load.image("apple", "/assets/apple.svg");
+        this.load.svg("apple", "/assets/apple.svg", { width: 64, height: 64 });
         this.load.start();
       }
     }

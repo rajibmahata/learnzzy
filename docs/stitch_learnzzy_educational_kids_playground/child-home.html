@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>Learnzzy</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-fixed": "#d8e2ff", "on-primary-container": "#fefcff", "on-tertiary-container": "#f5fff6", "on-surface": "#0d1c2e", "surface": "#f8f9ff", "on-error": "#ffffff", "on-surface-variant": "#424754", "on-background": "#0d1c2e", "inverse-primary": "#adc6ff", "surface-dim": "#ccdbf3", "inverse-on-surface": "#eaf1ff", "on-secondary-container": "#684000", "background": "#f8f9ff", "on-tertiary": "#ffffff", "secondary-container": "#fea619", "on-error-container": "#93000a", "surface-tint": "#005ac2", "secondary-fixed-dim": "#ffb95f", "surface-container": "#e6eeff", "error": "#ba1a1a", "outline-variant": "#c2c6d6", "outline": "#727785", "surface-container-highest": "#d5e3fc", "primary-fixed-dim": "#adc6ff", "primary": "#0058be", "surface-variant": "#d5e3fc", "primary-container": "#2170e4", "on-primary": "#ffffff", "surface-container-low": "#eff4ff", "on-secondary": "#ffffff", "tertiary": "#006947", "secondary": "#855300", "on-tertiary-fixed-variant": "#005236", "inverse-surface": "#233144", "on-primary-fixed": "#001a42", "tertiary-container": "#00855b", "on-primary-fixed-variant": "#004395", "tertiary-fixed": "#6ffbbe", "on-secondary-fixed-variant": "#653e00", "on-tertiary-fixed": "#002113", "surface-container-high": "#dce9ff", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#2a1700", "error-container": "#ffdad6", "secondary-fixed": "#ffddb8", "tertiary-fixed-dim": "#4edea3", "surface-bright": "#f8f9ff" }, "borderRadius": { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, "spacing": { "gutter": "1.5rem", "margin": "2rem", "space-lg": "2rem", "margin-mobile": "1.25rem", "space-md": "1.25rem", "gutter-mobile": "1rem", "space-sm": "0.75rem", "space-xs": "0.5rem", "space-xl": "3rem" }, "fontFamily": { "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "instruction-bold": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "display-hero": ["Plus Jakarta Sans"], "headline-md-mobile": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "answer-btn": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-hero-mobile": ["Plus Jakarta Sans"] }, "fontSize": { "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "700" }], "instruction-bold": ["24px", { "lineHeight": "32px", "fontWeight": "700" }], "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-md-mobile": ["22px", { "lineHeight": "30px", "fontWeight": "700" }], "headline-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }], "answer-btn": ["22px", { "lineHeight": "28px", "fontWeight": "800" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }], "display-hero-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased select-none"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-margin-mobile flex items-center justify-between gap-space-xs"><div class="flex items-center gap-space-xs"><img alt="Learnzzy Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VgZIOnueTsYUthqrzGiJtpyitW9RvQhPxkQvCehqpCnRfHYMYsk9yguAJb7_K-LQXI7OsV51rteaytfIiiHSeCQaTwb8BhNtQEI1EiimS8fPt_2Kc-8AwTQwiTcLyZpDyATYr53EFxoZwqBItQf5vyZDIncbRC10smFn9fkmS2oDreL5yfpGwEoITn-4u720mNhr6nk2pSZPqXlWNe1sszx3bnbRBXr23iUmPlH92CG6ced9rY1QxTQ2I"/><span class="font-headline-md-mobile text-headline-md-mobile text-primary tracking-tight font-extrabold hidden sm:inline">Learnzzy</span><span class="font-label-md text-label-md text-on-surface-variant font-bold ml-1">Play Garden</span></div><div class="flex items-center gap-space-xs"><div class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full shadow-[0_2px_0_#d5e3fc]"><span class="material-symbols-outlined text-secondary-container text-[20px]">star</span><span class="font-label-md text-label-md text-on-secondary-container font-extrabold">24</span></div><button aria-label="Sound Toggle" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-surface-container flex items-center justify-center text-primary active:scale-95 transition-transform shadow-[0_2px_0_#d5e3fc]"><span class="material-symbols-outlined text-[22px]">volume_up</span></button><button aria-label="Parent Gate" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant active:scale-95 transition-transform shadow-[0_2px_0_#e6eeff]"><span class="material-symbols-outlined text-[20px]">lock</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-20 pb-28 bg-surface"><div class="flex flex-col w-full px-margin-mobile pb-space-lg gap-space-md">
+<!-- Friendly Greeting & Tagline Header -->
+<div class="flex flex-col items-center text-center pt-space-xs">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high shadow-sm mb-2">
+<span class="material-symbols-outlined text-secondary-container text-[18px]">auto_awesome</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Play • Think • Learn</span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface tracking-tight">
+      What shall we play?
+    </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+      Choose an adventure!
+    </p>
+</div>
+<!-- Ambient AI Companion Quick-Audio Bubble -->
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-lowest shadow-[0_6px_0_#d5e3fc,0_10px_20px_rgba(13,28,46,0.06)] active:scale-[0.98] transition-transform">
+<div class="flex items-center gap-3 min-w-0">
+<div class="relative w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary shadow-sm flex-shrink-0">
+<span class="material-symbols-outlined text-[26px]">pets</span>
+<span class="absolute -top-1 -right-1 w-4 h-4 bg-tertiary rounded-full border-2 border-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Pip says: “Touch any game to start!”</span>
+<span class="font-label-sm text-label-sm text-primary">Tap Pip to hear again 🎵</span>
+</div>
+</div>
+<button aria-label="Listen prompt" class="w-11 h-11 rounded-full bg-primary-fixed flex items-center justify-center text-primary active:scale-90 transition-transform shadow-[0_3px_0_#adc6ff] flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">volume_up</span>
+</button>
+</div>
+<!-- Tactile 5 Core Games Grid -->
+<div class="flex flex-col gap-space-md">
+<!-- Game 1: Numbers (Coral/Warm Red Theme) -->
+<a class="group relative flex flex-col p-5 rounded-xl bg-error-container text-on-error-container shadow-[0_8px_0_#ffb4ab,0_16px_24px_rgba(186,26,26,0.12)] active:translate-y-1 active:shadow-[0_2px_0_#ffb4ab] transition-all" href="#">
+<div class="flex items-start justify-between gap-2 mb-3">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 text-on-surface text-label-sm font-label-sm shadow-sm">
+<span class="material-symbols-outlined text-secondary-container text-[16px]">star</span>
+<span>Learn Addition</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-error shadow-sm group-active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-error opacity-80">Number Adventure</span>
+<h2 class="font-headline-md-mobile text-headline-md-mobile font-instruction-bold text-on-error-container">Numbers</h2>
+<p class="font-body-md text-body-md text-on-error-container opacity-90 mt-0.5">Count juicy red apples!</p>
+</div>
+<div class="relative w-24 h-24 rounded-2xl overflow-hidden shadow-inner flex-shrink-0 bg-surface-container-lowest/30">
+<img class="w-full h-full object-cover" data-alt="Playful 3D claymation style glossy red apples with bright green leaves resting on a warm wooden Montessori table, vibrant warm lighting, child friendly colorful render, soft smooth textures, volumetric studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3AzVYS6zDtADD0RZ8OgY8k6rabrtMfth1tTQfIwBLCMBm1RcIaVePjU0Y9g1UohMl5-oJ0qZzyrgyDZ8pFysH4dzjXQ_40ELiAyPdBdJv93b67KtoKAEnoKxhYNLa9GcoeORQ61VCGKOt5dDajV3fKWdm2lgyh_84nYElZjc1BzHSyR6aCrB7KnRAKS968543sB-eIDE5i2pdhJC9VrvDkf85zLdockkLOSkZbCVec8VaZSgyyehJ"/>
+</div>
+</div>
+</a>
+<!-- Game 2: Fly Away (Sky Blue Theme) -->
+<a class="group relative flex flex-col p-5 rounded-xl bg-surface-container-high text-on-surface shadow-[0_8px_0_#adc6ff,0_16px_24px_rgba(0,88,190,0.12)] active:translate-y-1 active:shadow-[0_2px_0_#adc6ff] transition-all" href="#">
+<div class="flex items-start justify-between gap-2 mb-3">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 text-on-surface text-label-sm font-label-sm shadow-sm">
+<span class="material-symbols-outlined text-secondary-container text-[16px]">star</span>
+<span>Learn Subtraction</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm group-active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary opacity-80">Subtraction Trail</span>
+<h2 class="font-headline-md-mobile text-headline-md-mobile font-instruction-bold text-on-surface">Fly Away</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Watch friendly birds flap away!</p>
+</div>
+<div class="relative w-24 h-24 rounded-2xl overflow-hidden shadow-inner flex-shrink-0 bg-surface-container-lowest/50">
+<img class="w-full h-full object-cover" data-alt="Cute chubby sky blue birds perched cheerfully along a blooming tree branch with small white blossoms, warm sunny spring light, whimsical storybook digital art, soft pastel color palette, ultra tactile round shapes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6k0iO5jY8ujt1TukHaVA5Fp8WZguXnRHIhHBQhTXAFFQti3G69OPL6iuySuKDRvkO7GEK45-aC7Lf_ZnRP3h60vIRt_MgpWHMP20ucBL44UxGoTsiF1nZulBSeuj1bo4iG6W8UIprpPPDM-FL5oDf3vOuEd7HIkU40ZPanyai4uP-spifYnvocjpzjIfjzrx3oyQp4nEML96s8wtAYUe28sSborr41cNAKkLAqhLB3L30gEP17Q6z"/>
+</div>
+</div>
+</a>
+<!-- Game 3: Clean Up (Mint Green Theme) -->
+<a class="group relative flex flex-col p-5 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed shadow-[0_8px_0_#4edea3,0_16px_24px_rgba(0,105,71,0.12)] active:translate-y-1 active:shadow-[0_2px_0_#4edea3] transition-all" href="#">
+<div class="flex items-start justify-between gap-2 mb-3">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-lowest/90 text-on-surface text-label-sm font-label-sm shadow-sm">
+<span class="material-symbols-outlined text-secondary-container text-[16px]">star</span>
+<span>Spot &amp; Clean</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-tertiary shadow-sm group-active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[24px]">play_arrow</span>
+</div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary opacity-80">Tidy Toy Room</span>
+<h2 class="font-headline-md-mobile text-headline-md-mobile font-instruction-bold text-on-tertiary-fixed">Clean Up</h2>
+<p class="font-body-md text-body-md text-on-tertiary-fixed opacity-90 mt-0.5">Sort crayons and teddy bears!</p>
+</div>
+<div class="relative w-24 h-24 rounded-2xl overflow-hidden shadow-inner flex-shrink-0 bg-surface-container-lowest/40">
+<img class="w-full h-full object-cover" data-alt="Adorable plush teddy bear smiling gently beside colorful chunky wax crayons inside a soft woven wicker basket, cozy playroom setting, warm ambient morning light, Montessori toy aesthetic, warm soft focus" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5IKNiE8I0vcxSAWr-Zhoa91vSGBHGbiHCDErJRPC2DbhAhzgwE4pJHBDnI1EK7faaPAlAcitO5bWWkBuNGWBYrlgj6iHEKsjMcS-PR6wzPY9lXPyOUeCt47elTEPN1lprcuRTHlOp5ZORtlxUNGHAeAS_FEe7yY7PK0VrI9rm4LfZZXLH4Uk029DkJy0WYStQzpThvADh6MpvmjxEFFQ0os9sfokx00Qo-D3SLGQ5bMtPo0a1F1yA"/>
+</div>
+</div>
+</a>
+<!-- Two Column Row for Games 4 & 5 -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Game 4: Puzzle (Sunny Amber Theme) -->
+<a class="group relative flex flex-col p-4 rounded-xl bg-secondary-fixed text-on-secondary-fixed shadow-[0_8px_0_#ffb95f,0_16px_24px_rgba(133,83,0,0.12)] active:translate-y-1 active:shadow-[0_2px_0_#ffb95f] transition-all" href="#">
+<div class="flex items-center justify-between mb-2">
+<div class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-lowest/90 text-on-surface text-label-sm font-label-sm">
+<span>⭐ Logic</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center text-secondary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</div>
+</div>
+<div class="w-full h-24 rounded-2xl overflow-hidden mb-2 shadow-inner bg-surface-container-lowest/40">
+<img class="w-full h-full object-cover" data-alt="Playful 4-piece chunky wooden puzzle featuring a joyful smiling green baby dinosaur on a sunny meadow, tactile Montessori wooden toy style, soft studio rim light, bright cheerful warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBz1SAsszTVZjTOcP38urA3sGmfOtcBsez6brW13l-oopoata3w1AmbkM9SXYW1_Yu8HBFfwkxARX--zJQfEjmaxanIku5ivEuwt358RuDF1YVC4EqnyQ10r7vVK9rTlt-yqCflsDylgTDdxvoO4T0bv6e--lql8Rsw6lm83KgOYdz8yjvRpPvvEyF9q97_MgUlkuYfDp39Cma3KL2A7QtNCLDe0MMw16SW1wxPfnudx-2Kg5r0u2nI"/>
+</div>
+<span class="font-label-sm text-label-sm uppercase text-secondary">Spatial Fun</span>
+<h2 class="font-instruction-bold text-headline-md-mobile text-on-secondary-fixed mt-0.5">Puzzle</h2>
+</a>
+<!-- Game 5: Sketch (Soft Purple/Lilac Theme) -->
+<a class="group relative flex flex-col p-4 rounded-xl bg-primary-fixed text-on-primary-fixed shadow-[0_8px_0_#adc6ff,0_16px_24px_rgba(0,88,190,0.12)] active:translate-y-1 active:shadow-[0_2px_0_#adc6ff] transition-all" href="#">
+<div class="flex items-center justify-between mb-2">
+<div class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container-lowest/90 text-on-surface text-label-sm font-label-sm">
+<span>⭐ Trace</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</div>
+</div>
+<div class="w-full h-24 rounded-2xl overflow-hidden mb-2 shadow-inner bg-surface-container-lowest/40">
+<img class="w-full h-full object-cover" data-alt="Soft glowing magical dotted trace line of a cute baby elephant with oversized ears on smooth textured cream paper, gentle pastel rainbow sparkles, inspiring digital drawing aesthetic for kids, soft ambient lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0GChn8-AAV3Yq5Jk_-2IkZA8sv-87zu3pWEaCYilC-VugKwlLhQ1ME2Hdh3NvjlMLLaCaXS1zAS6XT9IikX68tHnGa0YAkGJ2EiueFh9dNMD6HRDEkAV2DbzSs1vmb2K7Po7rbjAgL2UOoxzphtzk0vmKePWANv7y5XemtzoZ4Br4Smfhqu4DbYSmknvMUPTL3rsmfDHAsfYjY23TC9NFv6eJ3VNM_TGeutDDZjqYyF_Knk3JFqN_"/>
+</div>
+<span class="font-label-sm text-label-sm uppercase text-primary">Draw &amp; Trace</span>
+<h2 class="font-instruction-bold text-headline-md-mobile text-on-primary-fixed mt-0.5">Sketch</h2>
+</a>
+</div>
+</div>
+<!-- Stars & Badges Quest Container -->
+<div class="flex flex-col p-5 rounded-xl bg-surface-container-lowest shadow-[0_8px_0_#e6eeff,0_16px_28px_rgba(13,28,46,0.05)] mt-2">
+<!-- Star Progress Header -->
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary-container shadow-sm">
+<span class="material-symbols-outlined text-[24px]">hotel_class</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-md-mobile text-headline-md-mobile text-on-surface">My Stars &amp; Badges</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">24 Golden Stars earned</span>
+</div>
+</div>
+<div class="px-3 py-1.5 rounded-full bg-secondary-container text-on-secondary font-answer-btn text-answer-btn shadow-[0_3px_0_#855300]">
+        24 ⭐
+      </div>
+</div>
+<!-- Stepper Quest Bar: 3 more to next badge -->
+<div class="flex flex-col gap-2 p-3 rounded-2xl bg-surface-container-low mb-4">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-on-surface font-instruction-bold">Next Reward</span>
+<span class="text-secondary font-bold">3 more stars to unlock!</span>
+</div>
+<!-- Chunky Quest Trail Dots -->
+<div class="flex items-center justify-between gap-2 pt-1">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[16px]">star</span>
+</div>
+<div class="flex-1 h-2 rounded-full bg-secondary-container"></div>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[16px]">star</span>
+</div>
+<div class="flex-1 h-2 rounded-full bg-secondary-container"></div>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary shadow-sm">
+<span class="material-symbols-outlined text-[16px]">star</span>
+</div>
+<div class="flex-1 h-2 rounded-full bg-surface-container-highest"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant shadow-inner">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant text-center mt-1">
+        3 more stars until <strong>Rainbow Explorer</strong> badge!
+      </span>
+</div>
+<!-- 3 Unlocked Playful Badges -->
+<div class="grid grid-cols-3 gap-space-xs">
+<!-- Badge 1: Early Counter -->
+<div class="flex flex-col items-center text-center p-3 rounded-2xl bg-error-container/40">
+<div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center text-error shadow-sm mb-1.5">
+<span class="material-symbols-outlined text-[26px]">pin</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface leading-tight">Early Counter</span>
+<span class="font-label-sm text-label-sm text-tertiary mt-0.5">Unlocked!</span>
+</div>
+<!-- Badge 2: Clean Master -->
+<div class="flex flex-col items-center text-center p-3 rounded-2xl bg-tertiary-fixed/40">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary shadow-sm mb-1.5">
+<span class="material-symbols-outlined text-[26px]">cleaning_services</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface leading-tight">Clean Master</span>
+<span class="font-label-sm text-label-sm text-tertiary mt-0.5">Unlocked!</span>
+</div>
+<!-- Badge 3: Star Artist -->
+<div class="flex flex-col items-center text-center p-3 rounded-2xl bg-primary-fixed/40">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-sm mb-1.5">
+<span class="material-symbols-outlined text-[26px]">palette</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface leading-tight">Star Artist</span>
+<span class="font-label-sm text-label-sm text-tertiary mt-0.5">Unlocked!</span>
+</div>
+</div>
+</div>
+<!-- Big Floating Instant Start Quick-Play Action -->
+<button class="w-full min-h-[64px] rounded-full bg-primary text-on-primary font-answer-btn text-answer-btn flex items-center justify-center gap-3 shadow-[0_6px_0_#004395,0_14px_22px_rgba(0,88,190,0.25)] active:translate-y-1 active:shadow-[0_2px_0_#004395] transition-all">
+<span class="material-symbols-outlined text-[30px]">shuffle</span>
+<span>Surprise Me &amp; Play!</span>
+</button>
+</div>
+<script>
+  // Simple delightful audio/haptic simulation feedback for child clicks
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('click', () => {
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(25);
+      }
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.04)]" data-active-classes="bg-primary text-on-primary shadow-[0_4px_0_#004395]"><div class="h-20 px-gutter-mobile flex items-center justify-around gap-space-xs"><a aria-current="page" class="flex items-center justify-center gap-2 px-space-md py-space-xs rounded-full min-h-[48px] font-answer-btn active:scale-95 transition-all bg-primary text-on-primary shadow-[0_4px_0_#004395]" data-path="play-garden" href="#"><span class="material-symbols-outlined text-[28px]">smart_toy</span><span>Play</span></a><a class="flex items-center justify-center gap-2 px-space-md py-space-xs rounded-full min-h-[48px] text-on-surface-variant font-answer-btn text-answer-btn active:scale-95 transition-all" data-path="star-trail" href="#"><span class="material-symbols-outlined text-[28px]">hotel_class</span><span>Stars</span></a><a class="flex items-center justify-center gap-2 px-space-md py-space-xs rounded-full min-h-[48px] text-on-surface-variant font-answer-btn text-answer-btn active:scale-95 transition-all" data-path="audio-tunes" href="#"><span class="material-symbols-outlined text-[28px]">music_note</span><span>Tunes</span></a></div></nav></body></html>

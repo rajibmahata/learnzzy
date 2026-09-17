@@ -14,6 +14,9 @@
   --color-secondary-container: #fea619;
   --color-tertiary-fixed: #6ffbbe;
   --color-tertiary: #006947;
+  --color-tertiary-container: #00855b;
+  --color-coral: #f43f5e;
+  --color-cosmic: #8b5cf6;
   --color-error-container: #ffdad6;
   --color-text: #0d1c2e;
   --color-muted: #424754;
@@ -31,4 +34,6 @@
   --touch-min: 56px;
   --touch-lg: 68px;
   --shadow-pillow: 0 4px 0 #e2dac8, 0 8px 16px rgba(180, 160, 130, 0.12);
+  --shadow-tactile: 0 6px 0 var(--btn-shade, #004395), 0 12px 20px rgba(180, 160, 130, 0.16);
+  --shadow-float: 0 16px 32px rgba(139, 92, 246, 0.18), 0 4px 12px rgba(180, 160, 130, 0.1);
 }

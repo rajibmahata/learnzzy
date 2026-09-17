@@ -46,6 +46,12 @@ Docker + Nginx + VPS
 Sentry + structured logs
 ```
 
+The learning-progress/content-variety gap is implemented. Read
+`LEARNING_PROGRESS_ASSESSMENT.md` for confirmed causes and compatibility notes.
+The child journey is derived from the existing global level and uses three
+tracks (`numbers`, `creative`, `visual`); future-level content requests return
+`403 LEVEL_LOCKED` server-side.
+
 ---
 
 # 3. Most Important Rules Before Coding

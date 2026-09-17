@@ -16,6 +16,7 @@ export const ContentDocSchema = z.object({
   contentId: z.string().min(1).max(100),
   gameId: z.string().min(1).max(50),
   difficulty: z.enum(["easy", "medium", "hard"]),
+  level: z.number().int().min(1).max(5).optional(),
   contentType: z.string().min(1).max(50),
   status: ContentStatusSchema,
   version: z.number().int().min(1),

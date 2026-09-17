@@ -45,11 +45,15 @@ adapters (mock-first, disabled by default), concept model, advisory-only
 planner hook, OER content grounding with provenance, parent auth + pairing +
 parent/child dashboards, admin education diagnostics, Sentry wiring, Redis-backed
 rate limiting, prod deploy assets, backup script, and QA instructions) are
-implemented and verified with lint, typecheck, 97 automated tests, 76 Playwright
+implemented and verified with lint, typecheck, 104 automated tests, 84 Playwright
 specs, production build, Docker-stack smoke checks, a live pairing-chain
-proof, and a root-caused/fixed sketch engine outage (`SKETCH_DOCKER_ROOT_CAUSE.md`).
+proof, a root-caused/fixed sketch engine outage (`SKETCH_DOCKER_ROOT_CAUSE.md`),
+and the learning-progress/content-variety work documented in
+`LEARNING_PROGRESS_ASSESSMENT.md`.
 Remaining backlog items are production-hardening or explicitly listed in
-`NEXT_SESSION.md`.
+`NEXT_SESSION.md`. Per-item `Status: TODO` below remains authoritative for
+granular tracking; the paragraph above is a progress snapshot, not a claim
+that every sub-item acceptance criterion is closed.
 
 Priority:
 

@@ -36,6 +36,24 @@ test("addition game loads and answers", async ({ page }) => {
   await expect(page.getByText(/great job|try again/i).first()).toBeVisible({ timeout: 15000 });
 });
 
+test("addition hint opens with a counting nudge", async ({ page }) => {
+  await page.goto("/play/addition");
+  const answers = page.getByRole("group", { name: /answer choices/i }).getByRole("button");
+  await expect(answers.first()).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: /show a hint/i }).click();
+  await expect(page.getByRole("dialog", { name: /hint/i })).toBeVisible();
+  await expect(page.getByText(/start at|count|just count/i).first()).toBeVisible();
+});
+
+test("subtraction hint opens with a take-away nudge", async ({ page }) => {
+  await page.goto("/play/subtraction");
+  const answers = page.getByRole("group", { name: /answer choices/i }).getByRole("button");
+  await expect(answers.first()).toBeVisible({ timeout: 15000 });
+  await page.getByRole("button", { name: /show a hint/i }).click();
+  await expect(page.getByRole("dialog", { name: /hint/i })).toBeVisible();
+  await expect(page.getByText(/take away|nothing flew/i).first()).toBeVisible();
+});
+
 test("stickers page renders empty state", async ({ page }) => {
   await page.goto("/stickers");
   await expect(page.getByRole("heading", { name: /stickers/i })).toBeVisible();

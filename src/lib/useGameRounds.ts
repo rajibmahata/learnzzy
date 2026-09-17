@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { fetchPool, type PoolItem, type PoolGameId } from "./pool-client";
+import { fetchPool, PoolAccessError, type PoolItem, type PoolGameId } from "./pool-client";
 import { getWindowSeed, shuffleWithSeed } from "./windowSeed";
 
 export type { PoolGameId };
@@ -23,6 +23,7 @@ export function useGameRounds<T>(opts: {
 }): {
   rounds: PlayRound<T>[] | null;
   source: "loading" | "pool" | "mixed" | "local";
+  locked: boolean;
   reload: () => void;
 } {
   const mapRef = React.useRef(opts.mapItem);
@@ -32,6 +33,7 @@ export function useGameRounds<T>(opts: {
 
   const [rounds, setRounds] = React.useState<PlayRound<T>[] | null>(null);
   const [source, setSource] = React.useState<"loading" | "pool" | "mixed" | "local">("loading");
+  const [locked, setLocked] = React.useState(false);
   const [nonce, setNonce] = React.useState(0);
 
   React.useEffect(() => {
@@ -39,8 +41,13 @@ export function useGameRounds<T>(opts: {
     (async () => {
       setRounds(null);
       setSource("loading");
+      setLocked(false);
       // Per-window seed ensures different windows never get identical game sequences
       const wSeed = typeof window !== "undefined" ? getWindowSeed() : 0;
+      const profile = readProfile();
+      const requestedLevel = readRequestedLevel() ?? profile?.level ?? 1;
+      const recentKey = `learnzzy.recentContent.${profile?.learnerId ?? "guest"}.${opts.gameId}`;
+      const recentIds = readRecentIds(recentKey);
       const local = (n: number): PlayRound<T> => {
         // Mix window seed into local generation so simultaneous windows diverge
         // even without pool content.
@@ -49,7 +56,13 @@ export function useGameRounds<T>(opts: {
         return { content: localRef.current(seededRound) };
       };
       try {
-        const items = await fetchPool(opts.gameId, opts.difficulty, opts.total);
+        const items = await fetchPool(opts.gameId, opts.difficulty, opts.total, {
+          level: requestedLevel,
+          ageBand: profile?.ageBand,
+          learnerId: profile?.learnerId,
+          seed: wSeed ^ nonce,
+          recentIds,
+        });
         const mapped: PlayRound<T>[] = [];
         for (const item of items) {
           const c = mapRef.current(item);
@@ -64,16 +77,30 @@ export function useGameRounds<T>(opts: {
         const final = shuffled.length > 1 ? shuffleWithSeed(shuffled, wSeed ^ 0x9e3779b9) : shuffled;
         if (cancelled) return;
         const withId = final.filter((m) => m.contentId).length;
+        if (typeof window !== "undefined" && withId > 0) {
+          const ids = final.flatMap((round) => round.contentId ? [round.contentId] : []);
+          window.localStorage.setItem(recentKey, JSON.stringify([...recentIds, ...ids].slice(-12)));
+        }
         setSource(withId === opts.total ? "pool" : withId > 0 ? "mixed" : "local");
         setRounds(final);
-      } catch {
+      } catch (error) {
         if (cancelled) return;
+        if (error instanceof PoolAccessError) {
+          setLocked(true);
+          setRounds(null);
+          return;
+        }
         setSource("local");
         const localOnly = Array.from({ length: opts.total }, (_, i) => local(i));
         setRounds(shuffleWithSeed(localOnly, wSeed));
       }
-    })().catch(() => {
+    })().catch((error) => {
       if (cancelled) return;
+      if (error instanceof PoolAccessError) {
+        setLocked(true);
+        setRounds(null);
+        return;
+      }
       setSource("local");
       const wSeed = typeof window !== "undefined" ? getWindowSeed() : 0;
       const localOnly = Array.from({ length: opts.total }, (_, i) => ({ content: localRef.current((i + (wSeed % 1000)) % 2147483647) }));
@@ -91,5 +118,32 @@ function hashGame(g: string): number {
   return h;
 }
 
-  return { rounds, source, reload: () => setNonce((n) => n + 1) };
+  return { rounds, source, locked, reload: () => setNonce((n) => n + 1) };
+}
+
+function readProfile(): { learnerId?: string; ageBand?: string; level?: number } | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem("learnzzy.learnerProfile.v1");
+    return raw ? JSON.parse(raw) as { learnerId?: string; ageBand?: string; level?: number } : null;
+  } catch {
+    return null;
+  }
+}
+
+function readRecentIds(key: string): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(key);
+    const ids = raw ? JSON.parse(raw) : [];
+    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string").slice(-12) : [];
+  } catch {
+    return [];
+  }
+}
+
+function readRequestedLevel(): number | undefined {
+  if (typeof window === "undefined") return undefined;
+  const value = Number(new URLSearchParams(window.location.search).get("level"));
+  return Number.isInteger(value) && value >= 1 && value <= 5 ? value : undefined;
 }

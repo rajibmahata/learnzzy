@@ -13,7 +13,7 @@ export function CleanupStage({
   onCollect: (targetId: string) => void;
 }) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const { apiRef, ready } = usePhaserGame<CleanupSceneApi>({
+  const { apiRef, ready, booted } = usePhaserGame<CleanupSceneApi>({
     containerRef,
     createSceneClass: createCleanupScene,
     width: 720,
@@ -23,19 +23,27 @@ export function CleanupStage({
   cbRef.current = onCollect;
 
   React.useEffect(() => {
-    if (ready) {
+    if (booted) {
       apiRef.current?.onCollect((id) => cbRef.current(id));
       apiRef.current?.showScene(scene);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, scene]);
+  }, [booted, scene]);
 
   return (
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="w-full overflow-hidden rounded-xl bg-white shadow-card [&>canvas]:mx-auto [&>canvas]:block"
+      className="relative w-full min-h-[180px] overflow-hidden rounded-xl bg-white shadow-card [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:mx-auto [&>canvas]:block"
       style={{ aspectRatio: "720 / 340", touchAction: "manipulation" }}
-    />
+    >
+      {!ready && (
+        <div className="absolute inset-0 flex items-center justify-center gap-2 p-4 text-3xl">
+          <span aria-hidden>🧹</span>
+          <span aria-hidden>🧸</span>
+          <span aria-hidden>🧺</span>
+        </div>
+      )}
+    </div>
   );
 }

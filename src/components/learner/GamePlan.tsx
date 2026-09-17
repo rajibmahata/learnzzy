@@ -19,7 +19,7 @@ export function GamePlan() {
   if (loading) return <div className="rounded-xl bg-white p-4 shadow-card text-center text-sm">Building your plan…</div>;
   if (!plan) return <div className="rounded-xl bg-white p-4 shadow-card text-center text-sm">Start playing to get a personalized plan. <Link href="/welcome" className="text-primary underline">Set up</Link></div>;
 
-  const icons: Record<string, string> = { addition: "🔢", subtraction: "🐦", "clean-up": "🧹", puzzle: "🧩", sketch: "✏️" };
+  const icons: Record<string, string> = { addition: "🔢", subtraction: "🐦", "clean-up": "🧹", puzzle: "🧩", sketch: "✏️", discover: "🧭" };
   return (
     <div className="rounded-xl bg-white p-4 shadow-card">
       <h3 className="text-sm font-black uppercase tracking-wide text-on-surface-variant">Your Next Games</h3>

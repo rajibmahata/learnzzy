@@ -1,15 +1,32 @@
 import { z } from "zod";
-import { DIFFICULTY_RANGES, mulberry32, type GameDefinition } from "./framework";
+import { DIFFICULTY_RANGES, mulberry32, type GameDefinition } from "./framework.ts";
 
 // BR-040..043 — subtraction is deterministic, non-negative: answer = start - removed.
 export const SubtractionContentSchema = z.object({
-  start: z.number().int().min(1).max(20),
-  removed: z.number().int().min(0).max(20),
+  start: z.number().int().min(1).max(40),
+  removed: z.number().int().min(0).max(40),
   answers: z.array(z.number().int()).min(3).max(4),
   correctAnswer: z.number().int().min(0),
 });
 
 export type SubtractionContent = z.infer<typeof SubtractionContentSchema>;
+
+// Short, rotating instructions/hints derived deterministically from the
+// operands — copy varies per round without any pool/model change.
+const SUB_INSTRUCTIONS = [
+  "How many left?",
+  "Count what is left!",
+  "Take away — how many stay?",
+] as const;
+
+export function subInstruction(start: number, removed: number): string {
+  return SUB_INSTRUCTIONS[(start + removed) % SUB_INSTRUCTIONS.length];
+}
+
+export function subHint(start: number, removed: number): string {
+  if (removed === 0) return `Nothing flew away — still ${start}.`;
+  return `Start with ${start}. Take away ${removed}.`;
+}
 
 export const subtractionGame: GameDefinition<SubtractionContent> = {
   id: "subtraction",

@@ -10,6 +10,13 @@ interface Insights {
   recommendedNext: { gameId: string; level: number; reason: string }[];
   advisoryFocus?: string;
   concepts: { conceptId: string; name: string; masteryPct: number; attempts: number }[];
+  discovery?: {
+    total: number;
+    learned: number;
+    mastered: number;
+    needsReview: number;
+    categories: { category: string; title: string; learned: number; mastered: number; needsReview: number; total: number; avgMasteryPct: number }[];
+  };
 }
 
 export default function ParentLearningPage() {
@@ -43,6 +50,21 @@ export default function ParentLearningPage() {
             {insights.advisoryFocus ? <p className="rounded-lg bg-tertiary-fixed px-3 py-2 text-sm font-bold text-on-tertiary-fixed">{insights.advisoryFocus}</p> : null}
             {insights.strengths.length > 0 ? <p className="mt-2 text-sm"><strong>Strengths:</strong> {insights.strengths.join(" · ")}</p> : null}
             {insights.practiceOpportunities.length > 0 ? <p className="mt-1 text-sm"><strong>Practice next:</strong> {insights.practiceOpportunities.join(" · ")}</p> : null}
+            {insights.discovery && insights.discovery.learned > 0 ? (
+              <div className="mt-3 rounded-lg bg-surface-low p-3" aria-label="Discovery world">
+                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">
+                  Discovery World · {insights.discovery.learned} learned · {insights.discovery.mastered} mastered
+                </p>
+                <ul className="mt-2 flex flex-col gap-1 text-sm">
+                  {insights.discovery.categories.slice(0, 6).map((c) => (
+                    <li key={c.category} className="flex items-center justify-between gap-2">
+                      <span className="font-bold">{c.title}</span>
+                      <span className="text-xs text-on-surface-variant">{c.learned}/{c.total} · {c.avgMasteryPct}%</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="mt-3 flex flex-col gap-2">
               {insights.concepts.slice(0, 8).map((c) => (
                 <div key={c.conceptId}>

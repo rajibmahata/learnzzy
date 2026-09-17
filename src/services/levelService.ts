@@ -1,6 +1,7 @@
-import { getLearner, setLearnerLevel } from "@/repositories/learners";
+import { getLearner, setLearnerLevel, setGameLevel } from "@/repositories/learners";
 import { getLevelConfig } from "@/repositories/levels";
 import type { AgeBand } from "@/repositories/learners";
+import { decideSkillLevel, evaluateSkill, skillLevelFor, type SkillAction } from "@/lib/skillLevels";
 
 // Level promotion is deterministic + configurable (admin can tune via levels collection).
 // DO NOT promote aggressively after single success (BR-084).
@@ -39,4 +40,37 @@ export async function maybePromote(learnerId: string, gameId: string, accuracy: 
   if (!check.shouldPromote) return { promoted: false, level: check.newLevel, reason: check.reason };
   const updated = await setLearnerLevel(learnerId, check.newLevel);
   return { promoted: true, level: updated?.level ?? check.newLevel, reason: check.reason };
+}
+
+export interface SkillAdjustment {
+  action: SkillAction;
+  level: number;
+  reason: string;
+  message: string;
+  evaluation: { sampleSize: number; avgAccuracy: number; trend: string; masteryPct: number };
+}
+
+/**
+ * Per-skill adaptive step (one game only — sibling skills untouched).
+ * Reads that game's rolling history, decides promote/stabilize/reduce, and
+ * persists the per-game level. Deterministic and testable; the global
+ * journey level (maybePromote) remains a separate authority.
+ */
+export async function maybeAdjustSkill(learnerId: string, gameId: string): Promise<SkillAdjustment> {
+  const learner = await getLearner(learnerId);
+  const fallback = { action: "stabilize" as const, level: 1, reason: "learner not found", message: "Let's practice a little more!", evaluation: { sampleSize: 0, avgAccuracy: 0, trend: "steady", masteryPct: 0 } };
+  if (!learner) return fallback;
+  const current = skillLevelFor(learner, gameId);
+  const prog = learner.gameProgress?.[gameId];
+  const history = {
+    completions: prog?.completions ?? 0,
+    recentAccuracy: prog?.recentAccuracy ?? [],
+    hintsUsed: prog?.hintsUsed ?? 0,
+  };
+  const evaluation = evaluateSkill(history);
+  const decision = decideSkillLevel(current, history);
+  if (decision.newLevel !== current) {
+    await setGameLevel(learnerId, gameId, decision.newLevel);
+  }
+  return { action: decision.action, level: decision.newLevel, reason: decision.reason, message: decision.message, evaluation };
 }

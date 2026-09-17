@@ -6,7 +6,7 @@ import { generateStructured } from "@/server/ai";
 import { mulberry32 } from "@/games/framework";
 import { hashSeed, createCleanupScene, CLEANUP_THEMES } from "@/games/cleanup";
 import { createPuzzleDef } from "@/games/puzzle";
-import { createSketchDef } from "@/games/sketch";
+import { createSketchActivity } from "@/games/sketch";
 import { validateCandidate } from "@/agents/quality";
 
 const THEMES = ["jungle", "ocean", "garden", "farm", "space"];
@@ -62,9 +62,10 @@ function deterministicBatch(gameId: string, difficulty: string, quantity: number
       const def = createPuzzleDef(s, level as 1 | 2 | 3);
       items.push({ contentType: "picture_puzzle", payload: def as unknown as Record<string, unknown>, tags: ["puzzle", "spatial"] });
     } else if (gameId === "sketch") {
-      const level = difficulty === "hard" ? 3 : difficulty === "medium" ? 2 : 1;
-      const def = createSketchDef(s, level as 1 | 2 | 3);
-      items.push({ contentType: "shadow_sketch", payload: def as unknown as Record<string, unknown>, tags: ["sketch", "tracing", def.shape] });
+      // Activity levels spread across the band so batches vary meaningfully.
+      const band = difficulty === "hard" ? [4, 5] : difficulty === "medium" ? [2, 3, 4] : [1, 2];
+      const def = createSketchActivity(s, band[Number(hashSeed(s)) % band.length]);
+      items.push({ contentType: "shadow_sketch", payload: def as unknown as Record<string, unknown>, tags: ["sketch", def.taskType ?? "tracing", def.shape] });
     }
   }
   return items;

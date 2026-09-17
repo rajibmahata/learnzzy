@@ -22,6 +22,13 @@
 - Resilience fixes (live-verified): fail-fast Redis clients + 10s negative-result caching in limiter, education cache, and BullMQ bootstrap (Redis outage previously hung requests); `COOKIE_SECURE` escape for local Docker HTTP auth while production stays Secure; `PARENT_AUTH_SECRET` plumbed through compose with `.env` auto-generation via `scripts/docker-env.mjs`.
 - Sketch/Docker root-cause fix: Phaser boot read `scene.events` before SceneManager attached it, crashing all 5 games silently in production (`SKETCH_DOCKER_ROOT_CAUSE.md`); readiness now uses the Game `ready` event and boot failures warn. Added sketch color picker (cosmetic-only), canvas boot + sketch draw e2e, and sketch definition unit tests.
 - Password hashes use `:` delimiters (`scrypt:<salt>:<hex>`) because `$` is interpolated by compose dotenv and Next dotenv-expand; old `$` hashes are invalid.
+- Learning progression/content gap fixed: the seed now produces 25 distinct
+  level-one addition combinations instead of a constant second operand; server
+  content selection rotates a deterministic candidate window, excludes recent
+  content IDs, and avoids duplicate problem identities. Added level-aware
+  fallback ranges, server-side locked-level responses, three deterministic
+  tracks, `/api/learners/:learnerId/journey`, child journey UI, parent journey
+  summary, and focused learning-progress tests.
 
 ### Changed
 - `/api/games` now exposes all five MVP games as active.

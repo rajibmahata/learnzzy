@@ -68,14 +68,14 @@ describe("promotion guardrails (mirrors levelService)", () => {
 });
 
 describe("learning plan validation (mirrors personalizationService)", () => {
-  const VALID_IDS = new Set(["addition", "subtraction", "clean-up", "puzzle", "sketch"]);
+  const VALID_IDS = new Set(["addition", "subtraction", "clean-up", "puzzle", "sketch", "discover"]);
   const VALID_REASONS = new Set(["interest", "need-practice", "variety"]);
   function validPlan(items: { gameId: string; level: number; reason: string }[]): boolean {
-    if (items.length !== 5) return false;
-    if (new Set(items.map((i) => i.gameId)).size !== 5) return false;
+    if (items.length !== VALID_IDS.size) return false;
+    if (new Set(items.map((i) => i.gameId)).size !== VALID_IDS.size) return false;
     return items.every((i) => VALID_IDS.has(i.gameId) && i.level >= 1 && i.level <= 5 && VALID_REASONS.has(i.reason));
   }
-  test("valid 5-game plan passes", () => {
+  test("valid 6-game plan passes", () => {
     assert.equal(
       validPlan([
         { gameId: "addition", level: 2, reason: "need-practice" },
@@ -83,6 +83,7 @@ describe("learning plan validation (mirrors personalizationService)", () => {
         { gameId: "clean-up", level: 2, reason: "interest" },
         { gameId: "puzzle", level: 2, reason: "variety" },
         { gameId: "sketch", level: 2, reason: "variety" },
+        { gameId: "discover", level: 1, reason: "variety" },
       ]),
       true
     );

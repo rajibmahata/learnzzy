@@ -44,6 +44,11 @@ describe("pool validators (real code)", () => {
   test("rejects addition with wrong pool answer", () => {
     assert.equal(toAdditionContent(addItem({ correctAnswer: 6 })), null);
   });
+  test("accepts addition without exposed answer (server recompute)", () => {
+    const { correctAnswer: _omitted, ...rest } = addItem();
+    const c = toAdditionContent(rest);
+    assert.deepEqual(c, { a: 3, b: 2, answers: [3, 4, 5, 6], correctAnswer: 5 });
+  });
   test("rejects addition with duplicate or missing-correct options", () => {
     assert.equal(toAdditionContent(addItem({ answers: [5, 5, 6, 7] })), null);
     assert.equal(toAdditionContent(addItem({ answers: [1, 2, 3, 4] })), null);
@@ -61,6 +66,11 @@ describe("pool validators (real code)", () => {
     assert.equal(toSubtractionContent(subItem({ question: { start: 2, removed: 5 } })), null);
     assert.equal(toSubtractionContent(subItem({ correctAnswer: 4 })), null);
     assert.equal(toSubtractionContent(subItem({ answers: [3, 3, 4, 5] })), null);
+  });
+  test("accepts subtraction without exposed answer (server recompute)", () => {
+    const { correctAnswer: _omitted, ...rest } = subItem();
+    const c = toSubtractionContent(rest);
+    assert.deepEqual(c, { start: 5, removed: 2, answers: [2, 3, 4, 5], correctAnswer: 3 });
   });
   test("accepts valid clean-up scene, rejects dup ids and deco-as-target", () => {
     const scene = {
@@ -108,5 +118,25 @@ describe("pool validators (real code)", () => {
     assert.equal(toSketchContent(base)?.shape, "circle");
     assert.equal(toSketchContent({ ...base, question: { ...def, tolerance: 99 } }), null);
     assert.equal(toSketchContent({ ...base, question: { ...def, guidePath: guide.slice(0, 3) } }), null);
+  });
+  test("passes through sketch task/instruction/hint, rejects bad copy", () => {
+    const guide = Array.from({ length: 20 }, (_, i) => ({ x: i * 5, y: 50 }));
+    const def = {
+      shape: "house",
+      guidePath: guide,
+      tolerance: 10,
+      coverageThreshold: 0.6,
+      taskType: "trace",
+      instruction: "Draw a house like the example.",
+      hint: "Start with the square body.",
+    };
+    const base: PoolItem = { contentId: "c", difficulty: 1, type: "shadow_sketch", question: def };
+    assert.deepEqual(toSketchContent(base), def);
+    // Legacy items without copy still validate.
+    const { taskType: _t, instruction: _i, hint: _h, ...legacy } = def;
+    assert.equal(toSketchContent({ ...base, question: legacy })?.shape, "house");
+    assert.equal(toSketchContent({ ...base, question: { ...def, taskType: "coloring" } }), null);
+    assert.equal(toSketchContent({ ...base, question: { ...def, instruction: "" } }), null);
+    assert.equal(toSketchContent({ ...base, question: { ...def, hint: "x".repeat(200) } }), null);
   });
 });

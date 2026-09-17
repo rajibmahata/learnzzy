@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getLearner } from "@/repositories/learners";
 import { requireParent, requireParentChild } from "@/server/parent-auth";
 import { buildChildSummary, gameDisplayName } from "@/services/parentInsights";
+import { buildLearningJourney } from "@/lib/learningJourney";
 
 export async function GET(_req: Request, { params }: { params: { childId: string } }) {
   const auth = requireParent();
@@ -25,6 +26,11 @@ export async function GET(_req: Request, { params }: { params: { childId: string
       stickerCount: summary.stickerCount,
       perGame,
       concepts: summary.concepts,
+      skills: summary.skills,
+      lastResult: summary.lastResult,
+      strengths: summary.strengths,
+      practiceOpportunities: summary.practiceOpportunities,
+      journey: buildLearningJourney(learner),
     },
   });
 }

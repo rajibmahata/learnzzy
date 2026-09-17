@@ -94,23 +94,24 @@ export async function buildPlan(learnerId: string): Promise<LearningPlan> {
     }
   } catch {}
 
-  const items: LearningPlanItem[] = ordered.slice(0, 5).map((s, i) => ({
+  const items: LearningPlanItem[] = ordered.map((s, i) => ({
     order: i + 1,
     gameId: s.gameId,
     level,
     reason: s.reason,
   }));
 
-  // Validate final plan: must contain valid gameIds, correct level, length 5
+  // Validate final plan: every registered game exactly once, correct level.
+  // Sized by the registry (not a hardcoded count) so new games join safely.
   const validIds = new Set(GAMES.map((g) => g.id));
   const validated = items.filter((it) => validIds.has(it.gameId) && it.level >= 1 && it.level <= 5);
-  if (validated.length !== 5) {
+  if (validated.length !== GAMES.length || new Set(validated.map((i) => i.gameId)).size !== GAMES.length) {
     // Fallback to deterministic default order
     return {
       learnerId,
       level,
       ageBand,
-      items: GAMES.slice(0, 5).map((g, i) => ({ order: i + 1, gameId: g.id, level, reason: "variety" })),
+      items: GAMES.map((g, i) => ({ order: i + 1, gameId: g.id, level, reason: "variety" })),
       generatedAt: new Date().toISOString(),
       source: "deterministic",
     };

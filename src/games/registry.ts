@@ -50,4 +50,13 @@ export const GAMES = [
     href: "/play/sketch",
     theme: "bg-surface-container text-on-surface shadow-[0_8px_0_#d5e3fc]",
   },
+  {
+    id: "discover",
+    name: "Discovery World",
+    tagline: "Discover",
+    label: "Meet animals, colors & more! Learn & Play",
+    icon: "🧭",
+    href: "/play/discover",
+    theme: "bg-tertiary-fixed text-on-tertiary-fixed shadow-[0_8px_0_#4edea3]",
+  },
 ];

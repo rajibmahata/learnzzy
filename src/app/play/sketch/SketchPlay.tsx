@@ -6,7 +6,7 @@ import { SketchStage } from "@/components/child/SketchStage";
 import { Celebration } from "@/components/child/Celebration";
 import { Button } from "@/components/ui/Button";
 import { GAME_ROUNDS } from "@/games/framework";
-import { createSketchDef, type SketchDef } from "@/games/sketch";
+import { createSketchActivity, type SketchActivity } from "@/games/sketch";
 import { evaluateTracing } from "@/games/sketch-eval";
 import type { SketchSceneApi } from "@/games/phaser/sketchScene";
 import { toSketchContent } from "@/lib/pool-client";
@@ -14,6 +14,7 @@ import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
+import { LockedAdventure } from "@/components/child/LockedAdventure";
 
 const INK_COLORS = [
   { name: "Blue", hex: 0x0058be, css: "#0058be" },
@@ -33,16 +34,27 @@ export default function SketchPlay() {
   const [inkColor, setInkColor] = React.useState<(typeof INK_COLORS)[number]>(INK_COLORS[0]);
   const apiRef = React.useRef<SketchSceneApi | null>(null);
   const retryRounds = React.useRef<Set<number>>(new Set());
+  const hintOpens = React.useRef(0);
+  const gameStart = React.useRef(Date.now());
 
-  const { rounds, reload } = useGameRounds<SketchDef>({
+  const [hintOpen, setHintOpen] = React.useState(false);
+  const { rounds, reload, locked } = useGameRounds<SketchActivity>({
     gameId: "sketch",
     difficulty: 1,
     total: GAME_ROUNDS,
     mapItem: toSketchContent,
-    makeLocal: (r) => createSketchDef(`local-skt-${Date.now() % 2147483647}-${r}`, 1),
+    makeLocal: (r) => createSketchActivity(`local-skt-${Date.now() % 2147483647}-${r}`, 1),
   });
   const sketch = rounds?.[round]?.content;
   const contentId = rounds?.[round]?.contentId;
+  const instruction = sketch?.instruction ?? (sketch ? `TRACE THE ${sketch.shape.toUpperCase()}` : "");
+
+  function openHint() {
+    if (!sketch) return;
+    setHintOpen(true);
+    hintOpens.current += 1;
+    queueEvent({ event: "hint_used", gameId: "sketch", contentId, metadata: { shape: sketch.shape } });
+  }
 
   React.useEffect(() => {
     queueEvent({ event: "game_started", gameId: "sketch", metadata: { sessionId: getSessionId() } });
@@ -52,6 +64,7 @@ export default function SketchPlay() {
   React.useEffect(() => {
     setResult("idle");
     setStartedAt(null);
+    setHintOpen(false);
   }, [round, rounds]);
 
   function strokeStart() {
@@ -100,7 +113,7 @@ export default function SketchPlay() {
           setDone(true);
           queueEvent({ event: "game_completed", gameId: "sketch", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
           const accuracy = Math.max(0, Math.min(1, (GAME_ROUNDS - retryRounds.current.size) / GAME_ROUNDS));
-          reportGameCompletion({ gameId: "sketch", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji });
+          reportGameCompletion({ gameId: "sketch", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
         } else {
           setRound(round + 1);
         }
@@ -120,6 +133,8 @@ export default function SketchPlay() {
     );
   }
 
+  if (locked) return <LockedAdventure title="Shadow Sketch" />;
+
   if (!sketch) {
     return (
       <GameShell title="Shadow Sketch" stars={totalStars}>
@@ -133,7 +148,32 @@ export default function SketchPlay() {
 
   return (
     <GameShell title="Shadow Sketch" stars={totalStars}>
-      <h2 className="mt-2 text-center text-instruction uppercase">TRACE THE {sketch.shape.toUpperCase()}</h2>
+      <h2 className="mt-2 text-center text-instruction uppercase">{instruction}</h2>
+      <div className="mt-2 flex justify-center">
+        <button
+          type="button"
+          onClick={openHint}
+          aria-label="Show a hint"
+          aria-expanded={hintOpen}
+          className="tactile min-h-12 rounded-full bg-secondary-fixed px-5 text-sm font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
+        >
+          ? Hint 💡
+        </button>
+      </div>
+      {hintOpen && (
+        <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
+          <p className="text-sm font-black text-on-surface">💡 Hint</p>
+          <p className="mt-1 text-sm text-on-surface-variant">{sketch.hint ?? "Follow the dots slowly."}</p>
+          <button
+            type="button"
+            onClick={() => setHintOpen(false)}
+            aria-label="Close hint"
+            className="tactile mt-3 min-h-12 w-full rounded-full bg-primary-container text-sm font-black text-white shadow-[0_4px_0_#004395]"
+          >
+            Got it!
+          </button>
+        </div>
+      )}
       <div className="mt-2">
         <SketchStage sketch={sketch} onStrokeStart={strokeStart} apiRef={apiRef} />
       </div>

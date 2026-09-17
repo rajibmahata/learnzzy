@@ -1,6 +1,8 @@
 import { getDb } from "@/db/mongodb";
 import type { LearnerDoc } from "@/repositories/learners";
 import { getConceptDef } from "@/lib/concepts";
+import { evaluateSkill, skillLevelFor, skillSummaryLine, SKILL_GAMES } from "@/lib/skillLevels";
+import { categoryProgress, flattenMasteryMap, type CategoryProgress } from "@/lib/knowledge";
 import type { AnnotatedPlan } from "./educationAdvisory";
 
 // Parent-facing learning summaries composed ONLY from validated Learnzzy
@@ -11,6 +13,28 @@ export interface ConceptProgress {
   name: string;
   masteryPct: number;
   attempts: number;
+}
+
+export interface SkillProfile {
+  gameId: string;
+  name: string;
+  level: number;
+  masteryPct: number;
+  recentAccuracyPct: number;
+  trend: string;
+  completions: number;
+  hintsUsed: number;
+  summary: string;
+}
+
+export interface LastResult {
+  gameId: string;
+  accuracy: number;
+  stars: number;
+  level: number;
+  hintsUsed: number;
+  durationMs?: number;
+  at: string;
 }
 
 export interface ChildSummary {
@@ -25,6 +49,15 @@ export interface ChildSummary {
   practiceOpportunities: string[];
   recommendedNext: { gameId: string; level: number; reason: string }[];
   advisoryFocus?: string;
+  skills: SkillProfile[];
+  lastResult: LastResult | null;
+  discovery: {
+    total: number;
+    learned: number;
+    mastered: number;
+    needsReview: number;
+    categories: CategoryProgress[];
+  };
 }
 
 const GAME_NAMES: Record<string, string> = {
@@ -33,6 +66,7 @@ const GAME_NAMES: Record<string, string> = {
   "clean-up": "Clean Up",
   puzzle: "Picture Puzzle",
   sketch: "Shadow Sketch",
+  discover: "Discovery World",
 };
 
 export function gameDisplayName(gameId: string): string {
@@ -61,9 +95,48 @@ export async function buildChildSummary(learner: LearnerDoc): Promise<ChildSumma
     attempts: v.attempts,
   }));
   concepts.sort((a, b) => b.masteryPct - a.masteryPct);
+  // Per-skill adaptive profiles from real rolling performance (one level per
+  // game — a strong skill never inflates a struggling one).
+  const skills: SkillProfile[] = SKILL_GAMES.map((gameId) => {
+    const prog = learner.gameProgress?.[gameId];
+    const evaluation = evaluateSkill({
+      completions: prog?.completions ?? 0,
+      recentAccuracy: prog?.recentAccuracy ?? [],
+      hintsUsed: prog?.hintsUsed ?? 0,
+    });
+    const level = skillLevelFor(learner, gameId);
+    return {
+      gameId,
+      name: gameDisplayName(gameId),
+      level,
+      masteryPct: evaluation.masteryPct,
+      recentAccuracyPct: Math.round(evaluation.avgAccuracy * 100),
+      trend: evaluation.trend,
+      completions: prog?.completions ?? 0,
+      hintsUsed: prog?.hintsUsed ?? 0,
+      summary: skillSummaryLine(gameId, level, evaluation),
+    };
+  });
   const withData = concepts.filter((c) => c.attempts > 0);
-  const strengths = withData.filter((c) => c.masteryPct >= 80).slice(0, 3).map((c) => c.name);
-  const practiceOpportunities = withData.filter((c) => c.masteryPct < 70).slice(0, 3).map((c) => c.name);
+  const strengths = [
+    ...skills.filter((s) => s.trend === "strong").map((s) => s.summary),
+    ...withData.filter((c) => c.masteryPct >= 80).slice(0, 3).map((c) => c.name),
+  ].slice(0, 4);
+  const practiceOpportunities = [
+    ...skills.filter((s) => s.trend === "needs_practice").map((s) => s.summary),
+    ...withData.filter((c) => c.masteryPct < 70).slice(0, 3).map((c) => c.name),
+  ].slice(0, 4);
+  const lastResult = learner.lastResult
+    ? {
+        gameId: learner.lastResult.gameId,
+        accuracy: learner.lastResult.accuracy,
+        stars: learner.lastResult.stars,
+        level: learner.lastResult.level,
+        hintsUsed: learner.lastResult.hintsUsed,
+        ...(typeof learner.lastResult.durationMs === "number" ? { durationMs: learner.lastResult.durationMs } : {}),
+        at: learner.lastResult.at instanceof Date ? learner.lastResult.at.toISOString() : String(learner.lastResult.at),
+      }
+    : null;
 
   let recommendedNext: ChildSummary["recommendedNext"] = [];
   let advisoryFocus: string | undefined;
@@ -80,6 +153,26 @@ export async function buildChildSummary(learner: LearnerDoc): Promise<ChildSumma
       }
     }
   }
+  const categories = categoryProgress(
+    Object.fromEntries(
+      Object.entries(flattenMasteryMap(learner.conceptMastery)).map(([id, m]) => [
+        id,
+        {
+          exposures: m.exposures ?? 0,
+          attempts: m.attempts ?? 0,
+          correct: m.correct ?? 0,
+          status: (m.status ?? "new") as "new" | "learning" | "practicing" | "mastered" | "needs_review",
+        },
+      ])
+    )
+  );
+  const discovery = {
+    total: categories.reduce((s, c) => s + c.total, 0),
+    learned: categories.reduce((s, c) => s + c.learned, 0),
+    mastered: categories.reduce((s, c) => s + c.mastered, 0),
+    needsReview: categories.reduce((s, c) => s + c.needsReview, 0),
+    categories: categories.filter((c) => c.learned > 0),
+  };
   return {
     learnerId: learner.learnerId,
     nickname: learner.nickname,
@@ -92,6 +185,9 @@ export async function buildChildSummary(learner: LearnerDoc): Promise<ChildSumma
     practiceOpportunities,
     recommendedNext,
     advisoryFocus,
+    skills,
+    lastResult,
+    discovery,
   };
 }
 

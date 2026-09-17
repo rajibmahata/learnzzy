@@ -5,20 +5,21 @@ import { GameShell } from "@/components/child/GameShell";
 import { SubtractionStage } from "@/components/child/SubtractionStage";
 import { AnswerButton } from "@/components/child/AnswerButton";
 import { Celebration } from "@/components/child/Celebration";
-import { subtractionGame, type SubtractionContent } from "@/games/subtraction";
+import { subtractionGame, subHint, subInstruction, type SubtractionContent } from "@/games/subtraction";
 import { GAME_ROUNDS } from "@/games/framework";
 import { toSubtractionContent } from "@/lib/pool-client";
 import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
+import { LockedAdventure } from "@/components/child/LockedAdventure";
 
 export default function SubtractionPlay() {
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
   // Pool-first per-window shuffled — open windows never see identical subtraction sets.
-  const { rounds, reload } = useGameRounds<SubtractionContent>({
+  const { rounds, reload, locked } = useGameRounds<SubtractionContent>({
     gameId: "subtraction",
     difficulty: 1,
     total: GAME_ROUNDS,
@@ -31,8 +32,11 @@ export default function SubtractionPlay() {
   const [picked, setPicked] = React.useState<number | null>(null);
   const [feedback, setFeedback] = React.useState<"idle" | "correct" | "retry">("idle");
   const [successTick, setSuccessTick] = React.useState(0);
+  const [hintOpen, setHintOpen] = React.useState(false);
   const [done, setDone] = React.useState(false);
   const mistakeRounds = React.useRef<Set<number>>(new Set());
+  const hintOpens = React.useRef(0);
+  const gameStart = React.useRef(Date.now());
 
   const remaining = content ? content.start - content.removed : 0;
 
@@ -63,11 +67,12 @@ export default function SubtractionPlay() {
           setDone(true);
           queueEvent({ event: "game_completed", gameId: "subtraction", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
           const accuracy = Math.max(0, Math.min(1, (GAME_ROUNDS - mistakeRounds.current.size) / GAME_ROUNDS));
-          reportGameCompletion({ gameId: "subtraction", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji });
+          reportGameCompletion({ gameId: "subtraction", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
         } else {
           setRound(round + 1);
           setPicked(null);
           setFeedback("idle");
+          setHintOpen(false);
         }
       }, 900);
     } else {
@@ -77,6 +82,7 @@ export default function SubtractionPlay() {
       setTimeout(() => {
         setPicked(null);
         setFeedback("idle");
+        setHintOpen(false);
       }, 900);
     }
   }
@@ -88,6 +94,8 @@ export default function SubtractionPlay() {
       </div>
     );
   }
+
+  if (locked) return <LockedAdventure title="Fly Away" />;
 
   if (!content) {
     return (
@@ -104,14 +112,14 @@ export default function SubtractionPlay() {
 
   return (
     <GameShell title="Fly Away" stars={totalStars}>
-      <div className="mt-2 flex items-center justify-between rounded-full bg-surface-low px-3 py-1.5 text-xs font-bold uppercase">
+       <div className="mt-3 flex items-center justify-between rounded-full bg-surface-low px-3 py-1.5 text-xs font-bold uppercase shadow-sm">
         <span>Lesson {round + 1} • Subtraction</span>
         <span aria-label={`${content.removed} flew away`} className="rounded-full bg-error-container px-2 py-0.5 text-on-error-container">
           ↗ -{content.removed} Flew Away
         </span>
       </div>
 
-      <div className="mt-3 rounded-xl bg-gradient-to-b from-primary-fixed via-surface-low to-surface-container p-4 shadow-card">
+       <div className="mt-4 rounded-3xl bg-gradient-to-b from-primary-fixed via-surface-low to-surface-container p-4 shadow-card">
         <p className="text-center text-headline-md font-extrabold">WATCH THEM FLY!</p>
         <p className="text-center text-sm text-on-surface-variant">Subtract by counting what stays</p>
         <div className="mt-2" aria-label={`${remaining} birds remaining out of ${content.start}`}>
@@ -129,9 +137,39 @@ export default function SubtractionPlay() {
         </p>
       </div>
 
-      <p className="mt-3 text-center text-instruction">How many left?</p>
+      <p className="mt-3 text-center text-instruction">{subInstruction(content.start, content.removed)}</p>
 
-      <div className="mt-2 flex flex-wrap gap-3" role="group" aria-label="Answer choices">
+      <div className="mt-2 flex justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            setHintOpen(true);
+            hintOpens.current += 1;
+            queueEvent({ event: "hint_used", gameId: "subtraction", contentId });
+          }}
+          aria-label="Show a hint"
+          aria-expanded={hintOpen}
+          className="tactile min-h-12 rounded-full bg-secondary-fixed px-5 text-sm font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
+        >
+          ? Hint 💡
+        </button>
+      </div>
+      {hintOpen && (
+        <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
+          <p className="text-sm font-black text-on-surface">💡 Hint</p>
+          <p className="mt-1 text-sm text-on-surface-variant">{subHint(content.start, content.removed)}</p>
+          <button
+            type="button"
+            onClick={() => setHintOpen(false)}
+            aria-label="Close hint"
+            className="tactile mt-3 min-h-12 w-full rounded-full bg-primary-container text-sm font-black text-white shadow-[0_4px_0_#004395]"
+          >
+            Got it!
+          </button>
+        </div>
+      )}
+
+       <div className="mt-3 grid grid-cols-4 gap-2" role="group" aria-label="Answer choices">
         {content.answers.map((a) => (
           <AnswerButton
             key={a}
@@ -142,9 +180,9 @@ export default function SubtractionPlay() {
         ))}
       </div>
 
-      <p aria-live="polite" className="mt-3 min-h-[1.75rem] text-center text-lg font-bold">
-        {feedback === "correct" ? "✨ Great job!" : feedback === "retry" ? "Try again!" : ""}
-      </p>
+       <p aria-live="polite" className="mt-4 min-h-[3.5rem] rounded-2xl bg-tertiary-fixed px-4 py-3 text-center text-sm font-bold text-on-tertiary-fixed shadow-[0_4px_0_#4edea3]">
+         {feedback === "correct" ? "✨ Great job!" : feedback === "retry" ? "Try again!" : ""}
+       </p>
     </GameShell>
   );
 }

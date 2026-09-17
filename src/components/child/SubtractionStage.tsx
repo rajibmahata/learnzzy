@@ -16,7 +16,7 @@ export function SubtractionStage({
   successTick: number;
 }) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const { apiRef, ready } = usePhaserGame<SubtractionSceneApi>({
+  const { apiRef, ready, booted } = usePhaserGame<SubtractionSceneApi>({
     containerRef,
     createSceneClass: createSubtractionScene,
     width: 720,
@@ -24,19 +24,31 @@ export function SubtractionStage({
   });
 
   React.useEffect(() => {
-    if (ready) apiRef.current?.showScene(start, removed);
-  }, [ready, apiRef, start, removed]);
+    if (booted) apiRef.current?.showScene(start, removed);
+  }, [booted, apiRef, start, removed]);
 
   React.useEffect(() => {
-    if (ready && successTick > 0) apiRef.current?.playSuccess();
-  }, [ready, apiRef, successTick]);
+    if (booted && successTick > 0) apiRef.current?.playSuccess();
+  }, [booted, apiRef, successTick]);
 
+  const remaining = Math.max(0, start - removed);
   return (
     <div
       ref={containerRef}
       aria-hidden="true"
-      className="w-full overflow-hidden rounded-xl bg-gradient-to-b from-primary-fixed via-surface-low to-surface-container shadow-card [&>canvas]:mx-auto [&>canvas]:block"
+      className="relative w-full min-h-[180px] overflow-hidden rounded-xl bg-gradient-to-b from-primary-fixed via-surface-low to-surface-container shadow-card [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:mx-auto [&>canvas]:block"
       style={{ aspectRatio: "720 / 300", touchAction: "manipulation" }}
-    />
+    >
+      {!ready && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 p-4">
+          <p className="text-3xl" aria-hidden>
+            {Array.from({ length: Math.max(0, Math.min(20, remaining)) }, () => "🐦").join(" ") || "🐦"}
+          </p>
+          <p className="text-xs font-bold text-on-surface-variant" aria-hidden>
+            {removed} flew away
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

@@ -20,7 +20,7 @@ export async function GET(req: Request, { params }: { params: { learnerId: strin
   const db = await getDb().catch(() => null);
   if (db) {
     const existing = await db.collection("learningPlans").findOne({ learnerId: params.learnerId }, { sort: { createdAt: -1 } }).catch(() => null);
-    if (existing) return NextResponse.json({ success: true, data: existing });
+    if (existing && existing.level === learner.level) return NextResponse.json({ success: true, data: existing });
   }
   const plan = await buildPlan(params.learnerId);
   await savePlan(plan);

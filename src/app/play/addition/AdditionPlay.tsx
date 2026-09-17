@@ -5,13 +5,14 @@ import { GameShell } from "@/components/child/GameShell";
 import { AdditionStage } from "@/components/child/AdditionStage";
 import { AnswerButton } from "@/components/child/AnswerButton";
 import { Celebration } from "@/components/child/Celebration";
-import { additionGame, type AdditionContent } from "@/games/addition";
+import { additionGame, addHint, addInstruction, type AdditionContent } from "@/games/addition";
 import { GAME_ROUNDS } from "@/games/framework";
 import { toAdditionContent } from "@/lib/pool-client";
 import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
+import { LockedAdventure } from "@/components/child/LockedAdventure";
 
 const COPY = {
   prompt: "COUNT THEM!",
@@ -27,7 +28,7 @@ export default function AdditionPlay() {
   // Pool-first (BR-201): 5 validated rounds prefetched; deterministic local
   // top-up/fallback keeps gameplay instant and offline-capable (BR-200/222).
   // Rounds are shuffled per window (sessionStorage) so open windows never see identical games.
-  const { rounds, reload } = useGameRounds<AdditionContent>({
+  const { rounds, reload, locked } = useGameRounds<AdditionContent>({
     gameId: "addition",
     difficulty: 1,
     total: GAME_ROUNDS,
@@ -40,9 +41,12 @@ export default function AdditionPlay() {
   const [picked, setPicked] = React.useState<number | null>(null);
   const [feedback, setFeedback] = React.useState<"idle" | "correct" | "retry">("idle");
   const [successTick, setSuccessTick] = React.useState(0);
+  const [hintOpen, setHintOpen] = React.useState(false);
   const [done, setDone] = React.useState(false);
   // Rounds with at least one wrong pick — for first-try accuracy reporting.
   const mistakeRounds = React.useRef<Set<number>>(new Set());
+  const hintOpens = React.useRef(0);
+  const gameStart = React.useRef(Date.now());
 
   React.useEffect(() => {
     queueEvent({ event: "game_started", gameId: "addition", metadata: { sessionId: getSessionId() } });
@@ -71,11 +75,12 @@ export default function AdditionPlay() {
           setDone(true);
           queueEvent({ event: "game_completed", gameId: "addition", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
           const accuracy = Math.max(0, Math.min(1, (GAME_ROUNDS - mistakeRounds.current.size) / GAME_ROUNDS));
-          reportGameCompletion({ gameId: "addition", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji });
+          reportGameCompletion({ gameId: "addition", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
         } else {
           setRound(round + 1);
           setPicked(null);
           setFeedback("idle");
+          setHintOpen(false);
         }
       }, 900);
     } else {
@@ -85,6 +90,7 @@ export default function AdditionPlay() {
       setTimeout(() => {
         setPicked(null);
         setFeedback("idle");
+        setHintOpen(false);
       }, 900);
     }
   }
@@ -109,6 +115,8 @@ export default function AdditionPlay() {
     );
   }
 
+  if (locked) return <LockedAdventure title="Number Adventure" />;
+
   if (!content) {
     return (
       <GameShell title="Number Adventure" stars={totalStars}>
@@ -124,21 +132,22 @@ export default function AdditionPlay() {
 
   return (
     <GameShell title="Number Adventure" stars={totalStars}>
-      <div className="mt-2 flex items-center justify-center gap-3" aria-label={`Round ${round + 1} of ${GAME_ROUNDS}`}>
-        {Array.from({ length: GAME_ROUNDS }).map((_, i) => (
-          <span
-            key={i}
-            aria-hidden
-            className={`h-6 w-6 rounded-full border-2 border-stroke ${i < round ? "bg-mint" : i === round ? "bg-sky" : "bg-surface-highest"}`}
-          />
-        ))}
-      </div>
+       <div className="mt-3 flex items-center justify-center gap-3" aria-label={`Round ${round + 1} of ${GAME_ROUNDS}`}>
+         {Array.from({ length: GAME_ROUNDS }).map((_, i) => (
+           <span
+             key={i}
+             aria-hidden
+             className={`h-9 w-9 rounded-full border-2 border-stroke shadow-sm ${i < round ? "bg-mint text-white" : i === round ? "bg-sky text-white ring-4 ring-primary-fixed" : "bg-surface-highest"}`}
+           />
+         ))}
+       </div>
 
-      <div className="mt-3 flex flex-col items-center text-center">
-        <h2 className="rounded-full bg-primary-fixed px-5 py-2 text-instruction uppercase tracking-wide text-on-primary-fixed">
-          📣 {COPY.prompt}
-        </h2>
-      </div>
+       <div className="mt-4 flex flex-col items-center text-center">
+         <h2 className="rounded-full bg-primary-fixed px-5 py-2 text-instruction uppercase tracking-wide text-on-primary-fixed shadow-[0_3px_0_#adc6ff]">
+           📣 {COPY.prompt}
+         </h2>
+         <p className="mt-2 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-primary shadow-[0_3px_0_#d5e3fc]">🔊 Read aloud</p>
+       </div>
 
       <div role="group" aria-label={`${content.a} plus ${content.b}`}>
         <AdditionStage a={content.a} b={content.b} successTick={successTick} />
@@ -164,9 +173,39 @@ export default function AdditionPlay() {
         </div>
       </div>
 
-      <p className="mt-3 text-center text-instruction">{COPY.question}</p>
+      <p className="mt-3 text-center text-instruction">{content ? addInstruction(content.a, content.b) : COPY.question}</p>
 
-      <div className="mt-2 flex flex-wrap gap-3" role="group" aria-label="Answer choices">
+      <div className="mt-2 flex justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            setHintOpen(true);
+            hintOpens.current += 1;
+            queueEvent({ event: "hint_used", gameId: "addition", contentId });
+          }}
+          aria-label="Show a hint"
+          aria-expanded={hintOpen}
+          className="tactile min-h-12 rounded-full bg-secondary-fixed px-5 text-sm font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
+        >
+          ? Hint 💡
+        </button>
+      </div>
+      {hintOpen && content && (
+        <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
+          <p className="text-sm font-black text-on-surface">💡 Hint</p>
+          <p className="mt-1 text-sm text-on-surface-variant">{addHint(content.a, content.b)}</p>
+          <button
+            type="button"
+            onClick={() => setHintOpen(false)}
+            aria-label="Close hint"
+            className="tactile mt-3 min-h-12 w-full rounded-full bg-primary-container text-sm font-black text-white shadow-[0_4px_0_#004395]"
+          >
+            Got it!
+          </button>
+        </div>
+      )}
+
+       <div className="mt-3 grid grid-cols-4 gap-2" role="group" aria-label="Answer choices">
         {content.answers.map((a) => (
           <AnswerButton
             key={a}
@@ -177,9 +216,9 @@ export default function AdditionPlay() {
         ))}
       </div>
 
-      <p aria-live="polite" className="mt-3 min-h-[1.75rem] text-center text-lg font-bold">
-        {feedback === "correct" ? `✨ ${COPY.correct}` : feedback === "retry" ? COPY.retry : ""}
-      </p>
+       <p aria-live="polite" className="mt-4 min-h-[3.5rem] rounded-2xl bg-surface-container px-4 py-3 text-center text-sm font-bold shadow-[0_4px_0_#d5e3fc]">
+         {feedback === "correct" ? `✨ ${COPY.correct}` : feedback === "retry" ? COPY.retry : ""}
+       </p>
     </GameShell>
   );
 }

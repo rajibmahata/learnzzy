@@ -33,3 +33,19 @@ test("sketch diagram loads, color draws, activity completes", async ({ page }) =
   await expect(page.getByText(/wonderful tracing|nice try/i).first()).toBeVisible({ timeout: 10000 });
   await page.screenshot({ path: "test-results/sketch-drawn.png" });
 });
+
+test("sketch shows instruction and opens hint panel", async ({ page }) => {
+  await page.goto("/play/sketch");
+  const canvas = page.locator('div[role="img"] canvas');
+  await expect(canvas).toBeVisible({ timeout: 20000 });
+  // Every activity carries a short instruction (content-driven, not generic).
+  await expect(page.getByRole("heading", { name: /trace|draw|connect|continue|complete/i }).first()).toBeVisible();
+  const hint = page.getByRole("button", { name: /show a hint/i });
+  await expect(hint).toBeVisible();
+  await hint.click();
+  await expect(page.getByRole("dialog", { name: /hint/i })).toBeVisible();
+  // The dismiss button's accessible name is its aria-label ("Close hint").
+  await expect(page.getByRole("button", { name: /close hint/i })).toBeVisible();
+  await page.getByRole("button", { name: /close hint/i }).click();
+  await expect(page.getByRole("dialog", { name: /hint/i })).toBeHidden();
+});
