@@ -745,3 +745,12 @@ The agentic implementation is complete when:
 - Consequential actions require approval.
 - Gameplay remains functional without AI availability.
 - Adding a new game does not require rewriting the agent framework.
+
+## 26. Addendum — Academic Agent (implemented 2026-09-17)
+
+The workforce grew 5 → 8 (personalization, QA, academic). The Academic
+Agent owns Validated Learning Plans (`academicPlans`) and follows every
+rule above: background execution, least privilege, auditability, retry,
+no chain-of-thought storage (DEC-094), advisory-only MCP use (DEC-183).
+See BACKLOG.md LZ-330–LZ-339, DECISIONS.md DEC-183–185,
+BUSINESS_RULES.md BR-260–266.

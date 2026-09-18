@@ -10,10 +10,13 @@ export function AdditionStage({
   a,
   b,
   successTick,
+  emoji = "🍎",
 }: {
   a: number;
   b: number;
   successTick: number;
+  /** Number Orchard per-round visual theme. Display-only; math never reads it. */
+  emoji?: string;
 }) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const { apiRef, ready, booted } = usePhaserGame<AdditionSceneApi>({
@@ -24,8 +27,8 @@ export function AdditionStage({
   });
 
   React.useEffect(() => {
-    if (booted) apiRef.current?.showGroups(a, b);
-  }, [booted, apiRef, a, b]);
+    if (booted) apiRef.current?.showGroups(a, b, emoji);
+  }, [booted, apiRef, a, b, emoji]);
 
   React.useEffect(() => {
     if (booted && successTick > 0) apiRef.current?.playSuccess();
@@ -43,9 +46,9 @@ export function AdditionStage({
     >
       {!ready && (
         <div className="absolute inset-0 flex items-center justify-center gap-6 p-4 text-3xl">
-          <span aria-hidden>{Array.from({ length: Math.max(0, Math.min(20, a)) }, () => "🍎").join(" ") || "🍎"}</span>
+          <span aria-hidden>{Array.from({ length: Math.max(0, Math.min(20, a)) }, () => emoji).join(" ") || emoji}</span>
           <span aria-hidden className="font-black text-secondary">+</span>
-          <span aria-hidden>{Array.from({ length: Math.max(0, Math.min(20, b)) }, () => "🍎").join(" ") || "🍎"}</span>
+          <span aria-hidden>{Array.from({ length: Math.max(0, Math.min(20, b)) }, () => emoji).join(" ") || emoji}</span>
         </div>
       )}
     </div>

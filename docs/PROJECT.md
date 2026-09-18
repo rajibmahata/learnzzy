@@ -36,7 +36,27 @@ Learnzzy is a child-focused educational games PWA for short, visual, determinist
 
 ## Status
 - Phase: build / stabilize
-- Last updated: 2026-09-13, by OpenCode
+- Last updated: 2026-09-18, by OpenCode
+
+## 2026-09-18 Stitch Retrieval + Attractiveness Update
+
+Retrieved: Stitch screens 12–20 live (7 HTML + 9 screenshots) + 3 optimized
+WebP scene postcards. Restyled: Worlds banner cards, Play Home Pip/Spin,
+Addition, Subtraction, Clean Up, Puzzle, Sketch — presentation only.
+Verified: 174 unit tests, typecheck, lint, production build, Playwright
+child/sketch/discover/adaptive/learning-journey, screenshot review, Docker
+image build. Open: live-Mongo E2E (KI-019), TTS binaries (KI-020),
+parent-journey screenshot re-fetch, physical devices.
+
+## 2026-09-17 Academic Engine Update
+
+Added: Academic Orchestrator + Validated Learning Plan (+ 4 learner APIs),
+8th `academic-agent`, Voice Character Engine (5×11×5, `voiceAssets` cache),
+dynamic visual themes + 5 cross-domain combos, numbers/vocabulary catalog
+growth (13 categories), parent academic rollup + streak, admin academic
+panel. Verified: 156 unit tests, typecheck, lint, production build
+(81 routes). Open: live-Mongo E2E (KI-019), TTS binaries (KI-020),
+Playwright academic pass, Stitch validation.
 
 ## 2026-09-14 Implementation Reconciliation
 

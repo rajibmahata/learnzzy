@@ -5,9 +5,14 @@ import { GameShell } from "@/components/child/GameShell";
 import { AdditionStage } from "@/components/child/AdditionStage";
 import { AnswerButton } from "@/components/child/AnswerButton";
 import { Celebration } from "@/components/child/Celebration";
-import { additionGame, addHint, addInstruction, type AdditionContent } from "@/games/addition";
+import { additionGame, addHint, addInstruction } from "@/games/addition";
 import { GAME_ROUNDS } from "@/games/framework";
-import { toAdditionContent } from "@/lib/pool-client";
+import { toAdditionContent, type AdditionLike } from "@/lib/pool-client";
+import { pickVisualTheme, themeById, themeNoun } from "@/lib/visualThemes";
+import { GuideCard, StepperTrail, QuestFeedbackBar, ClueButton } from "@/components/child/WonderBits";
+import { stateForMoment } from "@/lib/characters";
+import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
+import { additionStory, additionPraise, gentleRetry } from "@/lib/learningStories";
 import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
@@ -21,6 +26,11 @@ const COPY = {
   retry: "Try again!",
 } as const;
 
+function teddyVoice(text: string) {
+  const v = CHARACTER_VOICES.teddy ?? { rate: 0.85, pitch: 1.0 };
+  speakWithCharacter(text, { lang: "en-US", rate: v.rate, pitch: v.pitch });
+}
+
 export default function AdditionPlay() {
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
@@ -28,7 +38,7 @@ export default function AdditionPlay() {
   // Pool-first (BR-201): 5 validated rounds prefetched; deterministic local
   // top-up/fallback keeps gameplay instant and offline-capable (BR-200/222).
   // Rounds are shuffled per window (sessionStorage) so open windows never see identical games.
-  const { rounds, reload, locked } = useGameRounds<AdditionContent>({
+  const { rounds, reload, locked } = useGameRounds<AdditionLike>({
     gameId: "addition",
     difficulty: 1,
     total: GAME_ROUNDS,
@@ -68,6 +78,7 @@ export default function AdditionPlay() {
       setFeedback("correct");
       setSuccessTick((t) => t + 1);
       queueEvent({ event: "answer_correct", gameId: "addition", contentId });
+      teddyVoice(content ? additionPraise(content.a, content.b, content.objectType ?? "teddy") : COPY.correct);
       setTimeout(() => {
         if (round + 1 >= GAME_ROUNDS) {
           const r = award("addition", 3);
@@ -87,6 +98,7 @@ export default function AdditionPlay() {
       setFeedback("retry");
       mistakeRounds.current.add(round);
       queueEvent({ event: "answer_incorrect", gameId: "addition", contentId });
+      teddyVoice(gentleRetry("count"));
       setTimeout(() => {
         setPicked(null);
         setFeedback("idle");
@@ -102,6 +114,7 @@ export default function AdditionPlay() {
           title="AWESOME!"
           stars={reward?.stars ?? 3}
           sticker={reward?.sticker ?? null}
+          character="teddy"
           onReplay={() => {
             setRound(0);
             setPicked(null);
@@ -130,45 +143,69 @@ export default function AdditionPlay() {
     );
   }
 
+  // Number Orchard: per-round visual theme from the pool (validated id) or
+  // a deterministic fallback. Display-only — math never reads it (DEC-185).
+  const theme = content.objectType
+    ? themeById(content.objectType)
+    : pickVisualTheme(contentId ?? `local:addition:${round}`, "addition");
+  // Learning story (§3/§19): Teddy's tiny tale gives the numbers meaning.
+  // Deterministic from (a, b, theme) — the math itself is untouched.
+  const story = additionStory(content.a, content.b, theme.id, theme.emoji);
+  const praise = additionPraise(content.a, content.b, theme.id);
+  const retryLine = gentleRetry("count");
+  const guideLine =
+    feedback === "correct" ? praise : feedback === "retry" ? retryLine : story.setup;
+
   return (
     <GameShell title="Number Adventure" stars={totalStars}>
-       <div className="mt-3 flex items-center justify-center gap-3" aria-label={`Round ${round + 1} of ${GAME_ROUNDS}`}>
-         {Array.from({ length: GAME_ROUNDS }).map((_, i) => (
-           <span
-             key={i}
-             aria-hidden
-             className={`h-9 w-9 rounded-full border-2 border-stroke shadow-sm ${i < round ? "bg-mint text-white" : i === round ? "bg-sky text-white ring-4 ring-primary-fixed" : "bg-surface-highest"}`}
-           />
-         ))}
-       </div>
+      <StepperTrail round={round} total={GAME_ROUNDS} />
 
-       <div className="mt-4 flex flex-col items-center text-center">
-         <h2 className="rounded-full bg-primary-fixed px-5 py-2 text-instruction uppercase tracking-wide text-on-primary-fixed shadow-[0_3px_0_#adc6ff]">
-           📣 {COPY.prompt}
-         </h2>
-         <p className="mt-2 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-primary shadow-[0_3px_0_#d5e3fc]">🔊 Read aloud</p>
-       </div>
+      <div className="mt-2 flex flex-col items-center text-center">
+        <GuideCard
+          character="teddy"
+          state={stateForMoment({ feedback })}
+          name="TEDDY'S HINT 🧸"
+          line={guideLine}
+          listenLabel="Listen"
+          listenAria="Teddy reads the story aloud"
+          onListen={() => teddyVoice(story.voiceLine)}
+        />
+      </div>
 
-      <div role="group" aria-label={`${content.a} plus ${content.b}`}>
-        <AdditionStage a={content.a} b={content.b} successTick={successTick} />
-        <div className="mt-2 flex items-center justify-center gap-3">
-          <p
-            className="rounded-full bg-surface-container px-4 py-1 text-headline-md font-black text-primary"
-            aria-label={`${content.a} apples`}
-          >
-            {content.a}
-          </p>
-          <span
-            aria-hidden
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container text-3xl font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
-          >
-            +
+      {/* Orchard stage (Stitch number-orchard): gradient grove card, branch
+          count badges, glowing plus ring, and the countable groups. */}
+      <div className="relative mt-3 w-full overflow-hidden rounded-3xl border-2 border-emerald-200/90 bg-gradient-to-b from-sky-100/90 via-amber-50/80 to-emerald-100/90 p-3 shadow-[0_8px_20px_rgba(16,185,129,0.18)]">
+        <div className="flex justify-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-1.5 text-[14px] font-black uppercase tracking-wider text-white shadow-[0_3px_0_#065f46]">
+            🌳 {theme.emoji} {theme.label}
           </span>
-          <p
-            className="rounded-full bg-surface-container px-4 py-1 text-headline-md font-black text-primary"
-            aria-label={`${content.b} apples`}
-          >
-            {content.b}
+        </div>
+        <div role="group" aria-label={`${content.a} plus ${content.b}`} className="relative z-10 mt-2">
+          <AdditionStage a={content.a} b={content.b} successTick={successTick} emoji={theme.emoji} />
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <p
+              className="rounded-full bg-red-500 px-4 py-1 text-headline-md font-black text-white shadow-[0_3px_0_#9f1239]"
+              aria-label={`${content.a} ${themeNoun(theme.id, content.a)}`}
+            >
+              🌳 {content.a}
+            </p>
+            <span
+              aria-hidden
+              className="anim-glow flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-200 text-3xl font-black text-amber-950 shadow-[0_4px_0_#d97706]"
+            >
+              +
+            </span>
+            <p
+              className="rounded-full bg-amber-500 px-4 py-1 text-headline-md font-black text-white shadow-[0_3px_0_#92400e]"
+              aria-label={`${content.b} ${themeNoun(theme.id, content.b)}`}
+            >
+              ✨ {content.b}
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-col items-center justify-center text-center">
+          <p className="rounded-full border border-emerald-200 bg-white/90 px-3.5 py-1 text-[15px] font-extrabold text-emerald-900 shadow-sm">
+            ⬇ {story.question}
           </p>
         </div>
       </div>
@@ -176,19 +213,14 @@ export default function AdditionPlay() {
       <p className="mt-3 text-center text-instruction">{content ? addInstruction(content.a, content.b) : COPY.question}</p>
 
       <div className="mt-2 flex justify-center">
-        <button
-          type="button"
+        <ClueButton
+          label="Need a Clue? 🧸"
           onClick={() => {
             setHintOpen(true);
             hintOpens.current += 1;
             queueEvent({ event: "hint_used", gameId: "addition", contentId });
           }}
-          aria-label="Show a hint"
-          aria-expanded={hintOpen}
-          className="tactile min-h-12 rounded-full bg-secondary-fixed px-5 text-sm font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
-        >
-          ? Hint 💡
-        </button>
+        />
       </div>
       {hintOpen && content && (
         <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
@@ -216,9 +248,12 @@ export default function AdditionPlay() {
         ))}
       </div>
 
-       <p aria-live="polite" className="mt-4 min-h-[3.5rem] rounded-2xl bg-surface-container px-4 py-3 text-center text-sm font-bold shadow-[0_4px_0_#d5e3fc]">
-         {feedback === "correct" ? `✨ ${COPY.correct}` : feedback === "retry" ? COPY.retry : ""}
-       </p>
+       <div className="mt-4" aria-live="polite">
+         <QuestFeedbackBar
+           title={feedback === "correct" ? `✨ ${COPY.correct}` : feedback === "retry" ? COPY.retry : "Tap the number that matches!"}
+           hint={feedback === "retry" ? "Count them slowly with me!" : `Put them together: count ${content.a}… then ${content.b} more!`}
+         />
+       </div>
     </GameShell>
   );
 }

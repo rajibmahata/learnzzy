@@ -1947,7 +1947,63 @@ Database
 
 ---
 
-# 48. Database Acceptance Criteria
+# 48. Collections: `academicPlans` + `voiceAssets` (2026-09-17)
+
+Validated Learning Plans and voice cache rows for the Academic Engine.
+Both are written by deterministic services / the `academic-agent`; MCP
+output never lands here without passing `validateAcademicPlan`.
+
+```json
+// academicPlans
+{
+  "_id": "ObjectId",
+  "planId": "aplan_...",
+  "learnerId": "learner_...",
+  "ageBand": "6-7",
+  "objective": "bird-recognition",
+  "concept": "birds.parrot",
+  "prerequisiteConcepts": ["knowledge.world-discovery"],
+  "activityType": "recognition",
+  "difficulty": 1,
+  "complexity": 2,
+  "reason": "Parrot recognition needs more practice.",
+  "reasonCode": "needs_practice",
+  "source": "deterministic",
+  "nextReviewAt": "Date",
+  "stage": "practice",
+  "game": "discover",
+  "locale": "en",
+  "characterId": "parrot",
+  "priority": 0.82,
+  "createdAt": "Date",
+  "createdAtDb": "Date"
+}
+```
+
+```json
+// voiceAssets
+{
+  "_id": "ObjectId",
+  "assetId": "voice_...",
+  "cacheKey": "voice:parrot:instruction:hi:<hash>",
+  "characterId": "parrot",
+  "event": "instruction",
+  "locale": "hi",
+  "text": "…prepared script (≤200 chars)…",
+  "status": "pending",
+  "audioUrl": null,
+  "createdAt": "Date",
+  "updatedAt": "Date"
+}
+```
+
+Recommended indexes: `academicPlans(learnerId, createdAtDb)`,
+`voiceAssets(cacheKey)` unique. No chain-of-thought, prompts, or raw
+provider traces are stored — operational summaries only.
+
+---
+
+# 49. Database Acceptance Criteria
 
 The database implementation is considered ready when:
 
@@ -1972,7 +2028,7 @@ The database implementation is considered ready when:
 
 ---
 
-# 49. Final Database Architecture Principle
+# 50. Final Database Architecture Principle
 
 Learnzzy should use MongoDB as a **fast, structured application data store**, not as a place to put arbitrary AI output.
 

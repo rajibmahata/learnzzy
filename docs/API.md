@@ -276,6 +276,78 @@ For simple client-side games, answer validation may be local. For server-trusted
 
 ---
 
+## 9.1a Get Activity Content (Learning Playground)
+
+```http
+GET /api/activities/{activityId}/content
+```
+
+Example:
+
+```http
+GET /api/activities/number-count/content?ageBand=4-5&seed=guest-123&limit=5
+```
+
+Serves deterministic worksheet-inspired activities (count, order,
+before-after, shape-count, big-small, word-family, word-match,
+trace-write, pattern, find-object). No LLM is involved in arithmetic,
+correctness, scoring, or unlocking. Activities that reuse shipped game
+engines (`addition`, `subtraction`, `sorting`, `picture-puzzle`,
+`shadow-sketch`, `discovery`) return `409 USE_GAME_ROUTE` with the game
+`href` instead.
+
+### Query Parameters
+
+```text
+ageBand (optional, 4-5 | 6-7 | 8-9; defaults to 6-7)
+skillLevel (optional 1..5; overridden by the learner's per-skill level when learnerId resolves)
+learnerId (optional; best-effort Mongo lookup via skillLevelFor — works without Mongo)
+seed (optional deterministic generation seed)
+limit (optional 1..8, default 3)
+recentIds (optional comma-separated recent content IDs to exclude)
+```
+
+### Response
+
+```json
+{
+  "activityId": "number-count",
+  "category": "numbers",
+  "skill": "counting",
+  "ageBand": "4-5",
+  "skillLevel": 1,
+  "complexity": {
+    "ageBand": "4-5",
+    "difficulty": 1,
+    "numberRange": 10,
+    "optionCount": 3,
+    "itemCount": 3,
+    "timePressure": 0
+  },
+  "items": [
+    {
+      "contentId": "count-guest-123:0-4-127873",
+      "templateId": "number-count",
+      "prompt": "How many apples?",
+      "visual": ["🍎", "🍎", "🍎", "🍎"],
+      "options": ["3", "4", "5"],
+      "answer": "4",
+      "answerIndex": 1,
+      "hints": ["Point at each apple and count: 1, 2, 3…"],
+      "explanation": "Yes! There are 4 apples.",
+      "voiceLine": "How many apples? Count with me!"
+    }
+  ]
+}
+```
+
+Completion is reported through the existing game-events pipeline
+(`game_completed` with `accuracy/attempts/hintsUsed/durationMs`) plus
+`POST /api/learners/{learnerId}/academic/result`, so per-skill levels,
+parent dashboards, and the academic engine require no new contracts.
+
+---
+
 # 9.2 Learner Journey and Progression
 
 ```http
@@ -293,6 +365,25 @@ time, capped at level 5.
 When `learnerId` and `level` are provided to the game-content endpoint, a
 future level returns `403 LEVEL_LOCKED`. The browser journey is presentation;
 the server remains the unlock authority.
+
+# 9.3 Academic Engine (Validated Learning Plan)
+
+Advisory MCP output behind the Education Gateway; deterministic Learnzzy
+services stay authoritative. Every response is a validated plan or
+parent-safe derivative — never chain-of-thought or provider internals.
+Gateway failures degrade to the deterministic plan (never 500 to gameplay).
+
+```http
+GET  /api/learners/{learnerId}/academic/plan            # Validated Learning Plan
+GET  /api/learners/{learnerId}/academic/recommendation  # {game, concept, complexity, objective, reasonCode, priority, reason, stage, characterId}
+POST /api/learners/{learnerId}/academic/voice           # {event, locale, characterId, name?, fact?, reward?, text?} -> cached asset + script text
+POST /api/learners/{learnerId}/academic/result          # {gameId, conceptId?, accuracy, attempts, hintsUsed, responseTimeMs?, complexity} -> {action, complexity}
+```
+
+`result` actions: `continue | practice | review | increase_complexity |
+introduce_new_concept`. Complexity moves at most ±1 (BR-262). All four
+routes are rate-limited (30–60 req/min/IP) and validate input with Zod
+(422 on invalid, 404 on unknown learner).
 
 # 10. Game Event API
 
@@ -1543,11 +1634,13 @@ GET  /api/parent/children/{childId}                # summary + recent activity
 GET  /api/parent/children/{childId}/learning-plan  # latest validated plan
 GET  /api/parent/children/{childId}/insights       # strengths/practice/next
 GET  /api/parent/children/{childId}/activity       # recent game events
-GET  /api/parent/children/{childId}/progress       # level/stars/per-game/concepts
+GET  /api/parent/children/{childId}/progress       # level/stars/per-game/concepts/skills + academic {learned/mastered/practicing, streakDays, nextActivity}
 ```
 
 Parent responses contain validated learning summaries only — no LLM
-chain-of-thought, prompts, or raw provider traces.
+chain-of-thought, prompts, or raw provider traces. The `academic`
+block carries parent-safe reasons (e.g. "Parrot recognition needs more
+practice."), never internal reasoning.
 
 # 39. Pairing APIs
 
@@ -1567,6 +1660,7 @@ POST /api/pairing/confirm         # { code, learnerId } -> pending (parent must 
 GET /api/admin/education/providers   # flags + config presence (no secrets/URLs)
 GET /api/admin/education/health      # per-provider status/latency/errors + cache stats
 GET /api/admin/education/provenance  # recent provider events + cached knowledge provenance
+GET /api/admin/academic/plans        # academic plans + voice assets + signal/failure counts (read-only observability)
 ```
 
 # 41. Definition of Done

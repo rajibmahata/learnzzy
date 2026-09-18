@@ -1016,6 +1016,8 @@ The MVP must enforce the following minimum rules:
 - Destructive/consequential admin actions require authorization and, where configured, confirmation.
 - Core gameplay events are recorded.
 - Child-facing UX remains positive and low-text.
+- Learning plans are advisory-validated and never expose chain-of-thought.
+- Voice and visual themes never block or alter gameplay correctness.
 - No public child chat/profile/social features.
 - No intrusive ads during gameplay.
 - Existing gameplay continues if AI services are unavailable.
@@ -1036,6 +1038,7 @@ The following are product-level hard rules unless explicitly changed by a future
 8. **Never collect unnecessary child PII.**
 9. **Never use harsh failure mechanics to punish learning mistakes.**
 10. **Never allow an invalid content/asset record to enter the active gameplay pool.**
+11. **Never make gameplay wait for voice/TTS generation or live translation.**
 
 ---
 
@@ -1058,7 +1061,51 @@ Business rules must not exist only inside prompts or UI code.
 
 ---
 
-# 35. Implementation Principle
+# 36. Academic Engine Rules
+
+## BR-260 — Learn Before Test
+
+New concepts enter through LEARN (show + voice + fact) before PRACTICE,
+PLAY, RECALL, REVIEW, and MASTER. A concept must never debut as a test
+question.
+
+## BR-261 — No Stage Skips
+
+Learning stages advance at most one step per successful activity
+(`nextStage`). Failure holds or returns to practice; `master` failure
+returns to review.
+
+## BR-262 — No Multi-Level Jumps
+
+Complexity changes at most ±1 per decision and only on sustained evidence
+(3+ attempts at 85%+ with no hints to increase). A single answer never
+promotes, demotes, or masters a concept.
+
+## BR-263 — Review Before Novelty
+
+Review-due and weak concepts outrank unseen concepts. Interests boost
+priority but never override review or need.
+
+## BR-264 — Validated Plans Only
+
+Only plans passing `validateAcademicPlan` (schema, age, safety, no
+chain-of-thought markers, bounded difficulty/complexity) enter gameplay,
+parent views, or admin views. Advisories that fail validation are dropped
+and the deterministic plan stands.
+
+## BR-265 — Voice Never Blocks Gameplay
+
+Voice assets resolve from cache; misses fall back to prepared text with
+device speech. No live TTS/translation call may sit in the gameplay path.
+
+## BR-266 — Theme Never Changes Correctness
+
+Visual theme selection must not alter any answer. Math renderers prove
+`answer == a + b` under every theme.
+
+---
+
+# 37. Implementation Principle
 
 The implementation should follow this hierarchy:
 

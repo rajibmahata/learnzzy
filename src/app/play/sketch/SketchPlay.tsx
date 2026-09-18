@@ -4,6 +4,10 @@ import * as React from "react";
 import { GameShell } from "@/components/child/GameShell";
 import { SketchStage } from "@/components/child/SketchStage";
 import { Celebration } from "@/components/child/Celebration";
+import { GuideCard, ClueButton } from "@/components/child/WonderBits";
+import { stateForMoment } from "@/lib/characters";
+import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
+import { artForGame } from "@/lib/worlds";
 import { Button } from "@/components/ui/Button";
 import { GAME_ROUNDS } from "@/games/framework";
 import { createSketchActivity, type SketchActivity } from "@/games/sketch";
@@ -16,12 +20,15 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 
+// Starlight wand palette (Stitch sketch): same six ink slots, Stitch color
+// story names. "Red" keeps its e2e-pinned accessible name.
 const INK_COLORS = [
-  { name: "Blue", hex: 0x0058be, css: "#0058be" },
+  { name: "Sky Aqua", hex: 0x38bdf8, css: "#38bdf8" },
+  { name: "Starlight", hex: 0xf5b301, css: "#f5b301" },
   { name: "Red", hex: 0xd7263d, css: "#d7263d" },
+  { name: "Rainbow", hex: 0xf472b6, css: "#f472b6" },
+  { name: "Berry", hex: 0xa21caf, css: "#a21caf" },
   { name: "Green", hex: 0x1f9d55, css: "#1f9d55" },
-  { name: "Orange", hex: 0xf4890a, css: "#f4890a" },
-  { name: "Purple", hex: 0x7b2fbe, css: "#7b2fbe" },
 ] as const;
 
 export default function SketchPlay() {
@@ -128,7 +135,7 @@ export default function SketchPlay() {
   if (done) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
-        <Celebration title="BEAUTIFUL!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />
+        <Celebration title="BEAUTIFUL!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="bunny" onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />
       </div>
     );
   }
@@ -148,21 +155,43 @@ export default function SketchPlay() {
 
   return (
     <GameShell title="Shadow Sketch" stars={totalStars}>
-      <h2 className="mt-2 text-center text-instruction uppercase">{instruction}</h2>
+      {/* Starlight Trace (Stitch sketch): Bella Bunny guide + wand palette.
+          Tracing mechanics, thresholds, and e2e contracts untouched. */}
+      <div className="mt-3 flex justify-center">
+        <h2 className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-1.5 text-[14px] font-black uppercase tracking-wider text-white shadow-[0_3px_0_#6b21a8]">
+          ✨ {instruction || "Starlight Trace"}
+        </h2>
+      </div>
+      <div className="mt-2">
+        <GuideCard
+          character="bunny"
+          state={stateForMoment({
+            feedback: result === "good" ? "good" : result === "retry" ? "retry" : "idle",
+            tracing: startedAt !== null && result === "idle",
+          })}
+          name="BELLA BUNNY 🐰"
+          line="Trace the glowing rainbow star trail with your magic finger!"
+          listenLabel="Listen"
+          onListen={() => {
+            const v = CHARACTER_VOICES.bunny ?? CHARACTER_VOICES.teddy;
+            speakWithCharacter("Trace the glowing rainbow star trail with your magic finger!", {
+              lang: "en-US",
+              rate: v.rate,
+              pitch: v.pitch,
+            });
+          }}
+          art={artForGame("sketch")}
+          tint="from-violet-50 via-white to-fuchsia-50"
+          border="border-violet-200"
+        />
+      </div>
       <div className="mt-2 flex justify-center">
-        <button
-          type="button"
-          onClick={openHint}
-          aria-label="Show a hint"
-          aria-expanded={hintOpen}
-          className="tactile min-h-12 rounded-full bg-secondary-fixed px-5 text-sm font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
-        >
-          ? Hint 💡
-        </button>
+        <ClueButton label="Need a Clue? Let's trace together!" ariaLabel="Show a hint" onClick={openHint} />
       </div>
       {hintOpen && (
         <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
-          <p className="text-sm font-black text-on-surface">💡 Hint</p>
+          <img src={artForGame("sketch") ?? undefined} alt="" aria-hidden loading="lazy" className="h-24 w-full rounded-xl object-cover" />
+          <p className="mt-2 text-sm font-black text-on-surface">💡 Let&apos;s trace together!</p>
           <p className="mt-1 text-sm text-on-surface-variant">{sketch.hint ?? "Follow the dots slowly."}</p>
           <button
             type="button"
@@ -174,10 +203,18 @@ export default function SketchPlay() {
           </button>
         </div>
       )}
-      <div className="mt-2">
-        <SketchStage sketch={sketch} onStrokeStart={strokeStart} apiRef={apiRef} />
+      {/* Starlight frame: night-sky gradient around the vector canvas.
+          The guide itself stays vector-drawn (no image assets involved). */}
+      <div className="mt-2 rounded-2xl bg-gradient-to-b from-[#1b2350] via-[#2b3a6b] to-[#0f1533] p-2 shadow-card">
+        <div className="overflow-hidden rounded-xl">
+          <SketchStage sketch={sketch} onStrokeStart={strokeStart} apiRef={apiRef} />
+        </div>
+        <p className="py-1 text-center text-xs font-bold text-amber-200" aria-hidden>
+          ✨ Trace among the starlight ✨
+        </p>
       </div>
       <p className="mt-2 text-center text-sm font-bold text-on-surface-variant">✏️ Draw here</p>
+      <p className="mt-1 text-center text-xs font-black uppercase tracking-wider text-fuchsia-700">🪄 Magic Wand Colors — tap to swap glow</p>
       <div className="mt-2 flex items-center justify-center gap-3" role="group" aria-label="Pick a crayon color">
         {INK_COLORS.map((c) => (
           <button

@@ -134,6 +134,17 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
     }
   }
 
+  // "Adjust" (Stitch content review): queue 5 fresh validated candidates via
+  // the real regenerate endpoint — same pipeline as Generate, scoped to one
+  // content row. Audited server-side like every other admin action.
+  async function regenerate(contentId: string) {
+    setMessage("");
+    const res = await fetch(`/api/admin/content/${contentId}/regenerate`, { method: "POST" });
+    const body = await res.json().catch(() => ({}));
+    setMessage(res.ok ? `Regeneration queued: ${body.data.task.taskId}` : body?.error?.message ?? "Unable to queue regeneration");
+    if (res.ok) refresh().catch(() => undefined);
+  }
+
   async function inspect(contentId: string) {
     if (!contentId) return;
     setSelectedId(contentId);
@@ -180,10 +191,19 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
       </section>
       <section className="admin-grid">
         <Panel title="Agent fleet" kicker="7 WORKERS">
-          <div className="agent-list">{agents.map((agent) => <div className="agent-row" key={agent.agentId}><span className={`agent-dot ${agent.status === "unavailable" ? "offline" : ""}`} /><div><strong>{agent.name}</strong><small>{agent.description}</small></div><code>{agent.queue}</code></div>)}</div>
+          <div className="agent-list">{agents.map((agent) => <div className="agent-row" key={agent.agentId}><span className={`agent-dot ${agent.status === "unavailable" ? "offline" : ""}`} /><div><strong>{agent.name}</strong><small>{agent.description}</small></div><span className="admin-pill">{agent.status === "unavailable" ? "Unavailable" : agent.status ?? "Online"}</span><code>{agent.queue}</code></div>)}</div>
         </Panel>
         <Panel title="Content pools" kicker="ACTIVE ONLY">
-          <div className="pool-list">{pools.map((pool) => <div className="pool-row" key={`${pool.gameId}-${pool.difficulty}`}><div><strong>{pool.gameId}</strong><small>{pool.difficulty}</small></div><span className={pool.status === "healthy" ? "pool-good" : "pool-low"}>{pool.available}/{pool.target}</span></div>)}</div>
+          <div className="pool-list">{pools.map((pool) => {
+            const pct = pool.target > 0 ? Math.max(0, Math.min(100, Math.round((pool.available / pool.target) * 100))) : 0;
+            return (
+              <div className="pool-row" key={`${pool.gameId}-${pool.difficulty}`}>
+                <div><strong>{pool.gameId}</strong><small>{pool.difficulty}</small></div>
+                <div className="pool-meter" role="img" aria-label={`${pool.gameId} ${pool.difficulty} pool ${pct}% full`}><span style={{ width: `${pct}%` }} /></div>
+                <span className={pool.status === "healthy" ? "pool-good" : "pool-low"}>{pool.available}/{pool.target}</span>
+              </div>
+            );
+          })}</div>
         </Panel>
         <Panel title="Learning signals" kicker="LAST 30 DAYS">
           {stats.length === 0 ? <p className="admin-empty">No gameplay events yet.</p> : <div className="stats-list">{stats.map((stat) => <div className="stat-row" key={stat.gameId}><strong>{stat.gameId}</strong><span>{Math.round(stat.accuracy * 100)}% accuracy</span><small>{stat.correct + stat.incorrect} answers</small></div>)}</div>}
@@ -219,6 +239,7 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
                   <div style={{ display: "flex", gap: 6 }}>
                     <button type="button" className="admin-quiet-button" onClick={() => inspect(row.contentId)}>Versions</button>
                     <button type="button" className="admin-quiet-button" onClick={() => review(row.contentId, "approve")}>Approve</button>
+                    <button type="button" className="admin-quiet-button" onClick={() => regenerate(row.contentId)}>Adjust</button>
                     <button type="button" className="admin-quiet-button" onClick={() => review(row.contentId, "disable")}>Disable</button>
                   </div>
                 </div>

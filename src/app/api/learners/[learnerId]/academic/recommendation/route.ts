@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { getLearner } from "@/repositories/learners";
 import { buildAcademicPlan } from "@/services/academicEngine";
 import { parentReasonText } from "@/lib/academic";
@@ -36,5 +35,3 @@ export async function GET(req: Request, { params }: { params: { learnerId: strin
     },
   });
 }
-
-export const RecommendationQuerySchema = z.object({ locale: z.string().max(10).optional() });

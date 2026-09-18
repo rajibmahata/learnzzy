@@ -97,6 +97,23 @@ export default function ParentProgressPage() {
                 </ul>
               </div>
             )}
+            {progress.skills && progress.skills.length > 0 && (
+              <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Level-up forecast">
+                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Level-up forecast</p>
+                <ul className="mt-2 flex flex-col gap-2">
+                  {progress.skills.map((s) => {
+                    const next = Math.min(5, s.level + 1);
+                    const pace = s.trend === "strong" || s.trend === "improving" ? "On track" : s.trend === "steady" ? "Getting there" : "Practicing";
+                    return (
+                      <li key={s.gameId} className="flex items-center justify-between gap-2 text-sm">
+                        <span className="font-bold">{s.name} · L{s.level} → L{next}</span>
+                        <span className="shrink-0 text-xs font-black">{s.masteryPct}% · {pace}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
             {(progress.strengths?.length > 0 || progress.practiceOpportunities?.length > 0) && (
               <div className="mb-3 rounded-lg bg-surface-low p-3">
                 {progress.strengths?.length > 0 && <p className="text-sm"><strong>Strengths:</strong> {progress.strengths.join(" · ")}</p>}

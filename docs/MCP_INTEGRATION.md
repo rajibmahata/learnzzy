@@ -2,6 +2,7 @@
 
 **Status:** Implemented (all providers disabled by default; deterministic mocks active)  
 **Date:** 2026-09-14  
+**Academic Engine Update:** 2026-09-17 — orchestrator + `academic-agent` + Validated Learning Plan APIs consume the gateway advisory-only (DEC-183); OER mock +4 discovery summaries; NCERT mock returns foundational Grade-1 rows with explicit non-official `learnzzy-native` provenance (never claim CBSE alignment)  
 **Scope:** Tutor MCP, OER MCP, NCERT MCP
 
 ## 0. Implementation Status
@@ -26,8 +27,12 @@ init.ts             idempotent bootstrap (mocks always; live only when enabled)
 Integration points: personalization agent records aggregated evidence and
 attaches validated advisories (plan order/level never change);
 content agent accepts optional `groundingTopic` with provenance stamped on
-docs; admin `/api/admin/education/{providers,health,provenance}` + dashboard
-panel; parent dashboard consumes validated plans/insights only.
+docs; academic orchestrator (`src/services/academicEngine.ts`) reads Tutor
+learner-state + NCERT prerequisites failure-isolated and writes validated
+plans to `academicPlans` via the `academic-agent`; admin
+`/api/admin/education/{providers,health,provenance}` +
+`/api/admin/academic/plans` + dashboard panels; parent dashboard consumes
+validated plans/insights only.
 
 Live provider URLs/keys are server-side only (`TUTOR/OER/NCERT_MCP_URL/_API_KEY`).
 No browser code touches providers. Mongoose-free; indexes in `src/db/mongodb.ts`.

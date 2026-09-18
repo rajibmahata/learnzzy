@@ -1431,6 +1431,128 @@ the journey/unlock authority; per-skill levels drive content complexity only.
 
 ---
 
+## DEC-183 — Academic Orchestrator Is Advisory-Only
+
+**Decision:**
+The Academic Orchestrator (`src/services/academicEngine.ts`) answers "what
+should this learner learn next?" as a Validated Learning Plan. Tutor/OER/
+NCERT output via the Education Gateway may nominate a known concept, but
+stage, complexity, ordering, score, rewards, and progression are decided by
+deterministic Learnzzy logic (`src/lib/academic.ts`) and gated by
+`validateAcademicPlan`. Every gateway call is failure-isolated: MCP failures
+never stop gameplay.
+
+**Reason:**
+- Keeps the "no LLM/MCP in the gameplay critical path" invariant (DEC-061)
+  while allowing intelligent personalization.
+- A single authority gate makes advisory output auditable and testable.
+
+**Status:** Active (2026-09-17)
+
+---
+
+## DEC-184 — Voice Is Prepared, Cached, Never Live in Gameplay
+
+**Decision:**
+Voice content is prepared per language (en/hi/bn/ta/te), keyed
+(character, event, locale, text-hash), and cached in `voiceAssets`.
+Gameplay resolves cached audio or falls back instantly to device
+speechSynthesis; no external TTS call happens in the request path, and
+voice never blocks play.
+
+**Reason:**
+- Instant playback for children; zero per-interaction cost/latency.
+- Text always works when audio is unavailable.
+
+**Status:** Active (2026-09-17)
+
+---
+
+## DEC-185 — Visual Theme and Difficulty Are Independent Axes
+
+**Decision:**
+Dynamic visual themes vary presentation only; the Difficulty Engine owns
+the numbers. Theme selection is a pure function of (seed, activityType)
+and `verifyThemeMath` proves answers are invariant under theme changes.
+Cross-domain combos (fruit+addition, bird+classification, …) resolve to
+validated games and concepts.
+
+**Reason:**
+- Variety without risking mathematical correctness.
+- New domains can be added without rewriting the game engine.
+
+**Status:** Active (2026-09-17)
+
+---
+
+## DEC-186 — Stitch Is Visual Reference; Code Is Truth
+
+**Decision:**
+Stitch screens guide visual/UX language only. When Stitch artifacts cannot
+be retrieved (no MCP tooling, expired URLs), implementation proceeds from
+the written screen specifications + existing Playful Wonder tokens, reusing
+Learnzzy components. Pixel parity is never claimed without inspecting the
+actual Stitch screen. No Stitch-generated code replaces Learnzzy game logic,
+scoring, progression, APIs, or security boundaries.
+
+**Reason:**
+- Protects the deterministic architecture from visual-reference churn.
+- Keeps claims honest when retrieval is blocked.
+
+**Status:** Active (2026-09-17)
+
+---
+
+## DEC-187 — Stitch Deviations: Shader, Hosts, Mechanics, Names
+
+**Decision:**
+After live-retrieving Stitch screens 12–20 (2026-09-18), four deliberate
+deviations from the fetched designs, per the DEC-186 hierarchy:
+1. The `Shader` WebGL simplex-noise background is NOT shipped as live
+   WebGL — continuous fragment-shader rendering conflicts with documented
+   PWA performance/battery rules; calm CSS ambient motion instead.
+2. Breeze Valley keeps Teddy as guide (Stitch shows Bella) — the tested
+   `characterForGame("subtraction") === "teddy"` mapping wins.
+3. Clean Up keeps tap-to-tidy mechanics (Stitch shows basket sorting) —
+   presentation aligned only, no mechanic rewrite.
+4. Stitch display names ("Bella Bunny", "Prof. Hoot", "Pip the Puppy") are
+   labels only; `characters.ts` roster/ids/roles are unchanged. Fetched art
+   ships as optimized lazy WebP; worlds without Stitch art use gradients,
+   never invented imagery.
+
+**Reason:**
+- Honors performance, test contracts, and prior mechanic decisions over
+  visual-reference fidelity.
+- Keeps every deviation explicit and reviewable instead of silent drift.
+
+**Status:** Active (2026-09-18)
+
+---
+
+## DEC-188 — Category-First Learning Playground, Generic Activity Engine
+
+**Decision:**
+/play is now category-first (6 Learning World cards → /learn/[category] →
+activities). Ten worksheet-inspired activities run on one generic engine:
+pure deterministic generators (`lib/activityContent.ts`) + reusable
+`ComplexityProfile` (`lib/complexity.ts`, spec §27 baseline) + registry
+(`lib/activityRegistry.ts`) + `GET /api/activities/[id]/content` + one
+`ActivityPlayer`. Shipped game engines (addition/subtraction/clean-up/
+puzzle/sketch/discover) are linked, never duplicated. Results flow through
+existing `game_events` + `POST academic/result`, so per-skill `skillLevels`,
+parent dashboards, and the academic engine work with zero new contracts.
+MCP/gateway untouched (advisory-only, fail-closed per DEC-183).
+
+**Reason:**
+- Worksheet patterns become interaction + story + character + complexity
+  without forking 16 game engines or breaking tested progression.
+- Complexity lives in one module (never hard-coded in components), so age
+  changes the actual problem and performance moves ±1 level safely.
+
+**Status:** Active (2026-09-18)
+
+---
+
 # 27. Decision Ownership
 
 The decision log should be reviewed whenever:

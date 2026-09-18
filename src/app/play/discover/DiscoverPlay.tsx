@@ -10,6 +10,8 @@ import {
   type KnowledgeConcept,
 } from "@/lib/knowledge";
 import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
+import { CharacterGuide } from "@/components/child/CharacterGuide";
+import { asCharacterId } from "@/lib/characters";
 import { getWindowSeed, shuffleWithSeed } from "@/lib/windowSeed";
 import { getCachedProfile } from "@/lib/learner";
 import { getSessionId, queueEvent } from "@/lib/events";
@@ -55,6 +57,7 @@ export default function DiscoverPlay() {
   // Academic friend: best-effort character from the Validated Learning Plan.
   // Falls back to Teddy; voice failure never blocks play.
   const [characterId, setCharacterId] = React.useState("teddy");
+  const guideCharacter = asCharacterId(characterId, "parrot");
   React.useEffect(() => {
     if (!learnerId) return;
     fetch(`/api/learners/${learnerId}/academic/recommendation`)
@@ -192,6 +195,7 @@ export default function DiscoverPlay() {
           title="AMAZING!"
           stars={reward?.stars ?? 3}
           sticker={reward?.sticker ?? null}
+          character={guideCharacter}
           onReplay={() => {
             mistakeSteps.current.clear();
             setStepIdx(0);
@@ -226,6 +230,9 @@ export default function DiscoverPlay() {
             {step.concept.emoji}
           </div>
           <h2 className="mt-3 text-headline-md">{step.concept.names.en}</h2>
+          <div className="mt-2 flex justify-center">
+            <CharacterGuide character={guideCharacter} state="explaining" compact />
+          </div>
           <div className="mt-2 flex gap-2">
             <button
               type="button"
@@ -257,6 +264,13 @@ export default function DiscoverPlay() {
             Practice · {stepIdx + 1} of {steps.length}
           </p>
           <h2 className="mt-2 text-instruction">What is this?</h2>
+          <div className="mt-2 flex justify-center">
+            <CharacterGuide
+              character={guideCharacter}
+              state={feedback === "correct" ? "happy" : feedback === "retry" ? "encouraging" : "thinking"}
+              compact
+            />
+          </div>
           <button
             type="button"
             onClick={() => hear("What is this?")}
@@ -324,6 +338,9 @@ export default function DiscoverPlay() {
             Find · {stepIdx + 1} of {steps.length}
           </p>
           <h2 className="mt-2 text-instruction">Find {step.need} {step.concept.names.en}s!</h2>
+          <div className="mt-2 flex justify-center">
+            <CharacterGuide character={guideCharacter} state="curious" compact />
+          </div>
           <div className="mt-3 grid w-full grid-cols-3 gap-2" role="group" aria-label={`Find the ${step.concept.names.en}`}>
             {step.grid.map((g, i) => (
               <button

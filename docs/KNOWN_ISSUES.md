@@ -1,9 +1,9 @@
 # Learnzzy — Known Issues
 
 **Document:** Known Issues & Risk Register  
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** Active / Living Document  
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-09-17
 
 ---
 
@@ -73,6 +73,10 @@ At the time this document was created, no implementation-specific defect should 
 | KI-016 | Secure session cookies broke all logins over local Docker HTTP | P1 | RESOLVED | Auth | `COOKIE_SECURE=false` in base compose for local HTTP; `"true"` in prod override; Secure stays the default |
 | KI-017 | `scene.events.once` on unbooted scenes crashed all 5 Phaser games silently (white stages, zero console output) | P0 | RESOLVED | Games | Readiness via Game `ready` event; catch now warns; `e2e/canvas.spec.ts` guards regression. See `SKETCH_DOCKER_ROOT_CAUSE.md` |
 | KI-018 | `$` delimiters in password hashes corrupted by compose dotenv + Next dotenv-expand (`$VAR` interpolation) | P1 | RESOLVED | Auth | Hash format changed to `scrypt:<salt>:<hex>`; old hashes invalid |
+| KI-019 | Academic-plan APIs verified at unit/build level only; live-Mongo E2E (Learn→Master→Parent loop via `run.bat docker`) not yet run — dev-server probe without Mongo returns 404 for learner reads by design (pre-existing no-DB fallback) | P1 | OPEN | Academic | Unit 156/156 + `next build` green; run `docker compose up --build`, seed, then exercise `/academic/plan|recommendation|voice|result` with a real learnerId |
+| KI-020 | `voiceAssets` rows queue as `status: pending` with `audioUrl: null` — no real TTS binary generation pipeline yet; playback uses device speechSynthesis | P2 | DEFERRED | Voice | Cache contract + deterministic keys implemented and tested; generation/CDN upload is content-pipeline work, gameplay never waits for it |
+| KI-021 | Stitch screens 12–20 (Living Wonder set) retrieved live 2026-09-18 (7 HTML + 9 screenshots via Stitch MCP + `curl -L`); pixel parity intentionally NOT claimed — deviations logged (DEC-187) | P2 | RESOLVED | Design | Cache + optimized WebP postcards in place; see STITCH_INSTRUCTIONS.md retrieval status |
+| KI-022 | Bare `docker` resolves to `C:\windows\system32\docker` in this shell (known run.bat trap); production image build verified 2026-09-18 via explicit `docker.exe` path (`learnzzy:stitch-check` built OK, daemon 29.8.0) | P2 | MITIGATED | Deploy | Invoke `docker.exe` by full path, or delete the shadowing file from an elevated prompt and rerun `run.bat docker` for full-stack verification |
 
 **Important:** KI-002 through KI-010 are scope/decision limitations, not confirmed software bugs.
 

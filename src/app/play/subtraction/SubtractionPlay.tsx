@@ -5,9 +5,14 @@ import { GameShell } from "@/components/child/GameShell";
 import { SubtractionStage } from "@/components/child/SubtractionStage";
 import { AnswerButton } from "@/components/child/AnswerButton";
 import { Celebration } from "@/components/child/Celebration";
-import { subtractionGame, subHint, subInstruction, type SubtractionContent } from "@/games/subtraction";
+import { subtractionGame, subHint, subInstruction } from "@/games/subtraction";
 import { GAME_ROUNDS } from "@/games/framework";
-import { toSubtractionContent } from "@/lib/pool-client";
+import { toSubtractionContent, type SubtractionLike } from "@/lib/pool-client";
+import { pickVisualTheme, themeById, themeNoun } from "@/lib/visualThemes";
+import { GuideCard, StepperTrail, QuestFeedbackBar, ClueButton } from "@/components/child/WonderBits";
+import { stateForMoment } from "@/lib/characters";
+import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
+import { subtractionStory, subtractionPraise, gentleRetry } from "@/lib/learningStories";
 import { useGameRounds } from "@/lib/useGameRounds";
 import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
@@ -19,7 +24,7 @@ export default function SubtractionPlay() {
   const { totalStars, award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
   // Pool-first per-window shuffled — open windows never see identical subtraction sets.
-  const { rounds, reload, locked } = useGameRounds<SubtractionContent>({
+  const { rounds, reload, locked } = useGameRounds<SubtractionLike>({
     gameId: "subtraction",
     difficulty: 1,
     total: GAME_ROUNDS,
@@ -39,6 +44,11 @@ export default function SubtractionPlay() {
   const gameStart = React.useRef(Date.now());
 
   const remaining = content ? content.start - content.removed : 0;
+
+  function teddyVoice(text: string) {
+    const v = CHARACTER_VOICES.teddy ?? { rate: 0.85, pitch: 1.0 };
+    speakWithCharacter(text, { lang: "en-US", rate: v.rate, pitch: v.pitch });
+  }
 
   React.useEffect(() => {
     queueEvent({ event: "game_started", gameId: "subtraction", metadata: { sessionId: getSessionId() } });
@@ -60,6 +70,7 @@ export default function SubtractionPlay() {
       setFeedback("correct");
       setSuccessTick((t) => t + 1);
       queueEvent({ event: "answer_correct", gameId: "subtraction", contentId });
+      teddyVoice(subtractionPraise(content.start, content.removed, content.objectType ?? "teddy"));
       setTimeout(() => {
         if (round + 1 >= GAME_ROUNDS) {
           const r = award("subtraction", 3);
@@ -79,6 +90,7 @@ export default function SubtractionPlay() {
       setFeedback("retry");
       mistakeRounds.current.add(round);
       queueEvent({ event: "answer_incorrect", gameId: "subtraction", contentId });
+      teddyVoice(gentleRetry("look"));
       setTimeout(() => {
         setPicked(null);
         setFeedback("idle");
@@ -90,7 +102,7 @@ export default function SubtractionPlay() {
   if (done) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
-        <Celebration title="AWESOME!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} onReplay={() => { setRound(0); setPicked(null); setFeedback("idle"); setDone(false); setReward(null); reload(); }} />
+        <Celebration title="AWESOME!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="teddy" onReplay={() => { setRound(0); setPicked(null); setFeedback("idle"); setDone(false); setReward(null); reload(); }} />
       </div>
     );
   }
@@ -110,49 +122,84 @@ export default function SubtractionPlay() {
     );
   }
 
+  // Breeze Valley: per-round visual theme from the pool (validated id) or a
+  // deterministic fallback. Display-only — math never reads it (DEC-185).
+  const theme = content.objectType
+    ? themeById(content.objectType)
+    : pickVisualTheme(contentId ?? `local:subtraction:${round}`, "counting");
+  // Meadow story (Stitch breeze-valley): birds settle, some fly into puffy
+  // clouds — how many stay? Deterministic; the math itself is untouched.
+  const story = subtractionStory(content.start, content.removed, theme.id, theme.emoji);
+  const praise = subtractionPraise(content.start, content.removed, theme.id);
+  const retryLine = gentleRetry("look");
+  const guideLine = feedback === "correct" ? praise : feedback === "retry" ? retryLine : story.setup;
+
   return (
     <GameShell title="Fly Away" stars={totalStars}>
-       <div className="mt-3 flex items-center justify-between rounded-full bg-surface-low px-3 py-1.5 text-xs font-bold uppercase shadow-sm">
-        <span>Lesson {round + 1} • Subtraction</span>
-        <span aria-label={`${content.removed} flew away`} className="rounded-full bg-error-container px-2 py-0.5 text-on-error-container">
-          ↗ -{content.removed} Flew Away
-        </span>
+      <StepperTrail round={round} total={GAME_ROUNDS} />
+
+      <div className="mt-2 flex flex-col items-center text-center">
+        <GuideCard
+          character="teddy"
+          state={stateForMoment({ feedback })}
+          name="TEDDY'S HINT 🧸"
+          line={guideLine}
+          listenLabel="Listen"
+          listenAria="Teddy reads the story aloud"
+          onListen={() => teddyVoice(story.voiceLine)}
+        />
       </div>
 
-       <div className="mt-4 rounded-3xl bg-gradient-to-b from-primary-fixed via-surface-low to-surface-container p-4 shadow-card">
-        <p className="text-center text-headline-md font-extrabold">WATCH THEM FLY!</p>
-        <p className="text-center text-sm text-on-surface-variant">Subtract by counting what stays</p>
-        <div className="mt-2" aria-label={`${remaining} birds remaining out of ${content.start}`}>
+      {/* Breeze Meadow stage (Stitch breeze-valley): sky gradient card,
+          meadow badge, flew-away pill, and the countable birds. */}
+      <div className="relative mt-3 w-full overflow-hidden rounded-3xl border-2 border-sky-200 bg-gradient-to-b from-[#d9f0ff] via-[#fff6f0] to-[#e8f5ff] p-3 shadow-[0_8px_20px_rgba(56,189,248,0.18)]">
+        <div className="flex items-center justify-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-500 px-4 py-1.5 text-[14px] font-black uppercase tracking-wider text-white shadow-[0_3px_0_#075985]">
+            🐦 {theme.emoji} Breeze Meadow
+          </span>
+        </div>
+        <div className="mt-2 flex justify-center">
+          <span aria-label={`${content.removed} flew away`} className="rounded-full bg-error-container px-3 py-1 text-xs font-black text-on-error-container shadow-sm">
+            ↗ −{content.removed} Flew Away!
+          </span>
+        </div>
+        <div className="mt-2" aria-label={`${remaining} ${themeNoun(theme.id, remaining)} remaining out of ${content.start}`}>
           <SubtractionStage
             start={content.start}
             removed={content.removed}
             successTick={successTick}
+            emoji={theme.emoji}
           />
           {remaining === 0 ? (
             <p className="mt-2 text-center font-bold">All flew away! How many left?</p>
           ) : null}
         </div>
-        <p className="mt-2 text-center text-sm font-bold">
-          Started with {content.start} • {content.removed} flew away
-        </p>
+        <div className="mt-2 flex items-center justify-center gap-2 text-sm font-black">
+          <span className="rounded-full bg-sky-500 px-3 py-1 text-white shadow-[0_3px_0_#075985]">
+            🐦 {content.start} {themeNoun(theme.id, content.start)}
+          </span>
+          <span className="rounded-full bg-white/90 px-3 py-1 text-sky-900 shadow-sm">
+            Still Perched: {remaining}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-col items-center justify-center text-center">
+          <p className="rounded-full border border-sky-200 bg-white/90 px-3.5 py-1 text-[15px] font-extrabold text-sky-900 shadow-sm">
+            ⬇ {story.question}
+          </p>
+        </div>
       </div>
 
       <p className="mt-3 text-center text-instruction">{subInstruction(content.start, content.removed)}</p>
 
       <div className="mt-2 flex justify-center">
-        <button
-          type="button"
+        <ClueButton
+          label="Need a Clue? 🧸"
           onClick={() => {
             setHintOpen(true);
             hintOpens.current += 1;
             queueEvent({ event: "hint_used", gameId: "subtraction", contentId });
           }}
-          aria-label="Show a hint"
-          aria-expanded={hintOpen}
-          className="tactile min-h-12 rounded-full bg-secondary-fixed px-5 text-sm font-black text-on-secondary-fixed shadow-[0_4px_0_#ffb95f]"
-        >
-          ? Hint 💡
-        </button>
+        />
       </div>
       {hintOpen && (
         <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
@@ -180,9 +227,12 @@ export default function SubtractionPlay() {
         ))}
       </div>
 
-       <p aria-live="polite" className="mt-4 min-h-[3.5rem] rounded-2xl bg-tertiary-fixed px-4 py-3 text-center text-sm font-bold text-on-tertiary-fixed shadow-[0_4px_0_#4edea3]">
-         {feedback === "correct" ? "✨ Great job!" : feedback === "retry" ? "Try again!" : ""}
-       </p>
+       <div className="mt-4" aria-live="polite">
+         <QuestFeedbackBar
+           title={feedback === "correct" ? "✨ Great job!" : feedback === "retry" ? "Try again!" : "Count the birds still on the branch!"}
+           hint={feedback === "retry" ? "Look carefully, take your time!" : `Take away: start at ${content.start}, ${content.removed} flew!`}
+         />
+       </div>
     </GameShell>
   );
 }

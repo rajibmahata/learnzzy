@@ -10,10 +10,13 @@ export function SubtractionStage({
   start,
   removed,
   successTick,
+  emoji = "🐦",
 }: {
   start: number;
   removed: number;
   successTick: number;
+  /** Breeze Valley per-round visual theme. Display-only; math never reads it. */
+  emoji?: string;
 }) {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const { apiRef, ready, booted } = usePhaserGame<SubtractionSceneApi>({
@@ -24,8 +27,8 @@ export function SubtractionStage({
   });
 
   React.useEffect(() => {
-    if (booted) apiRef.current?.showScene(start, removed);
-  }, [booted, apiRef, start, removed]);
+    if (booted) apiRef.current?.showScene(start, removed, emoji);
+  }, [booted, apiRef, start, removed, emoji]);
 
   React.useEffect(() => {
     if (booted && successTick > 0) apiRef.current?.playSuccess();
@@ -42,7 +45,7 @@ export function SubtractionStage({
       {!ready && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 p-4">
           <p className="text-3xl" aria-hidden>
-            {Array.from({ length: Math.max(0, Math.min(20, remaining)) }, () => "🐦").join(" ") || "🐦"}
+            {Array.from({ length: Math.max(0, Math.min(20, remaining)) }, () => emoji).join(" ") || emoji}
           </p>
           <p className="text-xs font-bold text-on-surface-variant" aria-hidden>
             {removed} flew away

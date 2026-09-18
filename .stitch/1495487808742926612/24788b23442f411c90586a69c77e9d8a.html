@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Learnzzy — Animal Wonderland &amp; Tiny Games for Big Learning</title>
+<!-- Tailwind CSS CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Plus Jakarta Sans & Fredoka for playful typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            fun: ['"Fredoka"', 'cursive', 'sans-serif'],
+          },
+          colors: {
+            wonderBlue: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#0055b3',
+              800: '#00428e',
+            },
+            sunnyYellow: '#fef08a',
+            magicPurple: '#8b5cf6',
+            cloudWhite: '#fcfdff'
+          },
+          boxShadow: {
+            'pill-soft': '0 10px 25px -5px rgba(2, 132, 199, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04)',
+            'pill-hover': '0 20px 30px -10px rgba(2, 132, 199, 0.16), 0 10px 14px -5px rgba(0, 0, 0, 0.06)',
+            'button-depth': '0 7px 0 #00428e, 0 14px 20px rgba(0, 66, 142, 0.28)',
+            'button-depth-hover': '0 4px 0 #00428e, 0 8px 14px rgba(0, 66, 142, 0.3)',
+            'card-gentle': '0 12px 32px -4px rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.03)',
+            'card-hover': '0 22px 38px -6px rgba(15, 23, 42, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.06)'
+          },
+          animation: {
+            'float-gentle': 'float 4s ease-in-out infinite',
+            'float-delayed': 'float 5s ease-in-out 1.5s infinite',
+            'wiggle-slow': 'wiggle 6s ease-in-out infinite',
+            'sparkle-pulse': 'sparkle 2.4s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-2deg)' },
+              '50%': { transform: 'rotate(2deg)' },
+            },
+            sparkle: {
+              '0%, 100%': { transform: 'scale(1)', opacity: '0.9' },
+              '50%': { transform: 'scale(1.2) rotate(15deg)', opacity: '1' }
+            }
+          }
+        }
+      }
+    };
+  </script>
+<!-- Custom styles for cloud aesthetics and custom element styling -->
+<style data-purpose="custom-decorations">
+    body {
+      background: radial-gradient(circle at 50% 12%, #ffffff 0%, #f7faff 60%, #eef5fc 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .text-shadow-heading {
+      text-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+    }
+    .badge-subtle-glow {
+      box-shadow: 0 0 20px rgba(186, 230, 253, 0.6);
+    }
+    /* Smooth bounce transition */
+    .wonder-lift {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .wonder-lift:hover {
+      transform: translateY(-6px) scale(1.02);
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-800 antialiased selection:bg-sky-200 selection:text-sky-900 relative">
+<!-- BEGIN: AmbientSkyBackdrop -->
+<!-- Ambient floating sparkles and backdrop pastel orbs -->
+<div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+<div class="absolute -top-32 -left-20 w-96 h-96 bg-blue-100/60 rounded-full blur-3xl"></div>
+<div class="absolute top-1/4 -right-24 w-80 h-80 bg-amber-100/60 rounded-full blur-3xl"></div>
+<div class="absolute bottom-10 left-1/3 w-[500px] h-64 bg-pink-100/40 rounded-full blur-3xl"></div>
+<!-- Decorative Floating Clouds -->
+<div class="absolute top-28 left-[6%] animate-float-gentle opacity-75 hidden md:block">
+<svg fill="none" height="46" viewbox="0 0 74 46" width="74" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 42h38a14 14 0 0 0 3.2-27.6A19 19 0 0 0 26.5 7.8 14 14 0 0 0 7.8 29.2 13 13 0 0 0 22 42z" fill="#ffffff" fill-opacity="0.9" stroke="#e2e8f0" stroke-width="1.5"></path>
+</svg>
+</div>
+<div class="absolute top-36 right-[8%] animate-float-delayed opacity-70 hidden md:block">
+<svg fill="none" height="52" viewbox="0 0 86 52" width="86" xmlns="http://www.w3.org/2000/svg">
+<path d="M26 48h44a16 16 0 0 0 3.8-31.5A22 22 0 0 0 31.2 9 16 16 0 0 0 9 33.5 15 15 0 0 0 26 48z" fill="#ffffff" fill-opacity="0.85" stroke="#e2e8f0" stroke-width="1.5"></path>
+</svg>
+</div>
+</div>
+<!-- END: AmbientSkyBackdrop -->
+<!-- BEGIN: NavigationBar -->
+<header class="relative z-20 max-w-6xl mx-auto px-6 pt-6 pb-2">
+<nav aria-label="Main Navigation" class="flex items-center justify-between py-3">
+<!-- Brand Logo -->
+<a aria-label="Learnzzy Home" class="group flex items-center gap-3 transition-transform duration-200 active:scale-95" href="#">
+<div class="relative flex items-center justify-center w-11 h-11 bg-white rounded-2xl shadow-sm border border-slate-100 group-hover:shadow-md transition-shadow">
+<!-- Playful Rainbow Mascot Logo -->
+<svg fill="none" height="24" viewbox="0 0 32 26" width="30" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 22C4 14.82 9.82 9 17 9s13 5.82 13 13" stroke="#f43f5e" stroke-linecap="round" stroke-width="3"></path>
+<path d="M8 22C8 17.03 12.03 13 17 13s9 4.03 9 9" stroke="#f59e0b" stroke-linecap="round" stroke-width="3"></path>
+<path d="M12 22C12 19.24 14.24 17 17 17s5 2.24 5 5" stroke="#0ea5e9" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="5" cy="8" fill="#fbbf24" r="2"></circle>
+<circle cx="27" cy="6" fill="#a855f7" r="1.5"></circle>
+</svg>
+</div>
+<span class="font-fun text-2xl md:text-3xl font-bold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+          Learn<span class="text-sky-500">zzy</span>
+</span>
+</a>
+<!-- Center Links & Wonderland Pill -->
+<div class="hidden md:flex items-center gap-8 text-base font-semibold text-slate-600">
+<a class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-50 border border-sky-100 text-sky-700 hover:bg-sky-100 transition-colors text-sm font-medium" href="#wonderland">
+<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          Animal Wonderland 3D
+        </a>
+<a class="hover:text-slate-900 transition-colors" href="#parents">For Parents</a>
+<a class="hover:text-slate-900 transition-colors" href="#about">About</a>
+</div>
+<!-- Top Primary Play Action -->
+<div class="flex items-center gap-3">
+<a class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-sky-600 hover:bg-sky-500 active:translate-y-0.5 text-white font-fun font-bold text-lg rounded-full shadow-md hover:shadow-lg shadow-sky-600/30 transition-all duration-200" href="#start">
+<svg class="w-4 h-4 fill-current ml-0.5" viewbox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+<span>Play</span>
+</a>
+</div>
+</nav>
+</header>
+<!-- END: NavigationBar -->
+<!-- BEGIN: MainHeroAndWonderlandStage -->
+<main class="relative z-10 pt-2 pb-16">
+<div class="max-w-5xl mx-auto px-6 text-center">
+<!-- Play. Think. Learn. Sub-header Badge -->
+<div class="inline-flex items-center justify-center mb-5">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 border border-slate-200/80 shadow-sm backdrop-blur-sm badge-subtle-glow">
+<span class="animate-sparkle-pulse text-amber-500 text-sm">✨</span>
+<span class="text-xs md:text-sm font-bold tracking-widest text-slate-700 uppercase">PLAY. THINK. LEARN.</span>
+<span class="animate-sparkle-pulse text-amber-500 text-sm">✨</span>
+</div>
+</div>
+<!-- Main Headline from Image -->
+<h1 class="font-fun text-4xl sm:text-6xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.08] mb-4 text-shadow-heading">
+        Tiny games.<br class="hidden sm:inline"/> Big learning.
+      </h1>
+<!-- Value Proposition Subtitle -->
+<p class="max-w-xl mx-auto text-lg sm:text-xl text-slate-600 font-medium leading-relaxed mb-6">
+        Simple educational adventures designed for curious kids. No login, no ads — just play.
+      </p>
+<!-- Primary Big Bounce Start Button -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+<button class="group relative inline-flex items-center justify-center gap-3 px-10 py-4 bg-[#0055b3] hover:bg-[#004bb0] active:translate-y-1 text-white font-fun font-bold text-2xl rounded-full shadow-button-depth hover:shadow-button-depth-hover transition-all duration-150 transform" id="main-start-btn" type="button">
+<svg class="w-6 h-6 fill-current transition-transform duration-200 group-hover:scale-125" viewbox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+<span>Start Playing</span>
+</button>
+</div>
+<!-- Playful Emoji Mascot Parade (Matches image & animal theme) -->
+<div aria-label="Wonderland Characters and Subject Badges" class="flex items-center justify-center gap-3 text-2xl sm:text-3xl py-2 select-none">
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Magic Sparkles">✨</span>
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Pip the Puppy">🐶</span>
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Bella Bunny">🐰</span>
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Teddy Bear">🧸</span>
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Wonder Birds">🐦</span>
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Logic Puzzles">🧩</span>
+<span class="hover:scale-125 transition-transform cursor-pointer" title="Creative Art">🎨</span>
+</div>
+<!-- BEGIN: 3D Three.js Animal Wonderland Scene -->
+<!-- Interactive 3D Mascot Stage Embedded using requested custom web component -->
+<section aria-label="Interactive 3D Animal Wonderland Stage" class="relative mt-4 mb-8" id="wonderland">
+<!-- Subtle framing badge -->
+<div class="flex items-center justify-center gap-2 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          Interactive 3D Stage • Move Cursor or Touch to Explore
+        </div>
+<div class="relative w-full rounded-3xl overflow-hidden bg-gradient-to-b from-sky-100/40 via-sky-50/20 to-transparent p-1 border border-sky-100/60 shadow-inner">
+<!-- STITCH_THREEJS_START:ANIMATION_39 class="w-full h-[520px] pointer-events-auto block" -->
+<div class="w-full h-[520px] pointer-events-auto block" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_39" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_39');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  // Animal Wonderland 3D Interactive Scene for Learnzzy
+// Built with global THREE namespace inside container
+
+const container = document.getElementById('threejs-container') || document.body;
+const width = container.clientWidth || window.innerWidth;
+const height = container.clientHeight || (window.innerHeight * 0.7);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+camera.position.set(0, 5, 22);
+
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xfff7e6, 1.2);
+dirLight.position.set(12, 20, 15);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const blueFill = new THREE.DirectionalLight(0xdbeafe, 0.6);
+blueFill.position.set(-15, 10, -10);
+scene.add(blueFill);
+
+// Wonderland Island / Floating Land
+const islandGroup = new THREE.Group();
+scene.add(islandGroup);
+
+// Soft grassy mound
+const moundGeo = new THREE.CylinderGeometry(14, 11, 2.5, 32);
+const grassMat = new THREE.MeshToonMaterial({ color: 0x86efac });
+const earthMat = new THREE.MeshToonMaterial({ color: 0xfef08a });
+const mound = new THREE.Mesh(moundGeo, grassMat);
+mound.position.y = -1.5;
+mound.receiveShadow = true;
+islandGroup.add(mound);
+
+// Stylized candy clouds
+const cloudMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+function createCloud(x, y, z, scale) {
+  const cloud = new THREE.Group();
+  const puffGeo = new THREE.SphereGeometry(1, 16, 16);
+  const p1 = new THREE.Mesh(puffGeo, cloudMat);
+  const p2 = new THREE.Mesh(puffGeo, cloudMat);
+  p2.position.set(0.9, -0.2, 0); p2.scale.set(0.8, 0.8, 0.8);
+  const p3 = new THREE.Mesh(puffGeo, cloudMat);
+  p3.position.set(-0.9, -0.2, 0); p3.scale.set(0.75, 0.75, 0.75);
+  const p4 = new THREE.Mesh(puffGeo, cloudMat);
+  p4.position.set(0.3, 0.5, 0.2); p4.scale.set(0.85, 0.85, 0.85);
+  cloud.add(p1, p2, p3, p4);
+  cloud.position.set(x, y, z);
+  cloud.scale.set(scale, scale, scale);
+  scene.add(cloud);
+  return cloud;
+}
+
+const clouds = [
+  createCloud(-14, 8, -6, 1.4),
+  createCloud(15, 9, -8, 1.6),
+  createCloud(0, 10, -12, 2.0),
+  createCloud(-8, 5, -10, 1.2),
+  createCloud(10, 4, -9, 1.1)
+];
+
+// Stylized Rainbow Arc
+const rainbowGroup = new THREE.Group();
+const rainbowColors = [0xf87171, 0xfbbf24, 0x34d399, 0x60a5fa, 0xa78bfa];
+rainbowColors.forEach((col, idx) => {
+  const ringGeo = new THREE.TorusGeometry(16 + idx * 0.45, 0.2, 12, 48, Math.PI);
+  const ringMat = new THREE.MeshBasicMaterial({ color: col });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.z = 0;
+  rainbowGroup.add(ring);
+});
+rainbowGroup.position.set(0, -1, -8);
+rainbowGroup.rotation.y = 0.15;
+scene.add(rainbowGroup);
+
+// Stylized Mushrooms & Trees
+function createTree(x, z, s) {
+  const tree = new THREE.Group();
+  const trunkGeo = new THREE.CylinderGeometry(0.25, 0.4, 1.5, 12);
+  const trunkMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.75;
+  tree.add(trunk);
+
+  const foliageGeo = new THREE.SphereGeometry(1.2, 16, 16);
+  const foliageMat = new THREE.MeshToonMaterial({ color: 0x4ade80 });
+  const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+  foliage.position.y = 2.0;
+  tree.add(foliage);
+
+  tree.position.set(x, -0.25, z);
+  tree.scale.set(s, s, s);
+  islandGroup.add(tree);
+}
+createTree(-7.5, -3, 1.2);
+createTree(8, -2, 1.3);
+createTree(-9, 1, 0.9);
+createTree(9, 2, 1.0);
+createTree(6.5, -4, 0.8);
+
+// Golden Stars floating
+const stars = [];
+const starGeo = new THREE.OctahedronGeometry(0.4, 0);
+const starMat = new THREE.MeshToonMaterial({ color: 0xfacc15, emissive: 0xfef08a, emissiveIntensity: 0.3 });
+for (let i = 0; i < 14; i++) {
+  const star = new THREE.Mesh(starGeo, starMat);
+  const ang = (i / 14) * Math.PI * 2;
+  const rad = 5 + Math.random() * 6;
+  star.position.set(Math.cos(ang) * rad, 1 + Math.random() * 5, Math.sin(ang) * rad * 0.7);
+  scene.add(star);
+  stars.push({ mesh: star, speed: 0.8 + Math.random() * 1.2, initialY: star.position.y });
+}
+
+// -------------------------------------------------------------
+// 3D CHARACTERS / ANIMALS WONDERLAND
+// -------------------------------------------------------------
+
+// 1. PIP THE PUPPY 🐶 (Golden/warm cute bouncy doggy)
+const puppyGroup = new THREE.Group();
+const pupMat = new THREE.MeshToonMaterial({ color: 0xfbbf24 });
+const earMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+const darkMat = new THREE.MeshToonMaterial({ color: 0x1e293b });
+const whiteMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+const pinkMat = new THREE.MeshToonMaterial({ color: 0xf472b6 });
+
+// Body
+const pupBody = new THREE.Mesh(new THREE.SphereGeometry(1.0, 16, 16), pupMat);
+pupBody.position.y = 1.0;
+puppyGroup.add(pupBody);
+
+// Head
+const pupHead = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16), pupMat);
+pupHead.position.set(0, 1.8, 0.4);
+puppyGroup.add(pupHead);
+
+// Snout
+const pupSnout = new THREE.Mesh(new THREE.SphereGeometry(0.4, 14, 14), whiteMat);
+pupSnout.position.set(0, 1.65, 1.0);
+pupSnout.scale.set(0.9, 0.7, 0.9);
+puppyGroup.add(pupSnout);
+
+// Nose
+const pupNose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), darkMat);
+pupNose.position.set(0, 1.8, 1.35);
+puppyGroup.add(pupNose);
+
+// Eyes
+const pupEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), darkMat);
+pupEyeL.position.set(-0.3, 1.95, 1.1);
+const pupEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), darkMat);
+pupEyeR.position.set(0.3, 1.95, 1.1);
+puppyGroup.add(pupEyeL, pupEyeR);
+
+// Floppy Ears
+const earGeo = new THREE.CylinderGeometry(0.18, 0.35, 1.1, 10);
+const pupEarL = new THREE.Mesh(earGeo, earMat);
+pupEarL.position.set(-0.8, 2.0, 0.3);
+pupEarL.rotation.z = 0.5;
+const pupEarR = new THREE.Mesh(earGeo, earMat);
+pupEarR.position.set(0.8, 2.0, 0.3);
+pupEarR.rotation.z = -0.5;
+puppyGroup.add(pupEarL, pupEarR);
+
+// Tail
+const tailGeo = new THREE.CylinderGeometry(0.08, 0.15, 0.8, 8);
+const pupTail = new THREE.Mesh(tailGeo, earMat);
+pupTail.position.set(0, 1.3, -1.0);
+pupTail.rotation.x = -0.9;
+puppyGroup.add(pupTail);
+
+// Bandana (cyan blue)
+const bandanaMat = new THREE.MeshToonMaterial({ color: 0x38bdf8 });
+const bandana = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.15, 8, 24), bandanaMat);
+bandana.position.set(0, 1.45, 0.3);
+bandana.rotation.x = Math.PI / 2.3;
+puppyGroup.add(bandana);
+
+puppyGroup.position.set(-4.5, -0.2, 2.5);
+puppyGroup.scale.set(0.95, 0.95, 0.95);
+scene.add(puppyGroup);
+
+// 2. BELLA BUNNY 🐰 (Cute white rabbit with long ears hopping around)
+const bunnyGroup = new THREE.Group();
+const bunMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+
+// Bunny Body
+const bunBody = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16), bunMat);
+bunBody.position.y = 0.9;
+bunnyGroup.add(bunBody);
+
+// Bunny Head
+const bunHead = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), bunMat);
+bunHead.position.set(0, 1.8, 0.1);
+bunnyGroup.add(bunHead);
+
+// Bunny Ears
+const bunEarGeo = new THREE.CylinderGeometry(0.15, 0.22, 1.4, 10);
+const bunEarL = new THREE.Mesh(bunEarGeo, bunMat);
+bunEarL.position.set(-0.35, 2.9, 0.1);
+bunEarL.rotation.z = -0.15;
+const bunEarR = new THREE.Mesh(bunEarGeo, bunMat);
+bunEarR.position.set(0.35, 2.9, 0.1);
+bunEarR.rotation.z = 0.15;
+
+const bunInnerEarGeo = new THREE.CylinderGeometry(0.08, 0.12, 1.1, 8);
+const innerEarL = new THREE.Mesh(bunInnerEarGeo, pinkMat);
+innerEarL.position.set(-0.35, 2.85, 0.2);
+innerEarL.rotation.z = -0.15;
+const innerEarR = new THREE.Mesh(bunInnerEarGeo, pinkMat);
+innerEarR.position.set(0.35, 2.85, 0.2);
+innerEarR.rotation.z = 0.15;
+
+bunnyGroup.add(bunEarL, bunEarR, innerEarL, innerEarR);
+
+// Bunny Eyes & Nose
+const bunEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), darkMat);
+bunEyeL.position.set(-0.25, 1.9, 0.75);
+const bunEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), darkMat);
+bunEyeR.position.set(0.25, 1.9, 0.75);
+const bunNose = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), pinkMat);
+bunNose.position.set(0, 1.75, 0.82);
+bunnyGroup.add(bunEyeL, bunEyeR, bunNose);
+
+bunnyGroup.position.set(4.8, -0.2, 3.2);
+bunnyGroup.scale.set(0.85, 0.85, 0.85);
+scene.add(bunnyGroup);
+
+// 3. TEDDY BEAR 🧸 (Warm honey-brown cuddly bear sitting and waving)
+const bearGroup = new THREE.Group();
+const bearMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+const bearSnoutMat = new THREE.MeshToonMaterial({ color: 0xfef3c7 });
+
+// Bear Body
+const bearBody = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), bearMat);
+bearBody.position.y = 1.2;
+bearGroup.add(bearBody);
+
+// Bear Head
+const bearHead = new THREE.Mesh(new THREE.SphereGeometry(1.0, 16, 16), bearMat);
+bearHead.position.set(0, 2.3, 0.2);
+bearGroup.add(bearHead);
+
+// Snout
+const bearSnout = new THREE.Mesh(new THREE.SphereGeometry(0.42, 12, 12), bearSnoutMat);
+bearSnout.position.set(0, 2.1, 1.05);
+bearGroup.add(bearSnout);
+
+// Nose
+const bearNose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), darkMat);
+bearNose.position.set(0, 2.25, 1.4);
+bearGroup.add(bearNose);
+
+// Bear Ears
+const earRoundGeo = new THREE.SphereGeometry(0.35, 12, 12);
+const bearEarL = new THREE.Mesh(earRoundGeo, bearMat);
+bearEarL.position.set(-0.8, 3.1, 0.2);
+const bearEarR = new THREE.Mesh(earRoundGeo, bearMat);
+bearEarR.position.set(0.8, 3.1, 0.2);
+bearGroup.add(bearEarL, bearEarR);
+
+// Waving Arm
+const armGeo = new THREE.CylinderGeometry(0.25, 0.3, 1.1, 10);
+const waveArm = new THREE.Mesh(armGeo, bearMat);
+waveArm.position.set(1.4, 1.6, 0.4);
+waveArm.rotation.z = -1.2;
+bearGroup.add(waveArm);
+
+bearGroup.position.set(0, -0.3, -0.5);
+bearGroup.scale.set(1.05, 1.05, 1.05);
+scene.add(bearGroup);
+
+// 4. FLYING WONDER BIRDS 🐦 (Flapping around in the sky in arcs)
+const birds = [];
+const birdMat = new THREE.MeshToonMaterial({ color: 0x38bdf8 });
+const beakMat = new THREE.MeshToonMaterial({ color: 0xf59e0b });
+
+for (let b = 0; b < 3; b++) {
+  const bird = new THREE.Group();
+  const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), birdMat);
+  bBody.scale.set(1, 0.8, 1.4);
+  bird.add(bBody);
+
+  const bHead = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 10), birdMat);
+  bHead.position.set(0, 0.25, 0.5);
+  bird.add(bHead);
+
+  const bBeak = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.35, 8), beakMat);
+  bBeak.position.set(0, 0.22, 0.85);
+  bBeak.rotation.x = Math.PI / 2;
+  bird.add(bBeak);
+
+  // Wings
+  const wingGeo = new THREE.BoxGeometry(0.9, 0.08, 0.5);
+  const wingL = new THREE.Mesh(wingGeo, birdMat);
+  wingL.position.set(-0.55, 0.1, 0);
+  const wingR = new THREE.Mesh(wingGeo, birdMat);
+  wingR.position.set(0.55, 0.1, 0);
+  bird.add(wingL, wingR);
+
+  bird.userData = { wingL, wingR, angle: (b / 3) * Math.PI * 2, radius: 8 + b * 2.5, speed: 0.6 + b * 0.2, height: 4 + b * 1.5 };
+  scene.add(bird);
+  birds.push(bird);
+}
+
+// Interactive Mouse / Touch Parallax
+let mouseX = 0, mouseY = 0;
+let targetX = 0, targetY = 0;
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+// Render Animation Loop
+let clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  targetX += (mouseX * 2.0 - targetX) * 0.05;
+  targetY += (mouseY * 1.0 - targetY) * 0.05;
+
+  camera.position.x = targetX * 1.5;
+  camera.position.y = 5 + targetY * 1.0;
+  camera.lookAt(0, 2, 0);
+
+  // 1. Teddy Bear subtle breathe & wave
+  bearGroup.position.y = -0.3 + Math.sin(t * 2.5) * 0.08;
+  waveArm.rotation.z = -1.2 + Math.sin(t * 5.0) * 0.45;
+  waveArm.rotation.x = Math.cos(t * 5.0) * 0.2;
+  bearHead.rotation.y = Math.sin(t * 1.5) * 0.25;
+
+  // 2. Pip the Puppy bouncing playfully & moving around
+  const pupHop = Math.abs(Math.sin(t * 3.8));
+  puppyGroup.position.y = -0.2 + pupHop * 0.7;
+  puppyGroup.position.x = -4.5 + Math.sin(t * 1.2) * 1.2;
+  puppyGroup.position.z = 2.5 + Math.cos(t * 1.2) * 0.8;
+  puppyGroup.rotation.y = Math.PI / 5 + Math.cos(t * 1.2) * 0.4;
+  pupTail.rotation.z = Math.sin(t * 12) * 0.6;
+  pupEarL.rotation.z = 0.5 + Math.sin(t * 8) * 0.15;
+  pupEarR.rotation.z = -0.5 - Math.sin(t * 8) * 0.15;
+
+  // 3. Bella Bunny lively hopping path
+  const bunnyHop = Math.abs(Math.sin(t * 4.5));
+  bunnyGroup.position.y = -0.2 + bunnyHop * 0.9;
+  bunnyGroup.position.x = 4.8 + Math.cos(t * 1.0) * 1.1;
+  bunnyGroup.position.z = 3.2 + Math.sin(t * 1.0) * 0.7;
+  bunnyGroup.rotation.y = -Math.PI / 4 + Math.sin(t * 1.0) * 0.35;
+  bunEarL.rotation.x = Math.sin(t * 4.5) * 0.2;
+  bunEarR.rotation.x = Math.sin(t * 4.5 + 0.3) * 0.2;
+
+  // 4. Birds flying in graceful circles
+  birds.forEach((b) => {
+    b.userData.angle += b.userData.speed * 0.02;
+    const r = b.userData.radius;
+    b.position.x = Math.cos(b.userData.angle) * r;
+    b.position.z = Math.sin(b.userData.angle) * (r * 0.6) - 2;
+    b.position.y = b.userData.height + Math.sin(t * 2 + b.userData.angle) * 0.8;
+    b.rotation.y = -b.userData.angle - Math.PI / 2;
+    
+    // Wing flapping
+    const wingFlap = Math.sin(t * 16) * 0.7;
+    b.userData.wingL.rotation.z = wingFlap;
+    b.userData.wingR.rotation.z = -wingFlap;
+  });
+
+  // 5. Floating Stars bobbing and spinning
+  stars.forEach((s, idx) => {
+    s.mesh.position.y = s.initialY + Math.sin(t * s.speed + idx) * 0.35;
+    s.mesh.rotation.y += 0.02;
+    s.mesh.rotation.x += 0.015;
+  });
+
+  // 6. Clouds gently drifting
+  clouds.forEach((c, idx) => {
+    c.position.x += Math.sin(t * 0.4 + idx) * 0.005;
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize listener
+window.addEventListener('resize', () => {
+  const w = container.clientWidth || window.innerWidth;
+  const h = container.clientHeight || (window.innerHeight * 0.7);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_39 -->
+</div>
+<!-- Floating Companion Callouts Roster -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 text-left">
+<!-- Companion 1: Teddy Bear -->
+<div class="bg-white/80 backdrop-blur-sm p-3.5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🧸</span>
+<div>
+<p class="font-fun font-bold text-slate-900 text-sm">Teddy Bear</p>
+<p class="text-xs text-amber-700 font-medium">Numbers &amp; Counting</p>
+</div>
+</div>
+</div>
+<!-- Companion 2: Pip the Puppy -->
+<div class="bg-white/80 backdrop-blur-sm p-3.5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🐶</span>
+<div>
+<p class="font-fun font-bold text-slate-900 text-sm">Pip the Puppy</p>
+<p class="text-xs text-sky-700 font-medium">Observe &amp; Sorting</p>
+</div>
+</div>
+</div>
+<!-- Companion 3: Bella Bunny -->
+<div class="bg-white/80 backdrop-blur-sm p-3.5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🐰</span>
+<div>
+<p class="font-fun font-bold text-slate-900 text-sm">Bella Bunny</p>
+<p class="text-xs text-pink-700 font-medium">Create &amp; Colors</p>
+</div>
+</div>
+</div>
+<!-- Companion 4: Wonder Birds -->
+<div class="bg-white/80 backdrop-blur-sm p-3.5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-2">
+<span class="text-2xl">🐦</span>
+<div>
+<p class="font-fun font-bold text-slate-900 text-sm">Wonder Birds</p>
+<p class="text-xs text-emerald-700 font-medium">Logic &amp; Patterns</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: 3D Three.js Animal Wonderland Scene -->
+<!-- BEGIN: MiniGameCategoryCards -->
+<!-- Four elevated pillowy cards matching the exact design and categories in image.png -->
+<section aria-label="Game Learning Categories" class="mt-8 mb-12">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto">
+<!-- Card 1: Numbers -->
+<a class="group wonder-lift bg-white rounded-3xl p-6 shadow-card-gentle hover:shadow-card-hover border border-slate-100/80 flex flex-col items-center justify-center text-center cursor-pointer" href="#numbers">
+<div class="w-14 h-14 mb-3 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+<!-- Blue 1 2 3 4 block icon -->
+<svg class="w-9 h-9" fill="none" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#3b82f6" height="32" rx="8" width="32" x="2" y="2"></rect>
+<text fill="white" font-family="'Fredoka', sans-serif" font-size="11" font-weight="bold" x="7" y="16">1</text>
+<text fill="white" font-family="'Fredoka', sans-serif" font-size="11" font-weight="bold" x="21" y="16">2</text>
+<text fill="white" font-family="'Fredoka', sans-serif" font-size="11" font-weight="bold" x="7" y="29">3</text>
+<text fill="white" font-family="'Fredoka', sans-serif" font-size="11" font-weight="bold" x="21" y="29">4</text>
+</svg>
+</div>
+<span class="font-fun font-bold text-slate-800 text-lg group-hover:text-blue-600 transition-colors">Numbers</span>
+</a>
+<!-- Card 2: Observe -->
+<a class="group wonder-lift bg-white rounded-3xl p-6 shadow-card-gentle hover:shadow-card-hover border border-slate-100/80 flex flex-col items-center justify-center text-center cursor-pointer" href="#observe">
+<div class="w-14 h-14 mb-3 rounded-2xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+<!-- Broom / Observe cleaner wand icon from image -->
+<svg class="w-9 h-9" fill="none" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+<path d="M26 6L14 18" stroke="#9a3412" stroke-linecap="round" stroke-width="3"></path>
+<path d="M15 17L8 24C6 26 6.5 28.5 8.5 30C10.5 31.5 13 30.5 15 28.5L20 22" fill="#ea580c"></path>
+<path d="M8 29L14 23" stroke="#fef08a" stroke-linecap="round" stroke-width="1.5"></path>
+<circle cx="28" cy="8" fill="#f59e0b" r="1.5"></circle>
+<circle cx="24" cy="4" fill="#fbbf24" r="1.5"></circle>
+</svg>
+</div>
+<span class="font-fun font-bold text-slate-800 text-lg group-hover:text-amber-600 transition-colors">Observe</span>
+</a>
+<!-- Card 3: Logic -->
+<a class="group wonder-lift bg-white rounded-3xl p-6 shadow-card-gentle hover:shadow-card-hover border border-slate-100/80 flex flex-col items-center justify-center text-center cursor-pointer" href="#logic">
+<div class="w-14 h-14 mb-3 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+<!-- Green puzzle piece icon from image -->
+<svg class="w-9 h-9" fill="none" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+<path d="M14 6C14 7.66 15.34 9 17 9C18.66 9 20 7.66 20 6H26C27.1 6 28 6.9 28 8V14C26.34 14 25 15.34 25 17C25 18.66 26.34 20 28 20V26C28 27.1 27.1 28 26 28H20C20 26.34 18.66 25 17 25C15.34 25 14 26.34 14 28H8C6.9 28 6 27.1 6 26V20C7.66 20 9 18.66 9 17C9 15.34 7.66 14 6 14V8C6 6.9 6.9 6 8 6H14Z" fill="#84cc16"></path>
+<circle cx="17" cy="17" fill="#ffffff" fill-opacity="0.6" r="2"></circle>
+</svg>
+</div>
+<span class="font-fun font-bold text-slate-800 text-lg group-hover:text-lime-600 transition-colors">Logic</span>
+</a>
+<!-- Card 4: Create -->
+<a class="group wonder-lift bg-white rounded-3xl p-6 shadow-card-gentle hover:shadow-card-hover border border-slate-100/80 flex flex-col items-center justify-center text-center cursor-pointer" href="#create">
+<div class="w-14 h-14 mb-3 rounded-2xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+<!-- Crayon / Pencil icon from image -->
+<svg class="w-9 h-9" fill="none" viewbox="0 0 36 36" xmlns="http://www.w3.org/2000/svg">
+<path d="M25.5 5.5L29.5 9.5L13 26L7 28L9 22L25.5 5.5Z" fill="#f97316"></path>
+<path d="M22 9L26 13" stroke="#ffffff" stroke-width="2"></path>
+<path d="M7 28L10 24L11 25L7 28Z" fill="#475569"></path>
+<circle cx="28" cy="7" fill="#fef08a" r="1.5"></circle>
+</svg>
+</div>
+<span class="font-fun font-bold text-slate-800 text-lg group-hover:text-rose-600 transition-colors">Create</span>
+</a>
+</div>
+</section>
+<!-- END: MiniGameCategoryCards -->
+<!-- BEGIN: SafetyAndTrustIndicators -->
+<div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 max-w-xl mx-auto mb-10 pt-2 border-t border-slate-200/60">
+<div class="flex items-center gap-1.5">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
+</svg>
+<span>COPPA Child Safe</span>
+</div>
+<div class="flex items-center gap-1.5">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
+</svg>
+<span>Zero Third-Party Ads</span>
+</div>
+<div class="flex items-center gap-1.5">
+<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
+</svg>
+<span>No Account or Password Required</span>
+</div>
+</div>
+<!-- END: SafetyAndTrustIndicators -->
+<!-- BEGIN: BottomParentLinks -->
+<!-- Clean footer links directly reflecting bottom of image.png -->
+<footer class="text-sm font-medium text-slate-600">
+<div class="inline-flex items-center gap-2">
+<a class="text-sky-700 hover:text-sky-900 underline underline-offset-4 decoration-sky-300 hover:decoration-sky-600 transition-colors font-semibold" href="#parents">
+            For parents
+          </a>
+<span class="text-slate-400 font-bold">•</span>
+<a class="text-sky-700 hover:text-sky-900 underline underline-offset-4 decoration-sky-300 hover:decoration-sky-600 transition-colors font-semibold" href="#parent-sign-in">
+            Parent sign in
+          </a>
+</div>
+<p class="text-xs text-slate-400 mt-4">
+          © Learnzzy Wonderlands Inc. Designed with care for curious growing minds.
+        </p>
+</footer>
+<!-- END: BottomParentLinks -->
+</div>
+</main>
+<!-- END: MainHeroAndWonderlandStage -->
+<!-- Interactive Button feedback microscript -->
+<script data-purpose="button-interaction">
+    document.addEventListener('DOMContentLoaded', () => {
+      const startBtn = document.getElementById('main-start-btn');
+      if (startBtn) {
+        startBtn.addEventListener('click', () => {
+          // Playful ripple/bounce sound trigger placeholder or smooth scroll to playground
+          const wonderlandStage = document.getElementById('wonderland');
+          if (wonderlandStage) {
+            wonderlandStage.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+    });
+  </script>
+</body></html>

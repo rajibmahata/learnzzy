@@ -4,7 +4,7 @@ import { gridPositions, type Zone } from "./layout";
 // Visual layer for Number Adventure (LZ-051). Renders only — all math,
 // validation and scoring stay in deterministic game code (DEC-050/051).
 export interface AdditionSceneApi {
-  showGroups: (a: number, b: number) => void;
+  showGroups: (a: number, b: number, emoji?: string) => void;
   playSuccess: () => void;
 }
 
@@ -52,12 +52,14 @@ export function createAdditionScene(P: typeof Phaser) {
       }
     }
 
-    private spawnApple(x: number, y: number, size: number, delay: number, right: boolean) {
+    private spawnApple(x: number, y: number, size: number, delay: number, right: boolean, emoji = "🍎") {
       // Prefer a real image sprite for reliable cross-platform rendering over emoji text.
-      const useImage = this.textures.exists("apple");
+      // Number Orchard: per-round visual themes render as emoji text; the apple
+      // sprite stays the default path so existing rendering is byte-identical.
+      const useImage = emoji === "🍎" && this.textures.exists("apple");
       const apple: Phaser.GameObjects.Image | Phaser.GameObjects.Text = useImage
         ? this.add.image(x, y, "apple").setDisplaySize(size, size).setOrigin(0.5)
-        : (this.add.text(x, y, "🍎", { fontSize: `${size}px`, fontFamily: "Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif" }).setOrigin(0.5) as unknown as Phaser.GameObjects.Image);
+        : (this.add.text(x, y, emoji, { fontSize: `${size}px`, fontFamily: "Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif" }).setOrigin(0.5) as unknown as Phaser.GameObjects.Image);
       this.apples.push(apple);
       if (right) this.rightApples.push(apple);
       if (this.reduced || delay < 0) return;
@@ -71,16 +73,16 @@ export function createAdditionScene(P: typeof Phaser) {
       });
     }
 
-    showGroups(a: number, b: number) {
+    showGroups(a: number, b: number, emoji = "🍎") {
       this.tweens.killAll();
       for (const apple of this.apples) apple.destroy();
       this.apples = [];
       this.rightApples = [];
       gridPositions(a, LEFT).forEach((p, i) =>
-        this.spawnApple(p.x, p.y, p.size, i * 70, false)
+        this.spawnApple(p.x, p.y, p.size, i * 70, false, emoji)
       );
       gridPositions(b, RIGHT).forEach((p, i) =>
-        this.spawnApple(p.x, p.y, p.size, 250 + i * 70, true)
+        this.spawnApple(p.x, p.y, p.size, 250 + i * 70, true, emoji)
       );
     }
 

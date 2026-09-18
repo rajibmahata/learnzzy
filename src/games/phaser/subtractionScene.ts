@@ -4,7 +4,7 @@ import { gridPositions, type Zone } from "./layout";
 // Visual layer for Fly Away (LZ-061). Renders only — the authoritative
 // `remaining = start - removed` math lives in deterministic game code.
 export interface SubtractionSceneApi {
-  showScene: (start: number, removed: number) => void;
+  showScene: (start: number, removed: number, emoji?: string) => void;
   playSuccess: () => void;
 }
 
@@ -47,7 +47,7 @@ export function createSubtractionScene(P: typeof Phaser) {
       g.strokePath();
     }
 
-    showScene(start: number, removed: number) {
+    showScene(start: number, removed: number, emoji = "🐦") {
       this.tweens.killAll();
       for (const bird of this.stayers) bird.destroy();
       this.stayers = [];
@@ -58,10 +58,12 @@ export function createSubtractionScene(P: typeof Phaser) {
       const spots = gridPositions(start, FLOCK);
 
       spots.forEach((p, i) => {
-        const useImage = this.textures.exists("bird");
+        // Breeze Valley: per-round visual themes render as emoji text; the
+        // bird sprite stays the default path so existing rendering is identical.
+        const useImage = emoji === "🐦" && this.textures.exists("bird");
         const bird: Phaser.GameObjects.Image = useImage
           ? (this.add.image(p.x, p.y, "bird").setDisplaySize(p.size, p.size).setOrigin(0.5) as unknown as Phaser.GameObjects.Image)
-          : (this.add.text(p.x, p.y, "🐦", { fontSize: `${p.size}px`, fontFamily: "Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif" }).setOrigin(0.5) as unknown as Phaser.GameObjects.Image);
+          : (this.add.text(p.x, p.y, emoji, { fontSize: `${p.size}px`, fontFamily: "Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif" }).setOrigin(0.5) as unknown as Phaser.GameObjects.Image);
         if (i < remaining) {
           this.stayers.push(bird);
           if (!this.reduced) {

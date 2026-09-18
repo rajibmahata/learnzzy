@@ -18,7 +18,7 @@ Mongo on host port **27018**, Redis on **6379**.
 ```bash
 npm run typecheck
 npm run lint
-npm test          # 87 unit tests, 20 suites
+npm test          # 156 unit tests, 40 suites (22 academic/voice/theme)
 npm run build
 ```
 
@@ -43,6 +43,26 @@ Pool IDs must start with `seed-` (pool hit, not fallback).
   3rd only (never earlier, never +2).
 - Same plan twice → byte-identical items (determinism).
 - `learners` docs contain no `email/phone/location/photo` fields.
+
+## 3b. Academic-engine checks (2026-09-17)
+
+- `GET /api/learners/:id/academic/plan` → validated plan (`concept`,
+  `stage` in LEARN→MASTER, `reasonCode`, parent-safe `reason`, no
+  chain-of-thought markers); Tutor/OER/NCERT unreachable → deterministic
+  plan still 200 (never 500 to gameplay).
+- `GET .../academic/recommendation` → `{game, concept, complexity,
+  objective, reasonCode, priority 0–1}` + parent `reason`.
+- `POST .../academic/voice {event, locale: "hi", characterId: "parrot"}`
+  → 200 with Hindi script + `cacheKey`; unknown event → 422.
+- `POST .../academic/result {gameId, accuracy: 0.2, attempts: 3}` →
+  `review` at same complexity; `{accuracy: 0.95, attempts: 4, hintsUsed: 0}`
+  → `increase_complexity` exactly +1; attempts < 2 → `practice`.
+- Admin (auth): `GET /api/admin/academic/plans` → plans + voiceAssets +
+  signal/failure counts.
+- Voice failure drill: stop Mongo → voice endpoint still resolves text
+  (device speech path); gameplay never waits on audio.
+- Multilingual drill: `voice` for en/hi/bn/ta/te returns distinct
+  non-empty scripts; no live translation in the request path.
 
 ## 4. Gateway checks (all flags off by default)
 

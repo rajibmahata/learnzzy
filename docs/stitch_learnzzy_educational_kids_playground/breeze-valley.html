@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>Learnzzy - Breeze Valley Wonder Quest</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1.5deg); }
+}
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+@keyframes birdFlutter {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
+}
+.animate-float { animation: floatSlow 4s ease-in-out infinite; }
+.animate-flutter-1 { animation: birdFlutter 2.8s ease-in-out infinite; }
+.animate-flutter-2 { animation: birdFlutter 2.3s ease-in-out infinite 0.4s; }
+.animate-bouncy { animation: gentlePulse 2s ease-in-out infinite; }
+</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-fixed": "#d8e2ff", "on-primary-container": "#fefcff", "on-tertiary-container": "#034730", "on-surface": "#0d1c2e", "surface": "#f4f8ff", "on-error": "#ffffff", "on-surface-variant": "#424754", "on-background": "#0d1c2e", "inverse-primary": "#adc6ff", "surface-dim": "#ccdbf3", "inverse-on-surface": "#eaf1ff", "on-secondary-container": "#684000", "background": "#f4f8ff", "on-tertiary": "#ffffff", "secondary-container": "#fea619", "on-error-container": "#93000a", "surface-tint": "#005ac2", "secondary-fixed-dim": "#ffb95f", "surface-container": "#e6eeff", "error": "#ff5c5c", "outline-variant": "#c2c6d6", "outline": "#727785", "surface-container-highest": "#d5e3fc", "primary-fixed-dim": "#adc6ff", "primary": "#0062d2", "surface-variant": "#d5e3fc", "primary-container": "#3b82f6", "on-primary": "#ffffff", "surface-container-low": "#eff4ff", "on-secondary": "#ffffff", "tertiary": "#10b981", "secondary": "#e77a28", "on-tertiary-fixed-variant": "#005236", "inverse-surface": "#233144", "on-primary-fixed": "#001a42", "tertiary-container": "#34d399", "on-primary-fixed-variant": "#004395", "tertiary-fixed": "#6ffbbe", "on-secondary-fixed-variant": "#653e00", "on-tertiary-fixed": "#002113", "surface-container-high": "#dce9ff", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#2a1700", "error-container": "#ffe4e2", "secondary-fixed": "#ffddb8", "tertiary-fixed-dim": "#4edea3", "surface-bright": "#f8f9ff",
+  "wonder-sky": "#d9f0ff",
+  "wonder-peach": "#ffe8dc",
+  "wonder-coral": "#ff6b6b",
+  "wonder-yellow": "#ffea79",
+  "wonder-mint": "#bcf5d6",
+  "wonder-blue": "#38bdf8",
+  "wonder-deepblue": "#0284c7"
+}, "borderRadius": { "DEFAULT": "1rem", "lg": "1.75rem", "xl": "2.25rem", "2xl": "3rem", "full": "9999px" }, "spacing": { "gutter": "1.5rem", "margin": "2rem", "space-lg": "2rem", "margin-mobile": "1.1rem", "space-md": "1.25rem", "gutter-mobile": "1rem", "space-sm": "0.75rem", "space-xs": "0.5rem", "space-xl": "3rem" }, "fontFamily": { "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "instruction-bold": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "display-hero": ["Plus Jakarta Sans"], "headline-md-mobile": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "answer-btn": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-hero-mobile": ["Plus Jakarta Sans"] }, "fontSize": { "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "700" }], "instruction-bold": ["22px", { "lineHeight": "28px", "fontWeight": "800" }], "headline-lg": ["34px", { "lineHeight": "42px", "letterSpacing": "-0.01em", "fontWeight": "900" }], "display-hero": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "900" }], "headline-md-mobile": ["22px", { "lineHeight": "28px", "fontWeight": "800" }], "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "body-md": ["15px", { "lineHeight": "22px", "fontWeight": "600" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }], "answer-btn": ["26px", { "lineHeight": "32px", "fontWeight": "900" }], "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "600" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+      background: radial-gradient(120% 80% at 50% 0%, #e8f5ff 0%, #f6faff 60%, #fff6f0 100%);
+    }
+  </style>
+</head>
+<body class="font-body-md text-body-md text-on-surface antialiased select-none overflow-x-hidden">
+<!-- Top Navigation Chrome -->
+<header class="fixed top-0 w-full z-50 pt-safe bg-white/85 backdrop-blur-md shadow-[0_2px_15px_rgba(56,189,248,0.08)]">
+<div class="h-16 px-margin-mobile flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-2">
+<button aria-label="Back to Map" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-surface-container flex items-center justify-center text-primary shadow-[0_3px_0_#c7dcfe] active:translate-y-0.5 active:shadow-none transition-all" onclick="history.back()">
+<span class="material-symbols-outlined text-[22px]">arrow_back</span>
+</button>
+<div class="flex items-center gap-1.5 bg-gradient-to-r from-sky-100 to-indigo-50 px-3 py-1.5 rounded-full border border-sky-200/60 shadow-xs">
+<span class="text-base leading-none">🗺️</span>
+<span class="font-label-sm text-sky-900 font-extrabold uppercase tracking-wider text-[11px]">Breeze Valley</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<!-- Gem / Star Counter -->
+<div class="flex items-center gap-1.5 bg-gradient-to-r from-amber-100 to-yellow-200 px-3.5 py-1.5 rounded-full border border-amber-300 shadow-[0_2px_0_#f59e0b]">
+<span class="material-symbols-outlined text-amber-600 text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-amber-900 font-black" id="starCount">25</span>
+</div>
+<!-- Sound Chime Toggle -->
+<button aria-label="Toggle Forest Audio" class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center border border-emerald-200 shadow-[0_2px_0_#a7f3d0] active:scale-95 transition-transform" id="soundToggle" onclick="toggleSound()">
+<span class="material-symbols-outlined text-[20px]" id="soundIcon" style="font-variation-settings: 'FILL' 1;">volume_up</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex flex-col relative w-full pt-16">
+<div class="flex flex-col w-full pb-safe px-margin-mobile pt-2">
+<!-- Companion Guide: Bella Bunny Speaking Card -->
+<div class="relative mt-2 bg-gradient-to-r from-white via-amber-50/60 to-rose-50 p-3.5 rounded-2xl border-2 border-amber-200/80 shadow-[0_5px_0_#fed7aa] flex items-center gap-3 animate-float">
+<!-- Bella Bunny Character Badge -->
+<div class="relative shrink-0">
+<div class="w-14 h-14 rounded-full bg-gradient-to-br from-pink-200 via-rose-100 to-amber-200 flex items-center justify-center shadow-md border-2 border-white relative overflow-visible">
+<!-- Bunny Explorer Ears & Hat -->
+<span class="text-[34px] transform hover:rotate-6 transition-transform">🐰</span>
+<span class="absolute -top-1 -right-1 text-[16px] filter drop-shadow">🧭</span>
+</div>
+<div class="absolute -bottom-1 inset-x-0 mx-auto w-fit bg-amber-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
+          Bella
+        </div>
+</div>
+<!-- Speech Bubble Text -->
+<div class="flex-1 pr-1">
+<div class="flex items-center gap-1">
+<span class="text-xs">✨</span>
+<p class="font-headline-md-mobile text-[15px] leading-snug text-slate-800 font-black">
+            "Watch the bluebirds fly into puffy clouds! How many stay?"
+          </p>
+</div>
+<p class="font-label-sm text-slate-500 text-[11px] font-semibold mt-0.5 flex items-center gap-1">
+<span>🍃 Breeze Valley Subtraction Quest</span>
+</p>
+</div>
+<!-- Tactile Read-Aloud Button -->
+<button aria-label="Read prompt aloud" class="w-12 h-12 shrink-0 rounded-full bg-gradient-to-b from-sky-400 to-sky-600 text-white flex items-center justify-center shadow-[0_4px_0_#0284c7] active:translate-y-1 active:shadow-none transition-transform" id="audioCueBtn" onclick="playVoicePrompt()">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1;">campaign</span>
+</button>
+</div>
+<!-- Living Wonder Worlds Interactive Canvas: Breeze Valley Tree Perch -->
+<div class="relative w-full mt-3 rounded-2xl overflow-hidden shadow-[0_8px_0_#bfdbfe] border-2 border-sky-200 bg-gradient-to-b from-[#bae6fd] via-[#e0f2fe] to-[#ecfdf5] p-3.5 select-none min-h-[255px]">
+<!-- Whimsical Rainbow Arc in Sky -->
+<div class="absolute -top-10 left-1/4 w-64 h-32 rounded-full border-[10px] border-transparent border-t-rose-300/40 pointer-events-none"></div>
+<div class="absolute -top-8 left-[23%] w-68 h-32 rounded-full border-[8px] border-transparent border-t-amber-200/50 pointer-events-none"></div>
+<div class="absolute -top-6 left-[21%] w-72 h-32 rounded-full border-[6px] border-transparent border-t-emerald-200/50 pointer-events-none"></div>
+<!-- Dreamy Floating Pastel Clouds -->
+<div class="absolute top-2 left-2 flex items-center gap-1 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full border border-sky-100 shadow-xs">
+<span class="text-sky-500 text-xs">☁️</span>
+<span class="font-label-sm text-sky-900 text-[11px] font-extrabold">Breeze Meadow</span>
+</div>
+<div class="absolute top-3 right-2 flex items-center gap-1 bg-white/85 px-2.5 py-1 rounded-full shadow-xs border border-rose-100">
+<span class="text-xs">🌸</span>
+<span class="font-label-sm text-rose-700 text-[11px] font-bold">5 chirpers</span>
+</div>
+<!-- Floating Leaves Particles in Breeze -->
+<div class="absolute top-12 left-10 text-emerald-400 text-sm animate-bounce pointer-events-none" style="animation-duration: 3.5s;">🍃</div>
+<div class="absolute top-16 right-20 text-teal-400 text-xs animate-bounce pointer-events-none" style="animation-duration: 4.5s;">🍃</div>
+<div class="absolute top-24 left-1/3 text-amber-400 text-xs animate-pulse pointer-events-none">✨</div>
+<!-- TOP SKY AREA: 2 Departed Flying Bluebirds into Cloud -->
+<div class="relative w-full h-24 mt-4">
+<!-- Dashed Flight Trails -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" fill="none" viewbox="0 0 340 90">
+<path d="M 120 75 C 160 55, 210 50, 270 24" opacity="0.65" stroke="#38bdf8" stroke-dasharray="6 6" stroke-linecap="round" stroke-width="3"></path>
+<path d="M 80 82 C 130 68, 175 48, 230 20" opacity="0.6" stroke="#f472b6" stroke-dasharray="5 5" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+<!-- Big Destination Fluffy Cloud with -2 Flew Away Tag -->
+<div class="absolute top-0 right-1 bg-gradient-to-b from-white to-sky-50 px-3.5 py-2 rounded-2xl border border-sky-100 shadow-[0_4px_12px_rgba(56,189,248,0.18)] flex items-center gap-2">
+<div class="flex flex-col">
+<span class="font-instruction-bold text-rose-600 text-[13px] leading-tight flex items-center gap-1 font-black">
+<span>-2 Flew Away!</span>
+</span>
+<span class="text-[10px] text-sky-700 font-bold">Bye bye! 🍃</span>
+</div>
+<span class="text-xl">☁️</span>
+</div>
+<!-- Flying Bluebird 1 -->
+<div class="absolute top-1 right-28 flex flex-col items-center animate-flutter-1">
+<div class="w-11 h-11 rounded-full bg-gradient-to-tr from-sky-500 to-blue-400 text-white flex items-center justify-center shadow-[0_3px_0_#0284c7] ring-2 ring-white transform -rotate-12">
+<span class="text-xl">🕊️</span>
+</div>
+</div>
+<!-- Flying Bluebird 2 -->
+<div class="absolute top-9 right-44 flex flex-col items-center animate-flutter-2">
+<div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-400 to-sky-500 text-white flex items-center justify-center shadow-[0_3px_0_#0284c7] ring-2 ring-white transform rotate-6">
+<span class="text-lg">🐦</span>
+</div>
+</div>
+</div>
+<!-- LOWER AREA: Whimsical Mossy Branch with 3 Remaining Bluebirds -->
+<div class="relative w-full mt-2">
+<!-- Remaining Chirping Birds Container -->
+<div class="flex items-end justify-start pl-4 gap-3.5 z-10 relative -mb-3">
+<!-- Bird 1 (Still Perched) -->
+<div class="flex flex-col items-center cursor-pointer group active:scale-95 transition-transform" onclick="chirpBird(1)">
+<span class="px-2 py-0.2 rounded-full bg-emerald-400 text-emerald-950 text-[10px] font-black shadow-xs mb-1 border border-white">
+              🌿 1
+            </span>
+<div class="w-13 h-13 p-2 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white flex items-center justify-center shadow-[0_4px_0_#1d4ed8] border-2 border-white transform group-hover:-translate-y-1 transition-transform">
+<span class="text-[26px]">🐦</span>
+</div>
+</div>
+<!-- Bird 2 (Still Perched) -->
+<div class="flex flex-col items-center cursor-pointer group active:scale-95 transition-transform" onclick="chirpBird(2)">
+<span class="px-2 py-0.2 rounded-full bg-emerald-400 text-emerald-950 text-[10px] font-black shadow-xs mb-1 border border-white">
+              🌿 2
+            </span>
+<div class="w-13 h-13 p-2 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shadow-[0_4px_0_#b45309] border-2 border-white transform group-hover:-translate-y-1 transition-transform">
+<span class="text-[26px]">🐥</span>
+</div>
+</div>
+<!-- Bird 3 (Still Perched) -->
+<div class="flex flex-col items-center cursor-pointer group active:scale-95 transition-transform" onclick="chirpBird(3)">
+<span class="px-2 py-0.2 rounded-full bg-emerald-400 text-emerald-950 text-[10px] font-black shadow-xs mb-1 border border-white">
+              🌿 3
+            </span>
+<div class="w-13 h-13 p-2 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white flex items-center justify-center shadow-[0_4px_0_#1d4ed8] border-2 border-white transform group-hover:-translate-y-1 transition-transform">
+<span class="text-[26px]">🐦</span>
+</div>
+</div>
+<!-- Heart Sparkle Tag "Still Perched!" -->
+<div class="ml-auto mr-1 mb-2 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-pink-200 shadow-[0_2px_8px_rgba(244,114,182,0.2)] flex items-center gap-1.5">
+<span class="text-rose-500 text-sm">💖</span>
+<span class="font-label-sm text-slate-800 text-[11px] font-black">Still Perched!</span>
+</div>
+</div>
+<!-- Big Tactile Mossy Branch -->
+<div class="h-7 w-full rounded-full bg-gradient-to-r from-[#92400e] via-[#78350f] to-[#92400e] shadow-[0_5px_0_#451a03] flex items-center justify-between px-3 relative overflow-hidden border-t border-amber-500/40">
+<!-- Moss Patches & Twig Sprouts -->
+<div class="w-8 h-3 rounded-full bg-emerald-500 shadow-inner"></div>
+<div class="h-2 w-14 rounded-full bg-amber-400/30"></div>
+<div class="w-10 h-3 rounded-full bg-emerald-500 shadow-inner"></div>
+<div class="h-1.5 w-10 rounded-full bg-amber-300/30"></div>
+<div class="w-6 h-3 rounded-full bg-emerald-400 shadow-inner"></div>
+</div>
+</div>
+</div>
+<!-- Whimsical Subtraction Math Strip -->
+<div class="mt-3.5 bg-gradient-to-r from-sky-50 via-white to-amber-50 rounded-2xl p-3 border-2 border-sky-200/80 flex flex-col items-center text-center shadow-[0_4px_0_#e0f2fe]">
+<div class="flex items-center justify-center gap-2 flex-wrap">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 text-blue-900 border border-blue-200 font-instruction-bold text-[17px] shadow-xs">
+<span>🐦</span> 5 Birds
+        </span>
+<span class="font-headline-lg-mobile text-rose-500 font-black text-2xl">−</span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-100 text-rose-900 border border-rose-200 font-instruction-bold text-[17px] shadow-xs">
+<span>💨</span> 2 Flew
+        </span>
+<span class="font-headline-lg-mobile text-slate-700 font-black text-2xl">=</span>
+<span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-300 to-amber-400 text-amber-950 font-instruction-bold text-[22px] flex items-center justify-center shadow-[0_3px_0_#d97706] font-black animate-bouncy">
+          ?
+        </span>
+</div>
+<p class="font-body-md text-slate-700 font-extrabold text-[14px] mt-1">
+        How many feathered birds are left on the branch?
+      </p>
+</div>
+<!-- Tactile Bouncy Pillowy Answer Choices (4 Options: 2, 3, 4, 5) -->
+<div class="mt-3.5 grid grid-cols-4 gap-2.5 w-full">
+<!-- Option 2 -->
+<button class="h-21 rounded-2xl bg-white text-slate-800 border-2 border-sky-100 flex flex-col items-center justify-center shadow-[0_5px_0_#bae6fd] active:translate-y-1.5 active:shadow-none transition-all hover:bg-sky-50" onclick="handleAnswer(2, false, this)">
+<span class="font-answer-btn text-[28px] leading-tight text-slate-800 font-black">2</span>
+<span class="font-label-sm text-[11px] text-slate-400 font-bold">birds</span>
+</button>
+<!-- Option 3 (Correct - with Golden Highlight & Bobbing Tag) -->
+<button class="relative h-21 rounded-2xl bg-gradient-to-b from-amber-50 to-yellow-100 text-sky-900 border-2 border-amber-300 flex flex-col items-center justify-center shadow-[0_6px_0_#f59e0b] active:translate-y-1.5 active:shadow-none transition-all scale-[1.04] ring-4 ring-amber-200/50" onclick="handleAnswer(3, true, this)">
+<span class="absolute -top-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm uppercase tracking-wider animate-bounce">
+          Tap Me! ✨
+        </span>
+<span class="font-answer-btn text-[30px] leading-tight text-amber-950 font-black">3</span>
+<span class="font-label-sm text-[11px] text-amber-800 font-extrabold">birds</span>
+</button>
+<!-- Option 4 -->
+<button class="h-21 rounded-2xl bg-white text-slate-800 border-2 border-sky-100 flex flex-col items-center justify-center shadow-[0_5px_0_#bae6fd] active:translate-y-1.5 active:shadow-none transition-all hover:bg-sky-50" onclick="handleAnswer(4, false, this)">
+<span class="font-answer-btn text-[28px] leading-tight text-slate-800 font-black">4</span>
+<span class="font-label-sm text-[11px] text-slate-400 font-bold">birds</span>
+</button>
+<!-- Option 5 -->
+<button class="h-21 rounded-2xl bg-white text-slate-800 border-2 border-sky-100 flex flex-col items-center justify-center shadow-[0_5px_0_#bae6fd] active:translate-y-1.5 active:shadow-none transition-all hover:bg-sky-50" onclick="handleAnswer(5, false, this)">
+<span class="font-answer-btn text-[28px] leading-tight text-slate-800 font-black">5</span>
+<span class="font-label-sm text-[11px] text-slate-400 font-bold">birds</span>
+</button>
+</div>
+<!-- Rewarding Wonder Worlds Mint Green Completion Banner -->
+<div class="mt-3.5 bg-gradient-to-r from-emerald-100 via-teal-100 to-mint p-3 rounded-2xl border-2 border-emerald-300 flex items-center justify-between shadow-[0_4px_0_#a7f3d0]">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[18px]">touch_app</span>
+</div>
+<span class="font-label-md text-emerald-950 font-extrabold text-[13px]">Count the birds still on the branch! 🐦</span>
+</div>
+<div class="flex items-center gap-1 bg-white px-3 py-1 rounded-full text-emerald-800 font-label-sm font-black shadow-xs border border-emerald-200">
+<span class="material-symbols-outlined text-amber-500 text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>+1 Star</span>
+</div>
+</div>
+<!-- Interactive Reward Toast / Celebration Card -->
+<div class="hidden fixed inset-x-4 bottom-6 bg-gradient-to-b from-white to-amber-50 p-5 rounded-2xl shadow-2xl z-50 flex-col items-center text-center border-4 border-amber-300 animate-bounce" id="rewardCard">
+<div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-white shadow-lg -mt-11 mb-2 border-4 border-white">
+<span class="text-3xl">🎉</span>
+</div>
+<p class="font-headline-md-mobile text-slate-900 font-black text-2xl">Wonder World Clear!</p>
+<p class="font-body-md text-slate-600 font-bold mt-1 text-sm">
+        5 feathered birds minus 2 flying away leaves 3 happy birds on the perch!
+      </p>
+<div class="mt-4 flex items-center gap-2 bg-emerald-100 px-4 py-1.5 rounded-full text-emerald-900 font-extrabold text-sm border border-emerald-300">
+<span>⭐ Quest Completed: +1 Star Earned!</span>
+</div>
+<div class="mt-4 w-full flex items-center gap-3">
+<button class="w-full h-13 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 text-white font-headline-md-mobile text-base font-black shadow-[0_5px_0_#0284c7] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2" onclick="dismissReward()">
+<span>Fly to Next Quest</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<script>
+  let soundEnabled = true;
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    const icon = document.getElementById('soundIcon');
+    if (icon) {
+      icon.innerText = soundEnabled ? 'volume_up' : 'volume_off';
+    }
+  }
+
+  function playVoicePrompt() {
+    const btn = document.getElementById('audioCueBtn');
+    btn?.classList.add('scale-90');
+    setTimeout(() => btn?.classList.remove('scale-90'), 200);
+    
+    // Web speech synthesis gentle fallback
+    if ('speechSynthesis' in window) {
+      const utter = new SpeechSynthesisUtterance("Watch the feathered bluebirds fly into puffy clouds! How many stay on the branch?");
+      utter.pitch = 1.3;
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
+  function chirpBird(num) {
+    const speech = new SpeechSynthesisUtterance("Chirp! Bird number " + num);
+    speech.pitch = 1.6;
+    window.speechSynthesis?.speak(speech);
+  }
+
+  function handleAnswer(val, isCorrect, btnEl) {
+    if (isCorrect) {
+      btnEl.classList.remove('bg-gradient-to-b', 'from-amber-50', 'to-yellow-100');
+      btnEl.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'shadow-[0_6px_0_#047857]');
+      
+      const starEl = document.getElementById('starCount');
+      if (starEl) starEl.innerText = "26";
+
+      const reward = document.getElementById('rewardCard');
+      if (reward) {
+        reward.classList.remove('hidden');
+        reward.classList.add('flex');
+      }
+    } else {
+      btnEl.classList.add('animate-shake', 'bg-rose-100', 'border-rose-400');
+      setTimeout(() => {
+        btnEl.classList.remove('animate-shake', 'bg-rose-100', 'border-rose-400');
+      }, 700);
+    }
+  }
+
+  function dismissReward() {
+    const reward = document.getElementById('rewardCard');
+    if (reward) {
+      reward.classList.add('hidden');
+      reward.classList.remove('flex');
+    }
+  }
+</script>
+</body></html>

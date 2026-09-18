@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+<!-- STITCH_THREEJS_START:ANIMATION_39 class="fixed inset-0 w-full h-full bg-transparent" -->
+<div class="fixed inset-0 w-full h-full bg-transparent" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_39" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_39');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  // Animal Wonderland 3D Interactive Scene for Learnzzy
+// Built with global THREE namespace inside container
+
+const container = document.getElementById('threejs-container') || document.body;
+const width = container.clientWidth || window.innerWidth;
+const height = container.clientHeight || (window.innerHeight * 0.7);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+camera.position.set(0, 5, 22);
+
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xfff7e6, 1.2);
+dirLight.position.set(12, 20, 15);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const blueFill = new THREE.DirectionalLight(0xdbeafe, 0.6);
+blueFill.position.set(-15, 10, -10);
+scene.add(blueFill);
+
+// Wonderland Island / Floating Land
+const islandGroup = new THREE.Group();
+scene.add(islandGroup);
+
+// Soft grassy mound
+const moundGeo = new THREE.CylinderGeometry(14, 11, 2.5, 32);
+const grassMat = new THREE.MeshToonMaterial({ color: 0x86efac });
+const earthMat = new THREE.MeshToonMaterial({ color: 0xfef08a });
+const mound = new THREE.Mesh(moundGeo, grassMat);
+mound.position.y = -1.5;
+mound.receiveShadow = true;
+islandGroup.add(mound);
+
+// Stylized candy clouds
+const cloudMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+function createCloud(x, y, z, scale) {
+  const cloud = new THREE.Group();
+  const puffGeo = new THREE.SphereGeometry(1, 16, 16);
+  const p1 = new THREE.Mesh(puffGeo, cloudMat);
+  const p2 = new THREE.Mesh(puffGeo, cloudMat);
+  p2.position.set(0.9, -0.2, 0); p2.scale.set(0.8, 0.8, 0.8);
+  const p3 = new THREE.Mesh(puffGeo, cloudMat);
+  p3.position.set(-0.9, -0.2, 0); p3.scale.set(0.75, 0.75, 0.75);
+  const p4 = new THREE.Mesh(puffGeo, cloudMat);
+  p4.position.set(0.3, 0.5, 0.2); p4.scale.set(0.85, 0.85, 0.85);
+  cloud.add(p1, p2, p3, p4);
+  cloud.position.set(x, y, z);
+  cloud.scale.set(scale, scale, scale);
+  scene.add(cloud);
+  return cloud;
+}
+
+const clouds = [
+  createCloud(-14, 8, -6, 1.4),
+  createCloud(15, 9, -8, 1.6),
+  createCloud(0, 10, -12, 2.0),
+  createCloud(-8, 5, -10, 1.2),
+  createCloud(10, 4, -9, 1.1)
+];
+
+// Stylized Rainbow Arc
+const rainbowGroup = new THREE.Group();
+const rainbowColors = [0xf87171, 0xfbbf24, 0x34d399, 0x60a5fa, 0xa78bfa];
+rainbowColors.forEach((col, idx) => {
+  const ringGeo = new THREE.TorusGeometry(16 + idx * 0.45, 0.2, 12, 48, Math.PI);
+  const ringMat = new THREE.MeshBasicMaterial({ color: col });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.z = 0;
+  rainbowGroup.add(ring);
+});
+rainbowGroup.position.set(0, -1, -8);
+rainbowGroup.rotation.y = 0.15;
+scene.add(rainbowGroup);
+
+// Stylized Mushrooms & Trees
+function createTree(x, z, s) {
+  const tree = new THREE.Group();
+  const trunkGeo = new THREE.CylinderGeometry(0.25, 0.4, 1.5, 12);
+  const trunkMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+  const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+  trunk.position.y = 0.75;
+  tree.add(trunk);
+
+  const foliageGeo = new THREE.SphereGeometry(1.2, 16, 16);
+  const foliageMat = new THREE.MeshToonMaterial({ color: 0x4ade80 });
+  const foliage = new THREE.Mesh(foliageGeo, foliageMat);
+  foliage.position.y = 2.0;
+  tree.add(foliage);
+
+  tree.position.set(x, -0.25, z);
+  tree.scale.set(s, s, s);
+  islandGroup.add(tree);
+}
+createTree(-7.5, -3, 1.2);
+createTree(8, -2, 1.3);
+createTree(-9, 1, 0.9);
+createTree(9, 2, 1.0);
+createTree(6.5, -4, 0.8);
+
+// Golden Stars floating
+const stars = [];
+const starGeo = new THREE.OctahedronGeometry(0.4, 0);
+const starMat = new THREE.MeshToonMaterial({ color: 0xfacc15, emissive: 0xfef08a, emissiveIntensity: 0.3 });
+for (let i = 0; i < 14; i++) {
+  const star = new THREE.Mesh(starGeo, starMat);
+  const ang = (i / 14) * Math.PI * 2;
+  const rad = 5 + Math.random() * 6;
+  star.position.set(Math.cos(ang) * rad, 1 + Math.random() * 5, Math.sin(ang) * rad * 0.7);
+  scene.add(star);
+  stars.push({ mesh: star, speed: 0.8 + Math.random() * 1.2, initialY: star.position.y });
+}
+
+// -------------------------------------------------------------
+// 3D CHARACTERS / ANIMALS WONDERLAND
+// -------------------------------------------------------------
+
+// 1. PIP THE PUPPY 🐶 (Golden/warm cute bouncy doggy)
+const puppyGroup = new THREE.Group();
+const pupMat = new THREE.MeshToonMaterial({ color: 0xfbbf24 });
+const earMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+const darkMat = new THREE.MeshToonMaterial({ color: 0x1e293b });
+const whiteMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+const pinkMat = new THREE.MeshToonMaterial({ color: 0xf472b6 });
+
+// Body
+const pupBody = new THREE.Mesh(new THREE.SphereGeometry(1.0, 16, 16), pupMat);
+pupBody.position.y = 1.0;
+puppyGroup.add(pupBody);
+
+// Head
+const pupHead = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16), pupMat);
+pupHead.position.set(0, 1.8, 0.4);
+puppyGroup.add(pupHead);
+
+// Snout
+const pupSnout = new THREE.Mesh(new THREE.SphereGeometry(0.4, 14, 14), whiteMat);
+pupSnout.position.set(0, 1.65, 1.0);
+pupSnout.scale.set(0.9, 0.7, 0.9);
+puppyGroup.add(pupSnout);
+
+// Nose
+const pupNose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), darkMat);
+pupNose.position.set(0, 1.8, 1.35);
+puppyGroup.add(pupNose);
+
+// Eyes
+const pupEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), darkMat);
+pupEyeL.position.set(-0.3, 1.95, 1.1);
+const pupEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 10), darkMat);
+pupEyeR.position.set(0.3, 1.95, 1.1);
+puppyGroup.add(pupEyeL, pupEyeR);
+
+// Floppy Ears
+const earGeo = new THREE.CylinderGeometry(0.18, 0.35, 1.1, 10);
+const pupEarL = new THREE.Mesh(earGeo, earMat);
+pupEarL.position.set(-0.8, 2.0, 0.3);
+pupEarL.rotation.z = 0.5;
+const pupEarR = new THREE.Mesh(earGeo, earMat);
+pupEarR.position.set(0.8, 2.0, 0.3);
+pupEarR.rotation.z = -0.5;
+puppyGroup.add(pupEarL, pupEarR);
+
+// Tail
+const tailGeo = new THREE.CylinderGeometry(0.08, 0.15, 0.8, 8);
+const pupTail = new THREE.Mesh(tailGeo, earMat);
+pupTail.position.set(0, 1.3, -1.0);
+pupTail.rotation.x = -0.9;
+puppyGroup.add(pupTail);
+
+// Bandana (cyan blue)
+const bandanaMat = new THREE.MeshToonMaterial({ color: 0x38bdf8 });
+const bandana = new THREE.Mesh(new THREE.TorusGeometry(0.7, 0.15, 8, 24), bandanaMat);
+bandana.position.set(0, 1.45, 0.3);
+bandana.rotation.x = Math.PI / 2.3;
+puppyGroup.add(bandana);
+
+puppyGroup.position.set(-4.5, -0.2, 2.5);
+puppyGroup.scale.set(0.95, 0.95, 0.95);
+scene.add(puppyGroup);
+
+// 2. BELLA BUNNY 🐰 (Cute white rabbit with long ears hopping around)
+const bunnyGroup = new THREE.Group();
+const bunMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+
+// Bunny Body
+const bunBody = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16), bunMat);
+bunBody.position.y = 0.9;
+bunnyGroup.add(bunBody);
+
+// Bunny Head
+const bunHead = new THREE.Mesh(new THREE.SphereGeometry(0.75, 16, 16), bunMat);
+bunHead.position.set(0, 1.8, 0.1);
+bunnyGroup.add(bunHead);
+
+// Bunny Ears
+const bunEarGeo = new THREE.CylinderGeometry(0.15, 0.22, 1.4, 10);
+const bunEarL = new THREE.Mesh(bunEarGeo, bunMat);
+bunEarL.position.set(-0.35, 2.9, 0.1);
+bunEarL.rotation.z = -0.15;
+const bunEarR = new THREE.Mesh(bunEarGeo, bunMat);
+bunEarR.position.set(0.35, 2.9, 0.1);
+bunEarR.rotation.z = 0.15;
+
+const bunInnerEarGeo = new THREE.CylinderGeometry(0.08, 0.12, 1.1, 8);
+const innerEarL = new THREE.Mesh(bunInnerEarGeo, pinkMat);
+innerEarL.position.set(-0.35, 2.85, 0.2);
+innerEarL.rotation.z = -0.15;
+const innerEarR = new THREE.Mesh(bunInnerEarGeo, pinkMat);
+innerEarR.position.set(0.35, 2.85, 0.2);
+innerEarR.rotation.z = 0.15;
+
+bunnyGroup.add(bunEarL, bunEarR, innerEarL, innerEarR);
+
+// Bunny Eyes & Nose
+const bunEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), darkMat);
+bunEyeL.position.set(-0.25, 1.9, 0.75);
+const bunEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), darkMat);
+bunEyeR.position.set(0.25, 1.9, 0.75);
+const bunNose = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), pinkMat);
+bunNose.position.set(0, 1.75, 0.82);
+bunnyGroup.add(bunEyeL, bunEyeR, bunNose);
+
+bunnyGroup.position.set(4.8, -0.2, 3.2);
+bunnyGroup.scale.set(0.85, 0.85, 0.85);
+scene.add(bunnyGroup);
+
+// 3. TEDDY BEAR 🧸 (Warm honey-brown cuddly bear sitting and waving)
+const bearGroup = new THREE.Group();
+const bearMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+const bearSnoutMat = new THREE.MeshToonMaterial({ color: 0xfef3c7 });
+
+// Bear Body
+const bearBody = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), bearMat);
+bearBody.position.y = 1.2;
+bearGroup.add(bearBody);
+
+// Bear Head
+const bearHead = new THREE.Mesh(new THREE.SphereGeometry(1.0, 16, 16), bearMat);
+bearHead.position.set(0, 2.3, 0.2);
+bearGroup.add(bearHead);
+
+// Snout
+const bearSnout = new THREE.Mesh(new THREE.SphereGeometry(0.42, 12, 12), bearSnoutMat);
+bearSnout.position.set(0, 2.1, 1.05);
+bearGroup.add(bearSnout);
+
+// Nose
+const bearNose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), darkMat);
+bearNose.position.set(0, 2.25, 1.4);
+bearGroup.add(bearNose);
+
+// Bear Ears
+const earRoundGeo = new THREE.SphereGeometry(0.35, 12, 12);
+const bearEarL = new THREE.Mesh(earRoundGeo, bearMat);
+bearEarL.position.set(-0.8, 3.1, 0.2);
+const bearEarR = new THREE.Mesh(earRoundGeo, bearMat);
+bearEarR.position.set(0.8, 3.1, 0.2);
+bearGroup.add(bearEarL, bearEarR);
+
+// Waving Arm
+const armGeo = new THREE.CylinderGeometry(0.25, 0.3, 1.1, 10);
+const waveArm = new THREE.Mesh(armGeo, bearMat);
+waveArm.position.set(1.4, 1.6, 0.4);
+waveArm.rotation.z = -1.2;
+bearGroup.add(waveArm);
+
+bearGroup.position.set(0, -0.3, -0.5);
+bearGroup.scale.set(1.05, 1.05, 1.05);
+scene.add(bearGroup);
+
+// 4. FLYING WONDER BIRDS 🐦 (Flapping around in the sky in arcs)
+const birds = [];
+const birdMat = new THREE.MeshToonMaterial({ color: 0x38bdf8 });
+const beakMat = new THREE.MeshToonMaterial({ color: 0xf59e0b });
+
+for (let b = 0; b < 3; b++) {
+  const bird = new THREE.Group();
+  const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 12), birdMat);
+  bBody.scale.set(1, 0.8, 1.4);
+  bird.add(bBody);
+
+  const bHead = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 10), birdMat);
+  bHead.position.set(0, 0.25, 0.5);
+  bird.add(bHead);
+
+  const bBeak = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.35, 8), beakMat);
+  bBeak.position.set(0, 0.22, 0.85);
+  bBeak.rotation.x = Math.PI / 2;
+  bird.add(bBeak);
+
+  // Wings
+  const wingGeo = new THREE.BoxGeometry(0.9, 0.08, 0.5);
+  const wingL = new THREE.Mesh(wingGeo, birdMat);
+  wingL.position.set(-0.55, 0.1, 0);
+  const wingR = new THREE.Mesh(wingGeo, birdMat);
+  wingR.position.set(0.55, 0.1, 0);
+  bird.add(wingL, wingR);
+
+  bird.userData = { wingL, wingR, angle: (b / 3) * Math.PI * 2, radius: 8 + b * 2.5, speed: 0.6 + b * 0.2, height: 4 + b * 1.5 };
+  scene.add(bird);
+  birds.push(bird);
+}
+
+// Interactive Mouse / Touch Parallax
+let mouseX = 0, mouseY = 0;
+let targetX = 0, targetY = 0;
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+// Render Animation Loop
+let clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  targetX += (mouseX * 2.0 - targetX) * 0.05;
+  targetY += (mouseY * 1.0 - targetY) * 0.05;
+
+  camera.position.x = targetX * 1.5;
+  camera.position.y = 5 + targetY * 1.0;
+  camera.lookAt(0, 2, 0);
+
+  // 1. Teddy Bear subtle breathe & wave
+  bearGroup.position.y = -0.3 + Math.sin(t * 2.5) * 0.08;
+  waveArm.rotation.z = -1.2 + Math.sin(t * 5.0) * 0.45;
+  waveArm.rotation.x = Math.cos(t * 5.0) * 0.2;
+  bearHead.rotation.y = Math.sin(t * 1.5) * 0.25;
+
+  // 2. Pip the Puppy bouncing playfully & moving around
+  const pupHop = Math.abs(Math.sin(t * 3.8));
+  puppyGroup.position.y = -0.2 + pupHop * 0.7;
+  puppyGroup.position.x = -4.5 + Math.sin(t * 1.2) * 1.2;
+  puppyGroup.position.z = 2.5 + Math.cos(t * 1.2) * 0.8;
+  puppyGroup.rotation.y = Math.PI / 5 + Math.cos(t * 1.2) * 0.4;
+  pupTail.rotation.z = Math.sin(t * 12) * 0.6;
+  pupEarL.rotation.z = 0.5 + Math.sin(t * 8) * 0.15;
+  pupEarR.rotation.z = -0.5 - Math.sin(t * 8) * 0.15;
+
+  // 3. Bella Bunny lively hopping path
+  const bunnyHop = Math.abs(Math.sin(t * 4.5));
+  bunnyGroup.position.y = -0.2 + bunnyHop * 0.9;
+  bunnyGroup.position.x = 4.8 + Math.cos(t * 1.0) * 1.1;
+  bunnyGroup.position.z = 3.2 + Math.sin(t * 1.0) * 0.7;
+  bunnyGroup.rotation.y = -Math.PI / 4 + Math.sin(t * 1.0) * 0.35;
+  bunEarL.rotation.x = Math.sin(t * 4.5) * 0.2;
+  bunEarR.rotation.x = Math.sin(t * 4.5 + 0.3) * 0.2;
+
+  // 4. Birds flying in graceful circles
+  birds.forEach((b) => {
+    b.userData.angle += b.userData.speed * 0.02;
+    const r = b.userData.radius;
+    b.position.x = Math.cos(b.userData.angle) * r;
+    b.position.z = Math.sin(b.userData.angle) * (r * 0.6) - 2;
+    b.position.y = b.userData.height + Math.sin(t * 2 + b.userData.angle) * 0.8;
+    b.rotation.y = -b.userData.angle - Math.PI / 2;
+    
+    // Wing flapping
+    const wingFlap = Math.sin(t * 16) * 0.7;
+    b.userData.wingL.rotation.z = wingFlap;
+    b.userData.wingR.rotation.z = -wingFlap;
+  });
+
+  // 5. Floating Stars bobbing and spinning
+  stars.forEach((s, idx) => {
+    s.mesh.position.y = s.initialY + Math.sin(t * s.speed + idx) * 0.35;
+    s.mesh.rotation.y += 0.02;
+    s.mesh.rotation.x += 0.015;
+  });
+
+  // 6. Clouds gently drifting
+  clouds.forEach((c, idx) => {
+    c.position.x += Math.sin(t * 0.4 + idx) * 0.005;
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize listener
+window.addEventListener('resize', () => {
+  const w = container.clientWidth || window.innerWidth;
+  const h = container.clientHeight || (window.innerHeight * 0.7);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_39 -->
+</body>
+</html>

@@ -120,6 +120,92 @@ body {
   }
 }
 
+/* Living Wonder character states (§8) — calm 2–4s loops, one friend at a
+   time. The global reduced-motion rule above neutralizes all of these. */
+.char {
+  display: inline-flex;
+  will-change: transform;
+}
+@keyframes char-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes char-think {
+  0%, 100% { transform: rotate(-6deg) scale(1); }
+  50% { transform: rotate(6deg) scale(1.04); }
+}
+@keyframes char-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes char-celebrate {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  25% { transform: translateY(-8px) rotate(-6deg) scale(1.08); }
+  75% { transform: translateY(-8px) rotate(6deg) scale(1.08); }
+}
+@keyframes char-sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+.char-idle { animation: char-breathe 3.2s ease-in-out infinite; }
+.char-thinking { animation: char-think 2.8s ease-in-out infinite; }
+.char-curious { animation: char-bob 2.2s ease-in-out infinite; }
+.char-encouraging { animation: char-sway 2.6s ease-in-out infinite; }
+.char-explaining { animation: char-bob 3s ease-in-out infinite; }
+.char-happy { animation: char-bob 1.2s ease-in-out 3; }
+.char-celebrating { animation: char-celebrate 1.1s ease-in-out 4; }
+.char-surprised { animation: char-breathe 0.9s ease-in-out 3; }
+
+/* Living Wonder Worlds: slow sky drift for the landing hero + world cards.
+   Two clouds, one bird, a few stars — calm, low CPU, GPU-friendly transforms. */
+@keyframes sky-drift {
+  from { transform: translateX(-12%); }
+  to { transform: translateX(112%); }
+}
+@keyframes sky-twinkle {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.9; }
+}
+.sky-drift-slow { animation: sky-drift 46s linear infinite; }
+.sky-drift-med { animation: sky-drift 30s linear infinite; }
+.sky-twinkle { animation: sky-twinkle 3.4s ease-in-out infinite; }
+
+/* Stitch Living Wonder motion (number-orchard / breeze-valley / clean-up):
+   gentle-bob + reverse, playful wiggle for the buddy clue button, and a warm
+   pulse-glow for the operation ring. Calm 2–4s loops, GPU-friendly
+   transforms, neutralized by the reduced-motion rule above. */
+@keyframes wonder-bob-alt {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(-1.5deg); }
+}
+@keyframes wonder-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-6deg); }
+  40% { transform: rotate(6deg); }
+  60% { transform: rotate(-4deg); }
+  80% { transform: rotate(4deg); }
+}
+@keyframes wonder-glow {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(254, 166, 25, 0.5)); }
+  50% { transform: scale(1.07); filter: drop-shadow(0 0 16px rgba(254, 166, 25, 0.85)); }
+}
+.anim-bob-alt { animation: wonder-bob-alt 3.6s ease-in-out infinite; }
+.anim-wiggle { animation: wonder-wiggle 2.5s ease-in-out infinite; }
+.anim-glow { animation: wonder-glow 2.4s ease-in-out infinite; }
+
+/* Stitch f929a9c4a — Animal Wonderland hero motion (exact keyframes from
+   the downloaded Stitch HTML, offline-safe local copy). */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 25px rgba(254, 166, 25, 0.4), 0 8px 0 #b36b00; }
+  50% { box-shadow: 0 0 45px rgba(254, 166, 25, 0.7), 0 8px 0 #b36b00; }
+}
+.animate-float-slow { animation: floatSlow 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulseGlow 2.5s infinite; }
+
 :focus-visible {
   outline: 3px solid var(--color-primary-container);
   outline-offset: 2px;
@@ -167,6 +253,10 @@ body {
 .agent-dot.offline { background: #f09393; box-shadow: none; }
 .pool-good, .task-completed { color: #91f0be; font-size: 12px; font-weight: 800; }
 .pool-low, .task-failed { color: #ffb19e; font-size: 12px; font-weight: 800; }
+/* Wonder command-center bits (Stitch bc9f0d46): status pills + pool meters. */
+.admin-pill { flex: none; border: 1px solid #303746; border-radius: 999px; background: #151923; color: #91f0be; font-size: 10px; font-weight: 800; padding: 3px 10px; text-transform: capitalize; }
+.pool-meter { flex: none; width: 90px; height: 8px; border-radius: 999px; background: #252b37; overflow: hidden; }
+.pool-meter > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #91f0be, #cbd1ff); }
 .task-queued, .task-running { color: #cbd1ff; font-size: 12px; font-weight: 800; }
 .stat-row span { color: #cbd1ff; font-size: 12px; font-weight: 800; }
 .stat-row small { color: #7f899b; font-size: 10px; }

@@ -1,9 +1,9 @@
 # Learnzzy — Project Memory
 
 **Document:** Persistent Project Context  
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** Active  
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-09-18
 
 ---
 
@@ -213,9 +213,9 @@ Generated content is deterministic by default, optionally AI-assisted, and
 must pass schema, deterministic, safety, duplicate, and structural checks
 before it is stored as active content.
 
-The workforce has seven agents (personalization + QA added). Learners carry
-optional nicknames, age bands, levels, progress, interests, and rewards;
-promotion needs 3+ completions at 80%+ with max +1 level.
+The workforce has eight agents (personalization + QA + academic added).
+Learners carry optional nicknames, age bands, levels, progress, interests,
+and rewards; promotion needs 3+ completions at 80%+ with max +1 level.
 
 # 8.2 Education Gateway Memory
 
@@ -228,6 +228,35 @@ reorders them, changes levels/scores, or reaches the browser. OER results
 carry provenance + license; only pool-safe licenses may enter content.
 Parents sign in separately (`lz_parent` cookie), link devices via single-use
 expiring codes, and see only validated summaries for actively linked learners.
+
+# 8.3 Academic Engine + Voice Memory (2026-09-17)
+
+The Academic Orchestrator (`src/services/academicEngine.ts` + pure core
+`src/lib/academic.ts`) answers "what should this learner learn next?" as a
+Validated Learning Plan
+(learnerId/objective/concept/prerequisites/activityType/difficulty/complexity/
+reason+reasonCode/source/nextReviewAt/stage/game/locale/characterId/priority).
+Tutor/OER/NCERT advise through the Education Gateway; every gateway call is
+failure-isolated and the deterministic plan always stands. Plans persist in
+`academicPlans`; the `academic-agent` owns their lifecycle and never mutates
+game state, score, rewards, or progression.
+
+Learning follows LEARN → PRACTICE → PLAY → RECALL → REVIEW → MASTER with no
+stage skips and no multi-level jumps from a single result. Complexity is
+per-skill; interest boosts priority but never overrides review/need.
+
+Voice is prepared-per-language (en/hi/bn/ta/te), never live-translated:
+`src/lib/voice.ts` defines Teddy/Bunny/Owl/Monkey/Parrot × 11 events;
+`voiceAssets` caches (character, event, locale, text-hash) → audioUrl;
+gameplay uses cached audio or instant device speechSynthesis and never calls
+external TTS inline. Voice never blocks play; text always works.
+
+Visual themes (10 deterministic objects) vary presentation only — the
+Difficulty Engine owns the numbers and theme changes can never alter an
+answer (`verifyThemeMath`). Cross-domain combos (fruit+addition,
+animal+counting, color+sorting, shape+counting, bird+classification) resolve
+to validated games. Knowledge catalog: 13 categories (~120 concepts) incl.
+numbers + basic vocabulary, with prepared hi/bn/ta/te names.
 
 ---
 
@@ -372,6 +401,8 @@ agents
 agentTasks
 agentRuns
 agentEvents
+academicPlans
+voiceAssets
 difficultyRules
 difficultyRecommendations
 systemSettings
@@ -594,3 +625,67 @@ Important status rule: documentation must not claim that all five game renderers
 Parent login, secure parent-child linking, parent dashboard, activity, progress, rewards, insights, and learning plans are part of the approved architecture but are not yet verified as implemented in the supplied session evidence.
 
 The parent relationship must use an explicit secure pairing/approval mechanism. Child name + age and parent name are profile information, not authentication.
+
+# 24. Academic Engine Reconciliation — 2026-09-17
+
+Implemented and verified (unit 156/156, typecheck, lint, production build
+with 81 routes): Academic Orchestrator + `academic-agent` + Validated
+Learning Plan APIs + Voice Character Engine (5 × 11 × 5) with `voiceAssets`
+cache + dynamic visual themes + 5 cross-domain combos + numbers/vocabulary
+catalog growth + parent academic rollup + admin academic panel. Provenance
+rule: NCERT mock returns foundational-stage rows explicitly marked
+non-official (`learnzzy-native`) — never claim CBSE alignment.
+
+Status rule: do not claim live-Mongo E2E, real TTS binary generation,
+Playwright academic coverage, or Stitch validation — all four remain open
+(see KNOWN_ISSUES KI-019/KI-020 and NEXT_SESSION).
+
+# 25. Living Wonder Reconciliation — 2026-09-17
+
+Visual layer only; architecture unchanged. Character system
+(`src/lib/characters.ts` + `CharacterGuide`: 8 purposeful friends, 8
+states) guides all 6 plays. Per-round visual themes flow pool → stage →
+Phaser (apple/bird sprite defaults preserved; math never reads the theme).
+Mute preference (`learnzzy.soundMuted.v1`) gates every voice call. `/play`
+is a world selector; landing has CSS-only sky drift. Sketch guides are
+pure vector (no image-asset failure mode). Stitch screens 12–20 were
+followed from specs only — pixel parity NOT claimed (DEC-186, KI-021).
+
+# 26. Stitch Retrieval + Attractiveness Pass — 2026-09-18
+Stitch screens 12–20 are now fetched live, not speculated: `list_screens`
++ `get_screen` over the Stitch MCP (key from `STITCH_API_KEY`; note the
+Windows curl.exe single-quote trap — request bodies must go in `@file`
+form), then `curl -L` downloads. Cache holds 7 HTML + 9 screenshots; the 3
+art boards ship as optimized 640px WebP postcards
+(`public/assets/learnzzy/games/{clean-up,puzzle,sketch}/scene.webp`,
+36–54KB, lazy `<img>`). Worlds without Stitch art use gradient scenes,
+never invented imagery.
+
+Presentation facts live in `src/lib/worlds.ts` + `WonderBits.tsx`
+(`GuideCard`/`StepperTrail`/`QuestFeedbackBar`/`ClueButton`); registry,
+character ids/mappings, voice scripts, game-copy functions, and e2e
+contracts are untouched. Deliberate deviations (DEC-187): live WebGL
+Shader rejected for battery/perf, subtraction host stays Teddy, Clean Up
+mechanics unchanged, Stitch names display-only. Verified: unit 174/174,
+typecheck, lint, build, Playwright child/sketch/discover/adaptive/
+learning-journey, screenshot review of `/play` + addition + clean-up,
+production `docker build` OK (invoke `docker.exe` by full path — bare
+`docker` is shadowed per KI-022).
+
+# 27. Worksheet-Inspired Learning Playground — 2026-09-18
+
+/play is category-first: 6 Learning World cards (numbers/words/think/
+create/discover/puzzles, `lib/categories.ts`) → `/learn/[category]` →
+16 activities (`lib/activityRegistry.ts`). Ten new activities (count,
+order, before-after, shape-count, big-small, word-family, word-match,
+trace-write, pattern, find-object) run on one generic engine: deterministic
+generators (`lib/activityContent.ts`, no LLM, exactly-one-correct,
+rotated positions/visuals) + reusable `ComplexityProfile`
+(`lib/complexity.ts`, spec §27 baseline, timePressure always 0) +
+`GET /api/activities/[id]/content` (learner skill-level lookup
+best-effort, works without Mongo) + `ActivityPlayer` (hints teach
+thinking, read-aloud, completion via existing game-events +
+`academic/result`). Shipped engines linked, never duplicated (DEC-188).
+Characters guide meaningfully (Teddy/Owl/Bunny/Monkey/Parrot states);
+LEARN→REVIEW staging via instruction + hints before scoring. Verified:
+unit 182/182, typecheck, lint, `next build` 76 routes.

@@ -224,3 +224,35 @@ export function parrotLadder(locale: string): { step: string; text: string }[] {
     { step: "classify", text: scriptFor({ event: "instruction", locale: l, name: l === "en" ? "bird" : name }).text },
   ];
 }
+
+// Learning-first voice lines (§8) — ADDITIVE helpers, existing script tables
+// untouched. These teach (counting / fact recall), not just celebrate:
+//   praise: "Yes! 3 + 2 = 5. That's 5 balloons!"
+//   retry:  "Let's look again. Count them slowly with me."
+//   think:  "Take your time. Look carefully."
+// Callers speak them via lib/audio speakWithCharacter; text always works
+// when audio is unavailable, and voice never blocks gameplay.
+
+/** Learning-first praise: concept restated so the child hears the fact. */
+export function learningPraise(kind: "addition" | "subtraction" | "discovery", detail: string): string {
+  const d = detail.slice(0, 160);
+  switch (kind) {
+    case "addition":
+      return `Yes! ${d} You figured it out!`.slice(0, 200);
+    case "subtraction":
+      return `Yes! ${d} You figured it out!`.slice(0, 200);
+    case "discovery":
+      return `You found it! Remember, ${d}`.slice(0, 200);
+  }
+}
+
+/** Gentle retry line — never shames, always invites another look. */
+export function gentleRetryLine(hint?: string): string {
+  const h = (hint ?? "").slice(0, 120);
+  return h ? `Not quite. Let's look again. ${h}`.slice(0, 200) : "Not quite. Let's look again together.";
+}
+
+/** Calm thinking line — gives the child space before choices. */
+export function thinkingLine(): string {
+  return "Take your time. Look carefully.";
+}

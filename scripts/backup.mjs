@@ -34,6 +34,8 @@ const COLLECTIONS = [
   "pairingCodes",
   "educationProviderEvents",
   "educationKnowledgeCache",
+  "academicPlans",
+  "voiceAssets",
 ];
 
 const uri = process.env.MONGODB_URI;

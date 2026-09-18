@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { setLearnerId, cacheProfile } from "@/lib/learner";
+import { speakWithCharacter } from "@/lib/audio";
 import { useRouter } from "next/navigation";
 
 const AGE_BANDS = [
@@ -95,7 +96,15 @@ export function LearnerSetup() {
       <section className="safe-panel p-5" aria-labelledby="nickname-title">
         <div className="flex items-start gap-3">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-black text-white">1</span>
-          <div><h2 id="nickname-title" className="text-instruction">What should we call you?</h2><p className="text-xs text-on-surface-variant">Type a name or pick an explorer buddy.</p></div>
+          <div className="min-w-0 flex-1"><h2 id="nickname-title" className="text-instruction">What should we call you?</h2><p className="text-xs text-on-surface-variant">Type a name or pick an explorer buddy.</p></div>
+          <button
+            type="button"
+            aria-label="Hear the wonder guide say hello"
+            onClick={() => speakWithCharacter("Hi! I am Teddy, your wonder guide. What should we call you?", { lang: "en-US" })}
+            className="tactile flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-lg text-primary shadow-[0_3px_0_#adc6ff]"
+          >
+            🔊
+          </button>
         </div>
         <Input placeholder="e.g. Captain Leo..." value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={20} className="mt-3 h-14 w-full rounded-full bg-surface-low pl-5 text-lg" aria-label="Nickname" />
         <div className="mt-3 grid grid-cols-5 gap-2">
@@ -133,7 +142,11 @@ export function LearnerSetup() {
       <div className="mt-auto flex flex-col gap-3 pt-1">
         <Button aria-label="Let's Play — Start My Adventure" size="xl" className="tactile-button w-full" onClick={() => submit()} disabled={busy || !ageBand}>{busy ? "Preparing..." : "Start My Adventure! 🚀"}</Button>
         <button type="button" onClick={skip} disabled={busy} className="min-h-12 rounded-full text-sm font-black text-primary underline">Skip &amp; play right now</button>
-        <p className="text-center text-xs text-tertiary">🔒 100% kid safe • Zero ads • No passwords needed</p>
+        <div className="flex items-center justify-center gap-2 text-[11px] font-black text-on-surface-variant" aria-label="Safety promises">
+          <span className="rounded-full bg-surface-low px-2.5 py-1">100% Ad-Free</span>
+          <span className="rounded-full bg-surface-low px-2.5 py-1">Zero Ads</span>
+          <span className="rounded-full bg-surface-low px-2.5 py-1">No Personal Data Needed</span>
+        </div>
       </div>
     </div>
   );

@@ -33,6 +33,30 @@ function hashSeed(s: string): number {
   return h >>> 0;
 }
 
+/** Lookup by theme id (content-agent OBJECTS ids). Unknown → teddy default. */
+export function themeById(id: string | undefined | null): VisualTheme {
+  const found = VISUAL_THEMES.find((t) => t.id === id);
+  return found ?? VISUAL_THEMES[0];
+}
+
+/** Singular display noun for aria labels ("3 apples", "1 teddy bear"). */
+export function themeNoun(id: string | undefined | null, count: number): string {
+  const nouns: Record<string, [string, string]> = {
+    teddy: ["teddy bear", "teddy bears"],
+    apple: ["apple", "apples"],
+    mango: ["mango", "mangoes"],
+    star: ["star", "stars"],
+    car: ["car", "cars"],
+    fish: ["fish", "fish"],
+    balloon: ["balloon", "balloons"],
+    butterfly: ["butterfly", "butterflies"],
+    puppy: ["puppy", "puppies"],
+    rocket: ["rocket", "rockets"],
+  };
+  const pair = nouns[String(id)] ?? ["item", "items"];
+  return count === 1 ? pair[0] : pair[1];
+}
+
 /** Deterministic theme pick. Math inputs (a, b) are never consulted. */
 export function pickVisualTheme(seedKey: string, activityType = "addition"): VisualTheme {
   const eligible = VISUAL_THEMES.filter((t) => t.kinds.includes(activityType));

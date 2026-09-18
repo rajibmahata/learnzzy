@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { Button } from "../ui/Button";
 import type { Sticker } from "@/lib/rewards";
+import { CharacterGuide } from "./CharacterGuide";
+import type { CharacterId } from "@/lib/characters";
 
 export function Celebration({
   title = "AWESOME!",
   stars = 3,
   sticker,
+  character,
   onReplay,
 }: {
   title?: string;
   stars?: number;
   sticker?: Sticker | null;
+  /** Optional celebrating guide (§8). Absent → unchanged rendering. */
+  character?: CharacterId;
   onReplay?: () => void;
 }) {
   return (
@@ -18,6 +23,11 @@ export function Celebration({
       <p aria-hidden className="text-4xl">
         ✨ 🎉 ✨
       </p>
+      {character ? (
+        <div className="mt-2">
+          <CharacterGuide character={character} state="celebrating" compact />
+        </div>
+      ) : null}
       <h2 className="mt-2 text-headline-md">{title}</h2>
       {sticker ? (
         <div className="mt-3 flex flex-col items-center">

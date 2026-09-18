@@ -14,6 +14,8 @@ export interface AdditionLike {
   b: number;
   answers: number[];
   correctAnswer: number;
+  /** Validated visual-theme id (Number Orchard). Display-only; math never reads it. */
+  objectType?: string;
 }
 
 // Structural mirror of SubtractionContent { start, removed, answers, correctAnswer }.
@@ -22,6 +24,30 @@ export interface SubtractionLike {
   removed: number;
   answers: number[];
   correctAnswer: number;
+  /** Validated visual-theme id (Breeze Valley). Display-only; math never reads it. */
+  objectType?: string;
+}
+
+// Canonical display ids live in src/lib/visualThemes.ts (VISUAL_THEMES);
+// this allowlist is inlined here because pool-client must stay free of `@/`
+// runtime imports (node type-stripping tests). Keep the two lists in sync.
+const OBJECT_IDS = new Set([
+  "teddy",
+  "apple",
+  "mango",
+  "star",
+  "car",
+  "fish",
+  "balloon",
+  "butterfly",
+  "puppy",
+  "rocket",
+]);
+
+/** Extract a validated theme id from a pool item's `objects` record (or undefined). */
+function readObjectType(objects: Record<string, unknown> | undefined): string | undefined {
+  const t = objects?.type;
+  return typeof t === "string" && OBJECT_IDS.has(t) ? t : undefined;
 }
 
 const PoolItemSchema = z.object({
@@ -100,7 +126,8 @@ export function toAdditionContent(item: PoolItem): AdditionLike | null {
   // when present it must match the recomputed value (pool integrity check).
   if (item.correctAnswer !== undefined && item.correctAnswer !== correct) return null;
   if (!item.answers || !validOptions(item.answers, correct)) return null;
-  return { a, b, answers: item.answers, correctAnswer: correct };
+  const objectType = readObjectType(item.objects);
+  return { a, b, answers: item.answers, correctAnswer: correct, ...(objectType ? { objectType } : {}) };
 }
 
 export function toSubtractionContent(item: PoolItem): SubtractionLike | null {
@@ -113,7 +140,8 @@ export function toSubtractionContent(item: PoolItem): SubtractionLike | null {
   const correct = start - removed;
   if (item.correctAnswer !== undefined && item.correctAnswer !== correct) return null;
   if (!item.answers || !validOptions(item.answers, correct)) return null;
-  return { start, removed, answers: item.answers, correctAnswer: correct };
+  const objectType = readObjectType(item.objects);
+  return { start, removed, answers: item.answers, correctAnswer: correct, ...(objectType ? { objectType } : {}) };
 }
 
 // Structural mirror of CleanupSceneDef { theme, targets, nonTargets }.

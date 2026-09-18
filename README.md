@@ -19,10 +19,13 @@ asynchronous AI/agent workforce operating behind the scenes.
 2. **Fly Away** — subtraction by counting what remains
 3. **Clean Up** — spot-and-clean scenes
 4. **Picture Puzzle** — drag/tap spatial puzzles
-5. **Shadow Sketch** — tracing with forgiving evaluation
-6. **Adaptive Learning** — levels, plans, stars, stickers
-7. **Parent Dashboard** — progress, insights, pairing
-8. **Command Center** — agents, pools, provider health (admin)
+ 5. **Shadow Sketch** — tracing with forgiving evaluation
+ 6. **Learning World** — 6 categories (numbers/words/think/create/discover/
+    puzzles) → 16 activities; 10 run on a deterministic generic engine
+    (age-adaptive complexity, teaching hints), shipped games linked
+ 7. **Adaptive Learning** — levels, plans, stars, stickers
+ 8. **Parent Dashboard** — progress, insights, pairing
+ 9. **Command Center** — agents, pools, provider health (admin)
 
 ## Stack
 
@@ -45,7 +48,7 @@ inside containers; host dev uses mapped `127.0.0.1` ports — see `.env.example`
 
 ## Key routes
 
-- `/` landing · `/welcome` learner setup · `/play` game home · `/play/*` games
+- `/` landing · `/welcome` learner setup · `/play` game home · `/learn/[category]` learning categories · `/learn/[category]/[activity]` activities · `/play/*` games
 - `/stickers` collection · `/link` parent-device pairing
 - `/parents/*` public parent info · `/parent/*` parent dashboard (auth)
 - `/admin` command center (auth) · `/api/health`, `/health`
@@ -62,8 +65,12 @@ inside containers; host dev uses mapped `127.0.0.1` ports — see `.env.example`
 - **Education Gateway** (`src/integrations/education/`) — allowlisted
   Tutor/OER/NCERT providers, all disabled by default with deterministic
   mocks; advisory-only (plans never reordered, levels/scores untouched).
-- **7 agents** — content, quality/safety, asset, analytics, difficulty,
-  personalization, QA — least-privilege, retried, audited.
+- **Academic Engine** (`src/services/academicEngine.ts` + `src/lib/academic.ts`) — answers "what next?" as a Validated Learning Plan (LEARN→MASTER stages, review-first, no-jump decisions, `validateAcademicPlan` gate); MCP failures never stop gameplay.
+- **Voice Engine** (`src/lib/voice.ts`) — Teddy/Bunny/Owl/Monkey/Parrot × 11 events × 5 locales (en/hi/bn/ta/te), cached in `voiceAssets`; never live TTS in gameplay.
+- **Living Wonder worlds** (`src/lib/worlds.ts`, `WonderBits.tsx`) — Stitch-grounded banner cards, guide/feedback bits, and optimized scene postcards; presentation only, mechanics untouched.
+- **Learning Playground** (`src/lib/categories.ts`, `complexity.ts`, `activityRegistry.ts`, `activityContent.ts`) — category-first home, deterministic worksheet-inspired generators with §27 age baseline, `GET /api/activities/[id]/content`, generic `ActivityPlayer`; results reuse game-events + academic/result (DEC-188).
+- **8 agents** — content, quality/safety, asset, analytics, difficulty,
+  personalization, QA, academic — least-privilege, retried, audited.
 - **Parents** — separate auth, single-use expiring pairing codes, active-link
   authorization, validated summaries only.
 
@@ -72,7 +79,7 @@ inside containers; host dev uses mapped `127.0.0.1` ports — see `.env.example`
 ```bash
 npm run typecheck
 npm run lint
-npm test          # 87 unit tests
+npm test          # 182 unit tests (22 academic/voice/theme, 5 worlds, 8 activity engine)
 npm run test:e2e  # 52 Playwright specs (uses system Chrome)
 npm run build
 ```

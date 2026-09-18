@@ -1,9 +1,9 @@
 # Learnzzy — Next Session
 
 **Document:** Development Session Handoff  
-**Version:** 1.0  
+**Version:** 1.1  
 **Status:** Active / Living Handoff  
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-09-17
 
 ---
 
@@ -138,11 +138,11 @@ Do not randomly jump between unrelated areas.
 
 ## Current Implementation Snapshot
 
-The five-game MVP, Mongo content pool, AI abstraction, seven agents (content, quality, asset, analytics, difficulty, personalization, QA), retryable queue, admin authentication, admin command center, analytics endpoints, pool refill triggers, Docker Compose, and Nginx example are implemented. The adaptive personalized-learning layer is implemented: learner profiles with optional nickname + age band (4-5/6-7/8-9), 15 seeded level configs, server progress/promotion (3+ completions at 80%+, max +1 level), server reward mirror, interest signals (educational only), deterministic PersonalizationService with validated learning plans, learner setup (/welcome), level progress, personalized game plan, sticker collection (/stickers), per-window game shuffling, and admin learner-insights/levels/QA/personalization endpoints. The Education Gateway phase is implemented: provider interfaces + allowlisted registry + Tutor/OER/NCERT adapters (live HTTP contracts with deterministic mocks, all disabled by default), stable concept model (`src/lib/concepts.ts`), advisory-only personalization hook (plan order/level never change), OER grounding for the content agent with provenance stamps, 3-tier knowledge cache (Redis/memory -> provider -> Mongo), parent auth + single-use pairing + 10 parent pages + 5 public parent pages + child /link page, admin education diagnostics + dashboard panel, and 37 new gateway/parent/pairing tests. Sentry SDK is wired (inert without DSN; ErrorBoundary reports). Rate limiting is Redis-backed with instant memory fallback. Prod deploy assets exist (`docker-compose.prod.yml` with loopback-only web + log rotation, `deploy/nginx.prod.conf` TLS example, driver-based `npm run backup`, filled QA instructions). Two live-verified resilience fixes: fail-fast Redis clients with 10s negative-result caching (a Redis outage previously hung requests), and `COOKIE_SECURE=false` for local Docker HTTP auth (production stays Secure). Verification: 97 unit tests + 76 Playwright specs (mobile-320/mobile/tablet/desktop on system Chrome) green; typecheck/lint/build clean; Docker stack healthy with seeded pool; full parent pairing chain proven live. Sketch white-canvas root-caused and fixed (see `SKETCH_DOCKER_ROOT_CAUSE.md`); no Stitch MCP tool exists in this environment so Stitch screens could not be fetched live (KI-011 stands).
+The five-game MVP, Mongo content pool, AI abstraction, eight agents (content, quality, asset, analytics, difficulty, personalization, QA, academic), retryable queue, admin authentication, admin command center, analytics endpoints, pool refill triggers, Docker Compose, and Nginx example are implemented. The adaptive personalized-learning layer is implemented: learner profiles with optional nickname + age band (4-5/6-7/8-9), 15 seeded level configs, server progress/promotion (3+ completions at 80%+, max +1 level), server reward mirror, interest signals (educational only), deterministic PersonalizationService with validated learning plans, learner setup (/welcome), level progress, personalized game plan, sticker collection (/stickers), per-window game shuffling, and admin learner-insights/levels/QA/personalization endpoints. The Education Gateway phase is implemented: provider interfaces + allowlisted registry + Tutor/OER/NCERT adapters (live HTTP contracts with deterministic mocks, all disabled by default), stable concept model (`src/lib/concepts.ts`), advisory-only personalization hook (plan order/level never change), OER grounding for the content agent with provenance stamps, 3-tier knowledge cache (Redis/memory -> provider -> Mongo), parent auth + single-use pairing + 10 parent pages + 5 public parent pages + child /link page, admin education diagnostics + dashboard panel (plus 2026-09-17 academic panel), and 37 new gateway/parent/pairing tests. The Agentic Academic Engine phase (2026-09-17) is implemented: `src/lib/academic.ts` (LEARN→MASTER stages, review-first ordering, §16 recommendations, `validateAcademicPlan` gate), `academicEngine` orchestrator + `academic-agent`, learner `/academic/plan|recommendation|voice|result` APIs, Voice Character Engine (5×11×5, `voiceAssets` cache, never live TTS in gameplay), dynamic visual themes + 5 cross-domain combos, numbers/vocabulary catalog growth (13 categories), parent academic rollup. Sentry SDK is wired (inert without DSN; ErrorBoundary reports). Rate limiting is Redis-backed with instant memory fallback. Prod deploy assets exist (`docker-compose.prod.yml` with loopback-only web + log rotation, `deploy/nginx.prod.conf` TLS example, driver-based `npm run backup`, filled QA instructions). Two live-verified resilience fixes: fail-fast Redis clients with 10s negative-result caching (a Redis outage previously hung requests), and `COOKIE_SECURE=false` for local Docker HTTP auth (production stays Secure). Verification: 156 unit tests (22 academic/voice/theme, 2026-09-17) + typecheck + lint + production build (81 routes) + `docker compose config` ✅ + dev-server health ✅; prior state 97 unit tests + 76 Playwright specs (mobile-320/mobile/tablet/desktop on system Chrome) green; Docker stack healthy with seeded pool; full parent pairing chain proven live. Sketch white-canvas root-caused and fixed (see `SKETCH_DOCKER_ROOT_CAUSE.md`); no Stitch MCP tool exists in this environment so Stitch screens could not be fetched live (KI-011 stands). Academic Playwright coverage + live-Mongo academic E2E still open (KI-019).
 
 Use `node scripts/admin-setup.mjs <password-min-12-chars>` to generate local admin environment values. Do not commit the resulting values.
 
-Remaining production-readiness work is physical-device QA, server-trusted scoring tokens, S3/CDN asset generation, managed-service deployment validation, and live MCP server deployments (gateway runs deterministic mocks until URLs/keys are configured).
+Remaining production-readiness work is physical-device QA, server-trusted scoring tokens, S3/CDN asset generation, managed-service deployment validation, live MCP server deployments (gateway runs deterministic mocks until URLs/keys are configured), live-Mongo academic E2E (KI-019), TTS binary generation for `voiceAssets` (KI-020), Playwright academic pass, and Stitch validation of the new admin/parent surfaces.
 
 ---
 
@@ -344,6 +344,86 @@ A successful build alone is not sufficient.
 # 13. Session Update Template
 
 At the end of each session, update this section:
+
+## Session 2026-09-17 (7) — Living Wonder visual upgrade (Stitch 12–20)
+
+### Completed
+- Stitch screens 12–20 unretrievable (no MCP tool/URLs; STITCH_INSTRUCTIONS.md + KI-021); built from written specs + tokens, logic preserved, pixel parity NOT claimed (DEC-186).
+- Character system (`lib/characters.ts` + `CharacterGuide` + CSS states) in all 6 plays + `Celebration`; Number Orchard/Breeze Valley per-round themes (pool passthrough + deterministic fallback, Phaser defaults unchanged); working Read-aloud + persisted mute; `WonderWorlds` selector; landing SkyDrift; Sketch vector-trace root-cause (no image deps) + Starlight frame.
+- 13 new character/theme tests.
+
+### Verified
+- `typecheck` ✅, `lint` ✅, unit 169/169 ✅, `next build` ✅, Playwright 51/51 ✅ (system Chrome, mobile-320/mobile/tablet/desktop, fresh prod build).
+
+### Known Issues / Notes
+- KI-021 (Stitch parity open), KI-022 (Docker CLI shadowed), KI-019/020 still open; :3000 held by stale `learnzzy-web-1` port-forward — kill/recreate before local :3000 work.
+
+### Next Actions
+1. Re-fetch Stitch 12–20 hosted URLs when tooling exists; do the §27 side-by-side comparison.
+2. `run.bat docker` from an elevated shell (delete `C:\windows\system32\docker` first) + seed + KI-019 E2E.
+3. Physical-device pass (touch, install, offline, TalkBack/VoiceOver).
+
+## Session 2026-09-18 (9) — Worksheet-inspired Learning Playground
+
+### Completed
+- Category-first playground: 6 Learning Worlds on /play → `/learn/[category]` → 16 activities (DEC-188). Generic engine (deterministic generators + ComplexityProfile + registry + activities content API + ActivityPlayer); shipped engines linked, never duplicated.
+- Age changes the problem (counting 1–10 → 1–50 → 1–100+, ordering 3 → 4–5 → 5–7 nums, phonics letters → words → sentences); performance moves via existing per-skill skillLevels (±1, rolling, never one-mistake drops).
+- Results flow through game-events + academic/result → parent dashboards + academic engine with no new contracts; MCP/gateway untouched (advisory-only, fail-closed).
+
+### Verified
+- `typecheck` ✅, `lint` ✅ (pre-existing img warnings only), unit 182/182 ✅ (8 new), `next build` ✅ (76 routes incl. `/api/activities/[activityId]/content` + `/learn/*`).
+
+### Known Issues / Notes
+- KI-019/020 still open; Playwright /learn pass + Stitch validation of category/activity surfaces not yet run; physical devices still outstanding.
+
+### Next Actions
+1. Playwright pass: 4–5 / 6–7 / 8–9 learner Home → Category → Activity → Answer → Result → Next → Progress (incl. mobile 320px).
+2. Seed + KI-019 live-Mongo academic E2E incl. new activity skills; TTS pipeline (KI-020).
+3. Physical-device pass; parent-journey screenshot re-fetch.
+
+## Session 2026-09-18 (8) — Stitch 12–20 live retrieval + attractiveness pass
+
+### Completed
+- Unblocked Stitch MCP (`STITCH_API_KEY` in env; `@file` bodies for Windows curl); `list_screens` + 10× `get_screen`; `curl -L` fetched 7 HTML + 9 screenshots; 3 art boards optimized to 640px WebP postcards in `public/assets/`. KI-021 RESOLVED.
+- Inspected all screens vs the running app first; kept Pip (Stitch-canonical), kept Teddy for subtraction (tested mapping wins).
+- New `lib/worlds.ts` + `WonderBits.tsx` + 3 CSS keyframes; restyled Worlds selector, Play Home Pip/Spin, Addition, Subtraction, Clean Up, Puzzle, Sketch — presentation only. 5 new unit tests.
+- Deviations logged as DEC-187 (no live WebGL Shader; mechanics/scores/pools/agents/voice/e2e untouched; Stitch names display-only).
+
+### Verified
+- `typecheck` ✅, `lint` ✅, unit 174/174 ✅, `next build` ✅, Playwright child/sketch/discover/adaptive/learning-journey ✅ (mobile, prod build), screenshot review of `/play` + addition + clean-up ✅, `docker build learnzzy:stitch-check` ✅ via explicit `docker.exe` path.
+
+### Known Issues / Notes
+- KI-019/020 still open; parent-journey screenshot still expired; physical devices still outstanding. Bare `docker` still shadowed (KI-022) — use the full `docker.exe` path.
+
+### Next Actions
+1. Re-fetch the expired parent-journey screenshot from a fresh Stitch URL.
+2. Seed + KI-019 live-Mongo academic E2E; TTS pipeline (KI-020).
+3. Physical-device pass (touch, install, offline, TalkBack/VoiceOver).
+
+## Session 2026-09-17 (6) — Agentic Academic Engine + multi-character voice
+
+### Completed
+- Anti-duplication survey first: reused `educationGateway`, `conceptsForGame`/`getConceptDef`, `validateAdvisory`, `buildPlan`, per-skill `skillLevels`, knowledge mastery, Admin providers panel, `parentInsights`. New code only where nothing existed.
+- `src/lib/academic.ts` (pure, 22 focused tests): LEARN→PRACTICE→PLAY→RECALL→REVIEW→MASTER machine, review-first concept ordering, interest+need balance, §16 `recommendGame`, no-jump `decideNextStep`, parent-safe reasons, `validateAcademicPlan` gate (rejects CoT/banned/level-jumps).
+- `src/services/academicEngine.ts` orchestrator (gateway calls failure-isolated, deterministic fallback) + `src/repositories/academicPlans.ts` + 8th `academic-agent` (queue `academic-plan`).
+- Learner `/academic/plan|recommendation|voice|result` APIs (rate-limited, Zod) + `GET /api/admin/academic/plans`; parent insights/progress `academic` rollup; Progress page streak + Next card; Admin academic panel.
+- `src/lib/voice.ts` (5 chars × 11 events × 5 locales, Parrot ladder) + `voiceAssets` cache service (never live TTS in request path) + `speakWithCharacter` client ext; Discovery uses plan character best-effort.
+- `src/lib/visualThemes.ts` (10 themes, math-invariant) + 5 cross-domain combos; content-agent objects widened (math unchanged).
+- Knowledge: `numbers`/`words` categories (13 total), prepared hi/bn/ta/te names; OER +4 summaries; NCERT foundational Grade-1 rows marked explicitly non-official.
+- `tests/knowledge.test.ts` locale test updated to the new prepared names.
+
+### Verified
+- `typecheck` ✅, `lint` ✅, unit 156/156 ✅, `next build` ✅ (81 routes), `docker compose config` ✅, dev-server `/api/health` + `/api/games` ✅.
+
+### Known Issues / Notes
+- KI-019: live-Mongo academic E2E not run (no Mongo here; learner reads 404 by pre-existing no-DB design). KI-020: `voiceAssets` queue as `pending` (no TTS binaries yet; device speech used).
+- Playwright academic pass + Stitch validation not run in this environment.
+
+### Next Actions
+1. `docker compose up --build` + seed, then exercise the four academic APIs + parent/admin surfaces with a real learnerId (KI-019).
+2. TTS generation pipeline to fill `voiceAssets.audioUrl` (KI-020).
+3. Playwright academic failure-injection pass (MCP down, TTS down, multilingual, themes, auth).
+4. Stitch validation of admin academic panel + parent learning card.
 
 ## Session 2026-09-13 (5) — Pool-wired plays + device-readiness pass
 

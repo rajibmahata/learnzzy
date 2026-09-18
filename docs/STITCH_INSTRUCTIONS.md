@@ -22,6 +22,15 @@ Stitch is the visual/design reference for the screens listed below. Learnzzy pro
 | 9 | Learnzzy Admin — Agent Fleet & Orchestration | `4adf5f0ccc04426995828b347546a083` |
 | 10 | Learnzzy Child — Learner Setup & Parent Link | `a4492672347341efa5505f0e03e704be` |
 | 11 | Learnzzy Parent — Learning Journey & Personalization Plan | `80ccc6fb054d4be4ad7c625b3f92b4e9` |
+| 12 | Clean Up — Playful Sorting Game | `f66f9a18b6e2456988f29b9d8c3d08a2` |
+| 13 | Wooden dino puzzle art (chunky tactile pieces) | `76f8b3cf7e02450fbf0ef70eaeb85019` |
+| 14 | Baby elephant + starlight dust art | `d97dbb239d32457c9e86d93137a1e401` |
+| 15 | Puppy sorting toys art | `1f621168798d40aeab5f2cb10e184129` |
+| 16 | Picture Puzzle — Dino Discovery Game | `38d899db5d2143dd8db9ff8fd7ca4224` |
+| 17 | Shadow Sketch — Starlight Trace Game | `77cc886e4fcd4a77b1ea8a62574bf23d` |
+| 18 | Living Wonder Worlds selector | `e738ae27b07246839832c21532a46e38` |
+| 19 | Number Orchard — Addition Game | `e9c18d72525a43cf9b5afba286c9c182` |
+| 20 | Breeze Valley — Subtraction Game | `d635d120d6664068accc79f28bec27a9` |
 
 The architecture document and design system are references rather than child
 screens, but they are included here so implementation work uses the complete
@@ -36,7 +45,40 @@ locally; re-fetch the screenshot URL before claiming pixel parity for that
 screen. The parent-journey and architecture references remain visual references
 until re-verified live.
 
+**Retrieval status (2026-09-18):** screens 12–20 RETRIEVED via the Stitch
+MCP (`list_screens` + `get_screen` on project `1495487808742926612`, API key
+from `STITCH_API_KEY`) followed by `curl -L` downloads:
+`clean-up.html`, `puzzle.html`, `sketch.html`,
+`living-wonder-worlds.html`, `number-orchard.html`, `breeze-valley.html`,
+`shader.html` under `docs/stitch_learnzzy_educational_kids_playground/`,
+plus 9 screenshots (7 game screens + 3 square art boards:
+`art-puppy-sorting.png`, `art-dino-puzzle.png`,
+`art-elephant-starlight.png`) under `screenshots/`. The 3 art boards were
+additionally optimized with `sharp` to 640px WebP postcards (36–54KB) at
+`public/assets/learnzzy/games/{clean-up,puzzle,sketch}/scene.webp` and are
+used as world-banner/guide art (lazy-loaded `<img>`; plain `<img>` is a
+deliberate choice — no `next/image` layout churn for fixed-size cards).
+Worlds with no Stitch art (addition, subtraction, discover) use gradient
+sky scenes + place emoji instead of invented imagery.
+
 ## Stitch MCP Workflow
+
+**Deliberate deviations from the fetched screens (2026-09-18, documented
+per the source-of-truth hierarchy):**
+- `98b07e79…` **Shader** (WebGL simplex-noise background for the worlds
+  selector) was NOT adopted as live WebGL: continuous fragment-shader
+  rendering conflicts with the documented performance/battery rules for a
+  child PWA. The selector keeps the calm CSS sky-drift/twinkle ambient
+  motion instead (`globals.css`, neutralized by `prefers-reduced-motion`).
+- **Breeze Valley** shows a bunny guide ("Bella"), but the tested character
+  mapping (`characterForGame("subtraction") === "teddy"`, pinned by
+  `tests/characters.test.ts`) keeps Teddy as the subtraction host. Docs win
+  over Stitch here; the meadow visuals and story copy follow Stitch.
+- **Clean Up** in Stitch sorts items into named baskets; the shipped game is
+  tap-to-tidy (prior decision). Only the presentation layer was aligned
+  (Pip guide card, quest stepper, item pill, clue bar) — no mechanic change.
+- Stitch names ("Bella Bunny", "Prof. Hoot", "Pip the Puppy") are used as
+  display names only; the canonical `characters.ts` roster/ids are unchanged.
 
 When implementing a screen:
 

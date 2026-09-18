@@ -1,8 +1,9 @@
 # CURRENT SESSION: Learnzzy
 
-**Date:** 2026-09-13
-**Focus:** Agent workforce, admin operations, deployment hardening
+**Date:** 2026-09-17
+**Focus:** Living Wonder visual/UX upgrade (Stitch screens 12–20, code-preserving)
 **Owner:** OpenCode
+**Previous:** Agentic Academic Engine + multi-character voice learning (same day, committed c68179b)
 
 ## Stitch UI Validation — 2026-09-15
 
@@ -115,3 +116,115 @@ Complete the MVP background workforce and the first usable admin command center 
 - Configure `.env.local` using `node scripts/admin-setup.mjs <password>` for local admin smoke testing.
 - Run `docker compose up --build` in an environment with Docker, then seed Mongo separately.
 - Add server-trusted scoring tokens and full content version UI before production launch.
+
+## Living Wonder visual upgrade (2026-09-17, this session)
+- Stitch screens 12–20 NOT retrievable (no MCP tool, no URLs, cache has only
+  7 older artifacts; STITCH_INSTRUCTIONS.md + KI-021 record this). Built from
+  the written specs + Playful Wonder tokens; pixel parity NOT claimed.
+- New: `src/lib/characters.ts` (8 friends, purposeful per-game guides, 8
+  states, short lines, aria labels) + `CharacterGuide` + calm CSS keyframes
+  (reduced-motion neutralized globally); integrated into all 6 plays +
+  `Celebration` (optional prop, default off).
+- Number Orchard/Breeze Valley: pool `objects.type` passthrough with inline
+  allowlist (pool-client stays @/-free), deterministic per-round fallback;
+  stages + Phaser scenes accept optional emoji (apple/bird sprite path
+  byte-identical default); aria labels use theme nouns ("3 mangoes").
+- Voice: persisted mute (`learnzzy.soundMuted.v1`) honored by
+  `speakWithCharacter`; GameShell + Play Home toggles persist; addition/
+  subtraction "Read aloud" is now a working mute-aware button (was a dead
+  pill in addition).
+- `/play` games nav → `WonderWorlds` world cards (names/taglines/hrefs kept;
+  one e2e assertion caught the missing game name and was fixed in code, not
+  in the spec); landing hero gained CSS-only SkyDrift.
+- Sketch trace: guides are pure vector `guidePath` + Phaser Graphics — zero
+  image/URL references, so no asset-loading bug class exists; Starlight
+  frame is CSS-only; added Starlight-gold crayon (evaluation-blind).
+- Verified: unit 169/169 ✅, typecheck ✅, lint ✅, `next build` ✅,
+  Playwright 51/51 ✅ (system Chrome, fresh prod build on :3100; :3000 held
+  by a stale Docker port-forward, Docker CLI shadowed per KI-022).
+- NOT verified: Stitch pixel parity, live-Mongo E2E (KI-019), TTS binaries
+  (KI-020), physical devices.
+
+## Agentic Academic Engine + voice learning (2026-09-17)- Inspected before building (anti-duplication survey): reused
+  `educationGateway`, `conceptsForGame`/`getConceptDef`, `validateAdvisory`,
+  `buildPlan`, per-skill `skillLevels`, knowledge mastery machine, and the
+  Admin providers panel. New code only where nothing existed: orchestrator,
+  stage machine, voice engine, visual themes, `academicPlans`/`voiceAssets`.
+- New pure libs (dependency-free, unit-tested): `src/lib/academic.ts`
+  (LEARN→MASTER stages, review-first concept ordering, interest+need balance,
+  §16 recommendations, no-jump decisions, `validateAcademicPlan` gate),
+  `src/lib/voice.ts` (5 characters × 11 events × 5 locales, Parrot ladder,
+  deterministic cache keys), `src/lib/visualThemes.ts` (10 themes,
+  theme-never-changes-math, 5 cross-domain combos).
+- New server layer: `src/services/academicEngine.ts` (orchestrator, gateway
+  calls failure-isolated), `src/services/voiceAssetService.ts` (cache, never
+  live TTS in request path), `src/repositories/academicPlans.ts`, 8th agent
+  `academic-agent` (`src/agents/academic.ts`, queue `academic-plan`).
+- New APIs: learner `/academic/plan|recommendation|voice|result` +
+  `GET /api/admin/academic/plans`. Parent insights/progress carry
+  `academic {learned/mastered/practicing, streakDays, nextActivity}`.
+  Discovery play uses the plan's character voice (best-effort) and reports
+  academic results (best-effort). Admin dashboard gained an Academic panel.
+- Knowledge: +`numbers`/`words` categories (13 total), prepared hi/bn/ta/te
+  names; OER mock +4 summaries; NCERT mock foundational Grade-1 rows marked
+  explicitly non-official. Content-agent objects widened to 10 spec visuals.
+- Verified: unit 156/156 ✅ (22 new), typecheck ✅, lint ✅,
+  `next build` ✅ (81 routes), `docker compose config` ✅, dev server
+  `/api/health` ok. NOT verified: live-Mongo E2E (KI-019), TTS binaries
+  (KI-020), Playwright academic pass, Stitch validation.
+
+## Stitch 12–20 live retrieval + attractiveness pass (2026-09-18, this session)
+- Unblocked the Stitch MCP: `STITCH_API_KEY` present in env; `initialize` +
+  `tools/list` + `list_screens` + 10× `get_screen` over
+  `https://stitch.googleapis.com/mcp` (JSON-RPC bodies via `@file` — Windows
+  curl.exe mangles single-quoted `-d`). Then `curl -L`: 7 HTML
+  (clean-up/puzzle/sketch/living-wonder-worlds/number-orchard/breeze-valley/
+  shader) + 9 screenshots into `docs/stitch_learnzzy_educational_kids_playground/`.
+  Prior "unretrievable" status (KI-021) is now RESOLVED; retrieval method +
+  deviations recorded in STITCH_INSTRUCTIONS.md (DEC-187).
+- Inspected all 10 screens (code + rendered screenshots) against the running
+  app before changing anything. Corrections applied: "Pip" is Stitch-canonical
+  (kept, not replaced); subtraction host conflict (Stitch Bella vs tested
+  Teddy mapping) resolved in favor of docs/tests.
+- New: `src/lib/worlds.ts` (6 world metas, art manifest; 5 unit tests) +
+  `src/components/child/WonderBits.tsx` (`GuideCard`/`StepperTrail`/
+  `QuestFeedbackBar`/`ClueButton`) + `anim-bob-alt`/`anim-wiggle`/`anim-glow`
+  CSS (reduced-motion safe). Restyled: `WonderWorlds` banner cards, Play Home
+  Pip greeting + Spin button, Addition (orchard card/badges/glow plus/banner/
+  guidance), Subtraction (meadow card/flew-away pill/perched badges), Clean Up
+  (quest stepper/item pill/clue bar, "Wonderful Job!"), Puzzle (dino art,
+  "Dino is Awake!"), Sketch (Stitch wand names incl. pinned "Red", Bella
+  guide, elephant-art hint). Art: 3 boards → 640px WebP (36–54KB) via sharp,
+  lazy `<img>` (deliberate, no next/image churn). Mechanics, scoring, pools,
+  agents, voice scripts, e2e contracts untouched.
+- Verified: unit 174/174 ✅, typecheck ✅, lint ✅ (one
+  `no-unescaped-entities` fix), `next build` ✅, Playwright child 8/8 +
+  sketch 2/2 + discover 2/2 + adaptive + learning-journey ✅ (mobile, prod
+  build on :3100), screenshots of `/play`, `/play/addition`, `/play/clean-up`
+  reviewed ✅, `docker build learnzzy:stitch-check` ✅ via explicit
+  `docker.exe` path (KI-022 trap: bare `docker` resolves to
+  `C:\windows\system32\docker`).
+- NOT done: parent-journey screenshot re-fetch (still expired), physical
+  devices, live-Mongo E2E (KI-019), TTS binaries (KI-020).
+
+## Worksheet-inspired Learning Playground (2026-09-18, this session)
+- Inspected first (registry, /play, learner/age-bands, skillLevels,
+  pool-client, gateway/MCP, agents): reused everything — no rewrites.
+- New dependency-free libs: `lib/categories.ts` (6 Learning Worlds),
+  `lib/complexity.ts` (ComplexityProfile + §27 baseline matrix,
+  timePressure 0), `lib/activityRegistry.ts` (16 activities; shipped
+  engines linked via href, never duplicated), `lib/activityContent.ts`
+  (10 deterministic generators: count/order/before-after/shape-count/
+  big-small/word-family/word-match/trace-write/pattern/find-object;
+  exactly-one-correct, rotated answers/visuals, teaching hints).
+- New: `GET /api/activities/[activityId]/content` (ageBand + learner
+  skill lookup best-effort + recentIds exclusion) + `ActivityPlayer`
+  (CharacterGuide states, hint ladder, read-aloud, completion via
+  game-events + academic/result → skillLevels/parent/academic with no
+  new contracts) + `/learn/[category]` + `/learn/[category]/[activity]`
+  + /play Learning World category cards (WonderWorlds untouched).
+- Verified: unit 182/182 ✅ (8 new), typecheck ✅, lint ✅ (only
+  pre-existing no-img-element warnings), `next build` ✅ (76 routes).
+- NOT verified: Playwright pass for /learn flows, live-Mongo E2E
+  (KI-019), TTS (KI-020), physical devices, Stitch validation of new
+  category/activity surfaces.

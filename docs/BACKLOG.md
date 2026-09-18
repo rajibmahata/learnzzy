@@ -48,8 +48,18 @@ rate limiting, prod deploy assets, backup script, and QA instructions) are
 implemented and verified with lint, typecheck, 104 automated tests, 84 Playwright
 specs, production build, Docker-stack smoke checks, a live pairing-chain
 proof, a root-caused/fixed sketch engine outage (`SKETCH_DOCKER_ROOT_CAUSE.md`),
-and the learning-progress/content-variety work documented in
-`LEARNING_PROGRESS_ASSESSMENT.md`.
+the learning-progress/content-variety work documented in
+`LEARNING_PROGRESS_ASSESSMENT.md`, and (2026-09-17) the Agentic Academic
+Engine + multi-character voice learning layer: deterministic academic core
+(`src/lib/academic.ts`: LEARN→MASTER stages, review-first ordering,
+interest+need balance, §16 recommendations, no-jump decisions,
+`validateAcademicPlan` gate), `academicEngine` orchestrator + 8th
+`academic-agent`, learner `/academic/plan|recommendation|voice|result` APIs,
+admin academic inspection, Voice Character Engine (5×11×5, `voiceAssets`
+cache, never live TTS in gameplay), dynamic visual themes + 5 cross-domain
+combos, numbers/vocabulary catalog growth (13 categories), parent academic
+rollup, and admin academic panel — verified with 156 unit tests, typecheck,
+lint, and production build (81 routes).
 Remaining backlog items are production-hardening or explicitly listed in
 `NEXT_SESSION.md`. Per-item `Status: TODO` below remains authoritative for
 granular tracking; the paragraph above is a progress snapshot, not a claim
@@ -127,6 +137,8 @@ EPIC 31  Performance
 EPIC 32  SEO & Public Landing
 EPIC 33  Deployment
 EPIC 34  Post-MVP Expansion
+EPIC 35  Agentic Academic Engine (LZ-330–LZ-339, DONE 2026-09-17 except live-Mongo E2E/TTS binaries/Playwright/Stitch)
+EPIC 36  Living Wonder Visual Upgrade (LZ-340–LZ-345, DONE 2026-09-18 except parent-journey screenshot/physical devices; pixel parity intentionally not claimed per DEC-187; Docker image build verified)
 ```
 
 ---
@@ -1945,7 +1957,220 @@ The first visible success should be:
 
 ---
 
-# 42. Post-MVP Backlog
+# 42. EPIC 35 — Agentic Academic Engine (2026-09-17)
+
+## P1
+
+### LZ-330 — Academic Orchestrator + Validated Learning Plan
+
+**Status:** DONE  
+Build `src/lib/academic.ts` + `src/services/academicEngine.ts` answering
+"what should this learner learn next?" via the Education Gateway with
+failure-isolated, advisory-only MCP use and a `validateAcademicPlan`
+authority gate. Acceptance: spec-shaped plan validates; CoT/banned/jump
+inputs rejected; gateway outage still yields a deterministic plan.
+
+### LZ-331 — Academic Agent + Inspection
+
+**Status:** DONE  
+Register 8th least-privilege `academic-agent` (queue `academic-plan`),
+`academicPlans` persistence, `GET /api/admin/academic/plans` + dashboard
+panel. Acceptance: single + cohort tasks log operational summaries only.
+
+### LZ-332 — Learn→Master Stages + Recommendations
+
+**Status:** DONE  
+Stage machine (no skips), review-first ordering, interest+need balance,
+`GET .../academic/recommendation` (§16 shape), `POST .../academic/result`
+→ continue/practice/review/+1/new-concept. Acceptance: 22 focused unit
+tests green.
+
+### LZ-333 — Parent Academic Reporting
+
+**Status:** DONE  
+`academic {learned/mastered/practicing, streakDays, nextActivity}` in
+insights/progress + Progress page card. Acceptance: parent-safe reasons
+only, no reasoning leakage.
+
+### LZ-334 — Knowledge + Curriculum Grounding
+
+**Status:** DONE  
+`numbers`/`words` categories, prepared hi/bn/ta/te names, OER +4
+summaries, NCERT foundational Grade-1 rows explicitly marked
+non-official. Acceptance: catalog tests green (13 categories).
+
+### LZ-335 — Voice Character Engine
+
+**Status:** DONE  
+5 characters × 11 events × 5 locales in `src/lib/voice.ts` (prepared
+scripts, Parrot ladder). Acceptance: per-locale scripts resolve without
+live translation; cache keys deterministic.
+
+### LZ-336 — Voice Caching
+
+**Status:** DONE  
+`voiceAssets` cache + `resolveVoiceAsset` (never live TTS in request
+path), client `speakWithCharacter`, Discovery best-effort character
+voice. Acceptance: miss returns instant text; audio never blocks play.
+
+### LZ-337 — Voice API
+
+**Status:** DONE  
+`POST .../academic/voice` (Zod-validated, rate-limited). Acceptance:
+returns script + asset resolution for all 11 events × 5 locales.
+
+### LZ-338 — Dynamic Visual Themes
+
+**Status:** DONE  
+`src/lib/visualThemes.ts` (10 themes) + content-agent object widening.
+Acceptance: `verifyThemeMath` holds for every theme; math unchanged.
+
+### LZ-339 — Cross-Domain Combos
+
+**Status:** DONE  
+5 combos resolving to validated games/concepts. Acceptance: each combo
+maps to an allowlisted gameId with ≥1 known concept.
+
+Remaining (NOT DONE, see KI-019/KI-020): live-Mongo E2E, TTS binary
+generation pipeline, Playwright academic pass, Stitch validation.
+
+---
+
+# 43. EPIC 36 — Living Wonder Visual Upgrade (2026-09-17)
+
+Visual/UX only: game logic, scoring, pools, agents, and APIs untouched.
+Stitch screens 12–20 retrieved live 2026-09-18 (LZ-345, KI-021 RESOLVED);
+pixel parity intentionally NOT claimed per DEC-186/DEC-187.
+
+## P1
+
+### LZ-340 — Character System + Guides
+
+**Status:** DONE  
+`src/lib/characters.ts` (8 purposeful friends, 8 states, aria labels) +
+`CharacterGuide` + calm CSS loops (reduced-motion neutralized); integrated
+into all 6 plays + `Celebration` (optional prop). Acceptance: 13 focused
+unit tests green; states follow §8 mapping.
+
+### LZ-341 — Number Orchard / Breeze Valley Themes
+
+**Status:** DONE  
+Pool `objects.type` passthrough (inline allowlist, pool-client stays
+@/-free) + deterministic per-round fallback; stages + Phaser scenes take
+optional emoji (apple/bird sprite defaults byte-identical); theme nouns in
+aria labels. Acceptance: math paths untouched; canvas boots in e2e;
+`verifyThemeMath` holds.
+
+### LZ-342 — Voice Preference + Read-Aloud
+
+**Status:** DONE  
+Persisted mute (`learnzzy.soundMuted.v1`) honored by every voice call;
+GameShell + Play Home toggles persist; addition/subtraction Read-aloud are
+working mute-aware buttons. Acceptance: muted → `speak*` returns false and
+stops active speech.
+
+### LZ-343 — Worlds Selector + Landing Sky
+
+**Status:** DONE  
+`WonderWorlds` world cards on `/play` (names/taglines/hrefs preserved);
+CSS-only SkyDrift landing hero. Acceptance: existing play-home e2e green
+across 4 viewports; animations calm + reduced-motion safe.
+
+### LZ-344 — Sketch Starlight + Asset Trace
+
+**Status:** DONE  
+Traced full asset lifecycle: guides are pure vector `guidePath` + Phaser
+Graphics (zero image/URL references — no broken-image bug class); CSS-only
+Starlight frame + Starlight-gold crayon (evaluation-blind). Acceptance:
+sketch e2e green; trace documented in CURRENT_SESSION.md.
+
+Remaining (NOT DONE): parent-journey screenshot re-fetch (expired URL),
+physical devices. Pixel parity intentionally NOT claimed (DEC-187);
+Docker production image build verified 2026-09-18
+(`learnzzy:stitch-check` via explicit `docker.exe` path).
+
+### LZ-345 — Stitch 12–20 Live Retrieval + Attractiveness Pass
+
+**Status:** DONE (2026-09-18)  
+Stitch MCP unblocked (`STITCH_API_KEY`; `@file` bodies for Windows
+curl.exe): `list_screens` + 10× `get_screen`, then `curl -L` → 7 HTML + 9
+screenshots in `docs/stitch_learnzzy_educational_kids_playground/`; 3 art
+boards → 640px WebP postcards (`public/assets/learnzzy/games/…`,
+36–54KB, lazy). New `src/lib/worlds.ts` (5 tests) + `WonderBits.tsx`
+(`GuideCard`/`StepperTrail`/`QuestFeedbackBar`/`ClueButton`) + 3 calm CSS
+keyframes; restyled Worlds selector, Play Home Pip/Spin, Addition,
+Subtraction, Clean Up, Puzzle, Sketch — presentation only, mechanics/
+scores/pools/agents/voice/e2e contracts untouched. Acceptance: unit
+174/174, typecheck, lint, build, Playwright child/sketch/discover/
+adaptive/learning-journey green; screenshot review of `/play` + addition +
+clean-up; `docker build` green. Deviations: DEC-187; KI-021 RESOLVED.
+
+---
+
+# 43b. EPIC 36b — Worksheet-Inspired Learning Playground (2026-09-18)
+
+Category-first playground (DEC-188): 6 Learning Worlds on `/play` →
+`/learn/[category]` → 16 activities. Ten new activities share one generic
+engine; shipped game engines linked, never duplicated. Results reuse
+game-events + `academic/result` (no new contracts).
+
+## P1
+
+### LZ-346 — Learning World Categories + Registry
+
+**Status:** DONE (2026-09-18)  
+`src/lib/categories.ts` (6 categories with guide characters + skill lines)
++ `src/lib/activityRegistry.ts` (16 activities; shipped engines link via
+`href`, new ones via `generator`) + `/learn/[category]` pages + category
+cards on `/play` (`WonderWorlds` untouched). Acceptance: category is the
+primary nav; no activity duplicated as a loose home card.
+
+### LZ-347 — Complexity Model (§27 Baseline)
+
+**Status:** DONE (2026-09-18)  
+`src/lib/complexity.ts`: reusable `ComplexityProfile` + per-skill-family
+baseline matrix (counting 1–10/1–50/1–100+, ordering 3/4–5/5–6 nums,
+phonics letters/words/sentences, puzzles 4/9/16 pieces, …);
+`timePressure` always 0; never hard-coded in components. Acceptance:
+age changes the actual problem; `normalizeAgeBand` falls back to 6-7.
+
+### LZ-348 — Deterministic Activity Generators
+
+**Status:** DONE (2026-09-18)  
+`src/lib/activityContent.ts`: 10 pure generators (count, order,
+before-after, shape-count, big-small, word-family AN/EN/AT/AP/OG/IT,
+word-match, trace-write, pattern AB/AAB/ABC, find-object) with stable
+content IDs, exactly-one-correct + unique options, rotated
+answer positions/visuals, teaching hints + explanations + voice lines.
+Acceptance: post-conditions enforced (null on violation); 5 focused unit
+tests green.
+
+### LZ-349 — Activities API + Generic Player
+
+**Status:** DONE (2026-09-18)  
+`GET /api/activities/[activityId]/content` (ageBand + learner skill
+lookup best-effort + `recentIds` exclusion; `409 USE_GAME_ROUTE` for
+shipped engines) + `ActivityPlayer` (CharacterGuide states, hint ladder,
+read-aloud, friendly offline state, completion via game-events +
+`academic/result`) + `/learn/[category]/[activity]` routes. Acceptance:
+unit 182/182, typecheck, lint, `next build` 76 routes green.
+
+### LZ-350 — Adaptation + Parent/Gateway Wiring
+
+**Status:** DONE (2026-09-18)  
+No new contracts: completions flow through existing `skillLevels`
+(per-skill ±1, rolling, never one-mistake drops) into parent
+progress/insights and the advisory-only academic engine; MCP/gateway
+untouched (fail-closed). Acceptance: pre-existing skill/adaptive suites
+green; LEARN→REVIEW staging via instruction + hints before scoring.
+
+Remaining (NOT DONE): Playwright `/learn` pass (4–5/6–7/8–9 + 320px),
+live-Mongo E2E (KI-019), TTS binaries (KI-020), physical devices, Stitch
+validation of category/activity surfaces.
+
+---
+
+# 44. Post-MVP Backlog
 
 ## P2
 
@@ -1974,7 +2199,7 @@ The first visible success should be:
 
 ---
 
-# 43. Product Guardrails
+# 45. Product Guardrails
 
 These items are permanently important.
 
@@ -2011,7 +2236,7 @@ Cost tracking
 
 ---
 
-# 44. Final Definition of MVP
+# 46. Final Definition of MVP
 
 Learnzzy MVP is ready for production review when:
 
@@ -2044,7 +2269,7 @@ Learnzzy MVP is ready for production review when:
 
 ---
 
-# 45. Backlog Execution Principle
+# 47. Backlog Execution Principle
 
 The coding agent should always work in this sequence:
 

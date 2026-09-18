@@ -630,10 +630,12 @@ MongoDB repositories + indexes
 Redis/BullMQ with local in-process fallback
 Deterministic content pool + seed
 AI abstraction + mock/configurable model routing
-Five-agent registry/task/run/event persistence
+Eight-agent registry/task/run/event persistence (academic-agent added 2026-09-17)
 Admin authentication + protected admin APIs
-Admin dashboard/command center baseline
+Admin dashboard/command center baseline (+ academic panel 2026-09-17)
 Docker Compose + Nginx deployment baseline
+Academic Orchestrator + Validated Learning Plan APIs (2026-09-17)
+Voice Character Engine + voiceAssets cache (2026-09-17)
 ```
 
 The current verified gameplay implementation is strongest for Addition and Subtraction. The remaining games/content/renderers must be treated according to the latest repository audit and must not be marked complete merely because they exist in the product roadmap.
@@ -701,3 +703,36 @@ Do not implement parent access using child name + age as authorization. Pairing 
 Automated verification currently includes lint, typecheck, unit tests, production build, API smoke checks, content validation, and pool behavior. Physical-device validation remains outstanding for real touch, iPad orientation, PWA installation, offline behavior, accessibility assistive technologies, and low-end performance.
 
 The Test & QA Agent remains a planned extension unless verified in the repository.
+
+# 57. Academic Engine Reconciliation — 2026-09-17
+
+Supersedes the agent-count statement in §56 (five → eight) for the
+workforce only; all §56 precedence rules still apply.
+
+```text
+Child Game → Gameplay Events → Analytics → Learning Signals
+    → Academic Orchestrator (deterministic core + advisory Tutor/OER/NCERT)
+    → Validated Learning Plan (academicPlans)
+    → Content Pool → Game → Result → Parent Dashboard (academic rollup)
+```
+
+Invariants (DEC-183/184/185, BR-260–266): MCP advisory-only with
+failure-isolated gateway calls; LEARN→MASTER with no skips/jumps;
+voice prepared-per-language and cached, never live in gameplay; visual
+theme independent of difficulty. New collections: `academicPlans`,
+`voiceAssets`. New routes: learner `/academic/plan|recommendation|voice|
+result` + `GET /api/admin/academic/plans`. Living Wonder layer (2026-09-18):
+`lib/worlds.ts` + `WonderBits.tsx` presentation bits, 3 optimized Stitch
+scene postcards in `public/assets/`; deviations in DEC-187. Learning
+Playground layer (2026-09-18, DEC-188): category-first `/play` (6 Learning
+Worlds) → `/learn/[category]` → 16 activities; 10 worksheet-inspired
+activities share one generic engine (`lib/categories.ts`,
+`lib/complexity.ts` §27 baseline, `lib/activityRegistry.ts`,
+`lib/activityContent.ts` deterministic generators) served by
+`GET /api/activities/[activityId]/content` and rendered by one
+`ActivityPlayer`; shipped engines linked, never duplicated; completions
+reuse game-events + `academic/result` (no new collections/routes for
+adaptation, parent, or academic flow). Verified: 182
+unit tests, typecheck, lint, production build (76 routes), Docker image build.
+Open: Playwright `/learn` pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
+Playwright academic pass, parent-journey screenshot re-fetch, physical devices.

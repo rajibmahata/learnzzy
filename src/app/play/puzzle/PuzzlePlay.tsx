@@ -4,6 +4,10 @@ import * as React from "react";
 import { GameShell } from "@/components/child/GameShell";
 import { PuzzleStage } from "@/components/child/PuzzleStage";
 import { Celebration } from "@/components/child/Celebration";
+import { GuideCard } from "@/components/child/WonderBits";
+import { stateForMoment } from "@/lib/characters";
+import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
+import { artForGame } from "@/lib/worlds";
 import { GAME_ROUNDS } from "@/games/framework";
 import { createPuzzleDef, validatePuzzleDef, type PuzzleDef } from "@/games/puzzle";
 import { toPuzzleContent } from "@/lib/pool-client";
@@ -69,7 +73,7 @@ export default function PuzzlePlay() {
   if (done) {
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
-        <Celebration title="BEAUTIFUL!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />
+        <Celebration title="Dino is Awake!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="dino" onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />
       </div>
     );
   }
@@ -87,12 +91,32 @@ export default function PuzzlePlay() {
     );
   }
 
+  // Dino Discovery (Stitch puzzle): wake the happy baby dino by snapping
+  // wooden pieces home. Guide + art only; placement logic untouched.
+  const dinoLine = "Put the pieces together to wake up our happy baby dino!";
+  function dinoVoice(text: string) {
+    const v = CHARACTER_VOICES.dino ?? CHARACTER_VOICES.teddy;
+    speakWithCharacter(text, { lang: "en-US", rate: v.rate, pitch: v.pitch });
+  }
+
   return (
     <GameShell title="Picture Puzzle" stars={totalStars}>
-      <h2 className="mt-2 text-center text-instruction uppercase">COMPLETE THE PICTURE</h2>
-      <p className="text-center text-sm text-on-surface-variant">
-        Drag pieces — or tap a piece, then tap its home
+      <p className="mt-3 text-center text-xs font-black uppercase tracking-wider text-on-surface-variant">
+        Puzzle {round + 1} of {GAME_ROUNDS}
       </p>
+      <div className="mt-2">
+        <GuideCard
+          character="dino"
+          state={stateForMoment({})}
+          name="DINO GUIDE 🦕"
+          line={dinoLine}
+          listenLabel="Listen"
+          onListen={() => dinoVoice(dinoLine)}
+          art={artForGame("puzzle")}
+          tint="from-emerald-50 via-white to-teal-50"
+          border="border-emerald-200"
+        />
+      </div>
       <div className="mt-2" aria-label={`${valid.pieces.length}-piece puzzle`}>
         <PuzzleStage
           puzzle={valid}
@@ -101,7 +125,7 @@ export default function PuzzlePlay() {
           onMisdrop={misdrop}
         />
       </div>
-      <p className="mt-2 text-center text-sm font-bold text-on-surface-variant">🧩 Tap and drag gently!</p>
+      <p className="mt-2 text-center text-sm font-bold text-on-surface-variant">🧩 Tap a piece, then tap its home — Snap &amp; Fit!</p>
     </GameShell>
   );
 }
