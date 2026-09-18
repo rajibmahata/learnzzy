@@ -43,12 +43,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      # MCPs are optional (fail-closed mocks exist) — do not block web startup
+      # if an MCP is disabled/unhealthy. Child gameplay must never depend on MCPs.
       tutor-mcp:
-        condition: service_healthy
+        condition: service_started
       oer-mcp:
-        condition: service_healthy
+        condition: service_started
       ncert-mcp:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
@@ -132,9 +134,10 @@ services:
       - "3003"
     ports:
       - "127.0.0.1:3003:3003"
+    # qdrant is optional for NCERT (file fallback exists) — don't block ncert startup
     depends_on:
       qdrant:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/health"]
       interval: 15s
@@ -155,11 +158,12 @@ services:
     ports:
       - "127.0.0.1:6333:6333"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:6333/healthz"]
+      # qdrant image is minimal (no wget/curl guaranteed) — use bash TCP probe
+      test: ["CMD-SHELL", "timeout 2 bash -c 'cat < /dev/null > /dev/tcp/127.0.0.1/6333' || exit 1"]
       interval: 15s
       timeout: 5s
-      retries: 3
-      start_period: 20s
+      retries: 5
+      start_period: 30s
 
   mongo:
     image: mongo:7
