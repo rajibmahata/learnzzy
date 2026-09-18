@@ -91,14 +91,14 @@ export function stateForMoment(args: { done?: boolean; feedback?: FeedbackKind; 
 }
 
 const STATE_LINES: Record<CharacterState, string> = {
-  idle: "Let's play and learn together!",
-  happy: "Yay! You got it!",
-  thinking: "Hmm… let's think together.",
-  curious: "Ooh… show me what you see!",
-  encouraging: "Good try! Let's look again.",
-  celebrating: "Amazing! You did it!",
-  explaining: "Watch me first, then you try!",
-  surprised: "Wow! That was wonderful!",
+  idle: "Shall we try this one?",
+  happy: "Wonderful. You got it.",
+  thinking: "Take your time. Look carefully.",
+  curious: "What do you notice?",
+  encouraging: "Not quite. Let's look carefully.",
+  celebrating: "Nice thinking.",
+  explaining: "Let's try together. Watch first.",
+  surprised: "Wonderful. You noticed something new.",
 };
 
 /** Short useful line for the state (supplements the game instruction, never replaces it). */

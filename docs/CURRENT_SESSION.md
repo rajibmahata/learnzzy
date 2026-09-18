@@ -228,3 +228,22 @@ Complete the MVP background workforce and the first usable admin command center 
 - NOT verified: Playwright pass for /learn flows, live-Mongo E2E
   (KI-019), TTS (KI-020), physical devices, Stitch validation of new
   category/activity surfaces.
+
+## Animal Wonderland Rich + Home Learning World (2026-09-18, session 10)
+- New Stitch validation: `d14a9b61` + `4b8445bd` (ANIMATION_45 Rich) fetched
+  via `curl -L` into `.stitch/...` + `public/images/stitch/home-child-first-v2.png`
+  — validates `f929a9c4`/`b933` (copy identical; Rich scene delta: 5 candy
+  mushrooms + 5 apples + 15 stars + 4 birds + tap jump burst). Updated
+  `AnimalWonderland3D` (camera 4.5/20, mushrooms, apples, 15 deterministic
+  stars, 4-bird formation, `pointerdown` jumpBoost 1.0→0.92, snappier parallax)
+  with deterministic seeds and reduced-motion static frame.
+- Landing (/) now category-primary per spec §2/§3 while preserving Stitch
+  hierarchy: hero → CTA → `HomeContinue` (Good-morning + plan-first Continue
+  card, best-effort `GET /api/learners/.../plan`) → 7-category `CATEGORIES`
+  grid → secondary 5-tile quick shortcuts → games gallery → voice board →
+  safety. `BrandLogo` (all 26 usages) now `Link href="/play"`.
+- Bug + hygiene: `genTraceWrite` had `answerIndex: 0` regardless of shuffle →
+  `options.indexOf(answer)` with tightened `tests/activity-content.test.ts:18`
+  (`options[answerIndex]==answer` across all bands, expanded trace-write loop);
+  `resolveComplexity` dead `nudge` branching removed (no behavior change).
+- Verified: `tsc --noEmit` 0, `eslint` 0, `npm test` 189/189 (47 suites), `next build` 0.

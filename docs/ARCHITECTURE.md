@@ -716,7 +716,7 @@ Child Game → Gameplay Events → Analytics → Learning Signals
     → Content Pool → Game → Result → Parent Dashboard (academic rollup)
 ```
 
-Invariants (DEC-183/184/185, BR-260–266): MCP advisory-only with
+Invariants (DEC-183/184/185/189, BR-260–266): MCP advisory-only with
 failure-isolated gateway calls; LEARN→MASTER with no skips/jumps;
 voice prepared-per-language and cached, never live in gameplay; visual
 theme independent of difficulty. New collections: `academicPlans`,
@@ -724,7 +724,7 @@ theme independent of difficulty. New collections: `academicPlans`,
 result` + `GET /api/admin/academic/plans`. Living Wonder layer (2026-09-18):
 `lib/worlds.ts` + `WonderBits.tsx` presentation bits, 3 optimized Stitch
 scene postcards in `public/assets/`; deviations in DEC-187. Learning
-Playground layer (2026-09-18, DEC-188): category-first `/play` (6 Learning
+Playground layer (2026-09-18, DEC-188): category-first `/play` (7 Learning
 Worlds) → `/learn/[category]` → 16 activities; 10 worksheet-inspired
 activities share one generic engine (`lib/categories.ts`,
 `lib/complexity.ts` §27 baseline, `lib/activityRegistry.ts`,
@@ -732,7 +732,10 @@ activities share one generic engine (`lib/categories.ts`,
 `GET /api/activities/[activityId]/content` and rendered by one
 `ActivityPlayer`; shipped engines linked, never duplicated; completions
 reuse game-events + `academic/result` (no new collections/routes for
-adaptation, parent, or academic flow). Verified: 182
-unit tests, typecheck, lint, production build (76 routes), Docker image build.
-Open: Playwright `/learn` pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
+adaptation, parent, or academic flow). Session 10 (2026-09-18, DEC-189):
+landing category-primary (CATEGORIES grid + `HomeContinue` +
+`BrandLogo→/play` + `d14a`/`4b84` ANIMATION_45 Rich mushrooms/apples/stars) ;
+`genTraceWrite` `answerIndex` hardening. Verified: 189
+unit tests (47 suites), typecheck, lint, production build, Docker image build.
+Open: Playwright `/learn` + HomeContinue pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
 Playwright academic pass, parent-journey screenshot re-fetch, physical devices.

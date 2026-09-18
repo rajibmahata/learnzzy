@@ -61,6 +61,16 @@ deliberate choice — no `next/image` layout churn for fixed-size cards).
 Worlds with no Stitch art (addition, subtraction, discover) use gradient
 sky scenes + place emoji instead of invented imagery.
 
+**Retrieval status (2026-09-18 Session 10):** additional validation screens
+`d14a9b61423a49adb2d0a5bf05f5e5ed` (Animal Wonderland Child-First 3D Play Home)
++ `4b8445bd757549bd9b59e61932c946c9` (Three.js ANIMATION_45 Rich) fetched via
+`get_screen` + `curl -L` into `.stitch/1495487808742926612/` and `public/images/stitch/home-child-first-v2.png`.
+These validate `f929a9c4`/`b933` (copy/section structure identical; Rich delta
+is 5 candy mushrooms + 5 bobbing counting apples + 15 deterministic warm stars
++ 4-bird formation + tap `jumpBoost` burst, camera 4.5/20). Landing (/)
+reconciled to category-primary per spec §2/§3 (`HomeContinue` + 7-category grid
++ secondary 5-tile shortcuts + `BrandLogo→/play`).
+
 ## Stitch MCP Workflow
 
 **Deliberate deviations from the fetched screens (2026-09-18, documented

@@ -18,6 +18,7 @@ describe("activity content generators (real code)", () => {
         assert.ok(item, `${g}/${band}`);
         assert.equal(item!.options.filter((o) => o === item!.answer).length, 1, `${g}/${band} one-correct`);
         assert.equal(new Set(item!.options).size, item!.options.length, `${g}/${band} unique`);
+        assert.equal(item!.options[item!.answerIndex], item!.answer, `${g}/${band} index-points-at-answer`);
         assert.ok(item!.hints.length >= 2, `${g}/${band} hints`);
         assert.ok(item!.explanation.length >= 5, `${g}/${band} explanation`);
       }
@@ -72,6 +73,15 @@ describe("activity content generators (real code)", () => {
       const it = generateActivityContent("more-less", `ml${i}`, resolveComplexity("more-less", "6-7", 2))!;
       assert.ok(it.answer === "1" || it.answer === "2");
       assert.ok(it.visual.length === 3); // group, VS, group
+    }
+  });
+  test("trace-write produces trace-write kind with valid index", () => {
+    for (const band of BANDS) {
+      for (let i = 0; i < 5; i++) {
+        const it = generateActivityContent("trace-write", `tw-${band}-${i}`, resolveComplexity("writing", band, 2))!;
+        assert.equal(it.kind, "trace-write");
+        assert.equal(it.options[it.answerIndex], it.answer, `trace-write/${band}/${i}`);
+      }
     }
   });
   test("trace-number-name produces trace-write kind with valid index", () => {

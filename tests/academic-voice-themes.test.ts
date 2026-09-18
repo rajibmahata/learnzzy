@@ -172,10 +172,21 @@ describe("voice characters (5 friends, 11 events, 5 locales)", () => {
     const bn = scriptFor({ event: "correct_answer", locale: "bn" });
     const ta = scriptFor({ event: "correct_answer", locale: "ta" });
     const te = scriptFor({ event: "correct_answer", locale: "te" });
-    assert.equal(en.text, "Yay! You got it!");
+    assert.equal(en.text, "Wonderful. You got it.");
     assert.ok(hi.text.length > 0 && hi.text !== en.text);
     assert.ok(bn.text.length > 0 && ta.text.length > 0 && te.text.length > 0);
     assert.equal(normalizeLocale("xx"), "en");
+  });
+  test("calm voice quality: moderate rate, soft pitch, never shouting", () => {
+    for (const c of VOICE_CHARACTERS) {
+      assert.ok(c.voice.rate >= 0.8 && c.voice.rate <= 0.9, `${c.characterId} rate calm`);
+      assert.ok(c.voice.pitch >= 0.9 && c.voice.pitch <= 1.1, `${c.characterId} pitch soft`);
+      // All share calm female style
+      assert.ok(c.speechStyle.toLowerCase().includes("calm") || c.speechStyle.toLowerCase().includes("warm"));
+    }
+    const gentle = scriptFor({ event: "incorrect_answer", locale: "en" });
+    assert.equal(gentle.text, "Not quite. Let's look carefully.");
+    assert.equal(scriptFor({ event: "thinking", locale: "en" }).text, "Take your time. Look carefully.");
   });
   test("parrot ladder covers show→classify in Hindi/Bengali", () => {
     const hi = parrotLadder("hi");

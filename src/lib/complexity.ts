@@ -142,10 +142,10 @@ export function resolveComplexity(
   const band: AgeBand = ageBand === "4-5" || ageBand === "6-7" || ageBand === "8-9" ? ageBand : "6-7";
   const level = clamp(skillLevel, 1, 5);
   const base = (BASELINES[familyForSkill(skill)] ?? BASELINES.finding)[band];
-  const nudge = level >= 4 ? 1 : level <= 1 ? -0 : 0;
+  // Skill level gently widens/narrows the problem inside the age baseline:
+  // +1 item at level 4+; option counts stay at the age baseline (2–4).
   const itemCount = clamp(base.itemCount + (level >= 4 ? 1 : 0), 2, 12);
-  const optionCount = clamp(base.optionCount + (level >= 5 ? 0 : 0) + nudge * 0, 2, 4);
-  void nudge;
+  const optionCount = clamp(base.optionCount, 2, 4);
   return {
     ageBand: band,
     difficulty: level,

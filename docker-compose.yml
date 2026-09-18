@@ -1,9 +1,15 @@
+networks:
+  learnzzy:
+    driver: bridge
+
 services:
   web:
     build: .
     restart: unless-stopped
     ports:
       - "3000:3000"
+    networks:
+      - learnzzy
     environment:
       NODE_ENV: production
       APP_ENV: production
@@ -20,10 +26,28 @@ services:
       # Local Docker serves plain HTTP: allow non-Secure session cookies.
       # Production (TLS) overrides this to "true" in docker-compose.prod.yml.
       COOKIE_SECURE: "false"
+      # Education Gateway — Docker service DNS (learnzzy network)
+      TUTOR_MCP_ENABLED: ${TUTOR_MCP_ENABLED:-false}
+      TUTOR_MCP_URL: ${TUTOR_MCP_URL:-http://tutor-mcp:3001}
+      TUTOR_MCP_API_KEY: ${TUTOR_MCP_API_KEY:-}
+      OER_MCP_ENABLED: ${OER_MCP_ENABLED:-false}
+      OER_MCP_URL: ${OER_MCP_URL:-http://oer-mcp:3002}
+      OER_MCP_API_KEY: ${OER_MCP_API_KEY:-}
+      NCERT_MCP_ENABLED: ${NCERT_MCP_ENABLED:-false}
+      NCERT_MCP_URL: ${NCERT_MCP_URL:-http://ncert-mcp:3003}
+      NCERT_MCP_API_KEY: ${NCERT_MCP_API_KEY:-}
+      EDUCATION_GATEWAY_TIMEOUT_MS: ${EDUCATION_GATEWAY_TIMEOUT_MS:-5000}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
     depends_on:
       mongo:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      tutor-mcp:
+        condition: service_healthy
+      oer-mcp:
+        condition: service_healthy
+      ncert-mcp:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
@@ -38,9 +62,110 @@ services:
   # adding web replicas; a standalone worker requires a compiled worker
   # artifact (src/workers/worker.ts is TypeScript with path aliases).
 
+  # --- MCP servers (Docker-first, private network) ---
+  tutor-mcp:
+    build:
+      context: ./services/mcp
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - learnzzy
+    environment:
+      PROVIDER: tutor-mcp
+      PORT: 3001
+      DATA_DIR: /data/tutor
+      PROVIDER_API_KEY: ${TUTOR_MCP_API_KEY:-}
+    volumes:
+      - tutor-data:/data/tutor
+    expose:
+      - "3001"
+    ports:
+      - "127.0.0.1:3001:3001"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  oer-mcp:
+    build:
+      context: ./services/mcp
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - learnzzy
+    environment:
+      PROVIDER: oer-mcp
+      PORT: 3002
+      DATA_DIR: /data/oer
+      PROVIDER_API_KEY: ${OER_MCP_API_KEY:-}
+    volumes:
+      - oer-data:/data/oer
+    expose:
+      - "3002"
+    ports:
+      - "127.0.0.1:3002:3002"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  ncert-mcp:
+    build:
+      context: ./services/mcp
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    networks:
+      - learnzzy
+    environment:
+      PROVIDER: ncert-mcp
+      PORT: 3003
+      DATA_DIR: /data/ncert
+      PROVIDER_API_KEY: ${NCERT_MCP_API_KEY:-}
+      QDRANT_URL: http://qdrant:6333
+    volumes:
+      - ncert-data:/data/ncert
+    expose:
+      - "3003"
+    ports:
+      - "127.0.0.1:3003:3003"
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  qdrant:
+    image: qdrant/qdrant:v1.9.4
+    restart: unless-stopped
+    networks:
+      - learnzzy
+    volumes:
+      - qdrant-data:/qdrant/storage
+    expose:
+      - "6333"
+      - "6334"
+    ports:
+      - "127.0.0.1:6333:6333"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:6333/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
   mongo:
     image: mongo:7
     restart: unless-stopped
+    networks:
+      - learnzzy
     ports:
       # Host side is 27018 (not 27017): the default MongoDB port is commonly
       # taken by other local instances/containers. Container side stays 27017,
@@ -58,6 +183,8 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    networks:
+      - learnzzy
     command: redis-server --appendonly yes
     ports:
       - "6379:6379"
@@ -73,3 +200,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
+  tutor-data:
+  oer-data:
+  ncert-data:
+  qdrant-data:

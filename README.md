@@ -20,12 +20,13 @@ asynchronous AI/agent workforce operating behind the scenes.
 3. **Clean Up** — spot-and-clean scenes
 4. **Picture Puzzle** — drag/tap spatial puzzles
  5. **Shadow Sketch** — tracing with forgiving evaluation
- 6. **Learning World** — 6 categories (numbers/words/think/create/discover/
-    puzzles) → 16 activities; 10 run on a deterministic generic engine
-    (age-adaptive complexity, teaching hints), shipped games linked
- 7. **Adaptive Learning** — levels, plans, stars, stickers
- 8. **Parent Dashboard** — progress, insights, pairing
- 9. **Command Center** — agents, pools, provider health (admin)
+ 6. **Learning World** — 7 categories (numbers/words/write/think/shapes/
+     discover/puzzles) → 16 activities; 10 run on a deterministic generic
+     engine (age-adaptive complexity, teaching hints, `answerIndex` validated),
+     shipped games linked; landing also category-primary (`HomeContinue`)
+  7. **Adaptive Learning** — levels, plans, stars, stickers
+  8. **Parent Dashboard** — progress, insights, pairing
+  9. **Command Center** — agents, pools, provider health (admin)
 
 ## Stack
 
@@ -68,7 +69,8 @@ inside containers; host dev uses mapped `127.0.0.1` ports — see `.env.example`
 - **Academic Engine** (`src/services/academicEngine.ts` + `src/lib/academic.ts`) — answers "what next?" as a Validated Learning Plan (LEARN→MASTER stages, review-first, no-jump decisions, `validateAcademicPlan` gate); MCP failures never stop gameplay.
 - **Voice Engine** (`src/lib/voice.ts`) — Teddy/Bunny/Owl/Monkey/Parrot × 11 events × 5 locales (en/hi/bn/ta/te), cached in `voiceAssets`; never live TTS in gameplay.
 - **Living Wonder worlds** (`src/lib/worlds.ts`, `WonderBits.tsx`) — Stitch-grounded banner cards, guide/feedback bits, and optimized scene postcards; presentation only, mechanics untouched.
-- **Learning Playground** (`src/lib/categories.ts`, `complexity.ts`, `activityRegistry.ts`, `activityContent.ts`) — category-first home, deterministic worksheet-inspired generators with §27 age baseline, `GET /api/activities/[id]/content`, generic `ActivityPlayer`; results reuse game-events + academic/result (DEC-188).
+- **Learning Playground** (`src/lib/categories.ts`, `complexity.ts`, `activityRegistry.ts`, `activityContent.ts`) — category-first playground + landing (Stitch d14a/4b84 ANIMATION_45 Rich validated via `curl -L`), deterministic worksheet-inspired generators with §27 age baseline, `GET /api/activities/[id]/content`, generic `ActivityPlayer` (DEC-188/189).
+- **Animal Wonderland Rich** (`src/components/child/AnimalWonderland3D.tsx`, `HomeContinue`, `BrandLogo→/play`) — 5 mushrooms + 5 apples + 15 stars + 4 birds + tap jump; landing categories primary per spec §2/§3.
 - **8 agents** — content, quality/safety, asset, analytics, difficulty,
   personalization, QA, academic — least-privilege, retried, audited.
 - **Parents** — separate auth, single-use expiring pairing codes, active-link
@@ -79,9 +81,9 @@ inside containers; host dev uses mapped `127.0.0.1` ports — see `.env.example`
 ```bash
 npm run typecheck
 npm run lint
-npm test          # 182 unit tests (22 academic/voice/theme, 5 worlds, 8 activity engine)
+npm test          # 189 unit tests (47 suites; incl. activity-engine answerIndex + Stitch worlds)
 npm run test:e2e  # 52 Playwright specs (uses system Chrome)
-npm run build
+npm run build     # 82 routes (landing category-primary + activity + academic + parent)
 ```
 
 ## Docs

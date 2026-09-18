@@ -366,7 +366,7 @@ At the end of each session, update this section:
 ## Session 2026-09-18 (9) — Worksheet-inspired Learning Playground
 
 ### Completed
-- Category-first playground: 6 Learning Worlds on /play → `/learn/[category]` → 16 activities (DEC-188). Generic engine (deterministic generators + ComplexityProfile + registry + activities content API + ActivityPlayer); shipped engines linked, never duplicated.
+- Category-first playground: 7 Learning Worlds on `/play` (+ now `/` via `HomeContinue` + category grid, DEC-189) → `/learn/[category]` → 16 activities (DEC-188). Generic engine (deterministic generators + ComplexityProfile + registry + activities content API + ActivityPlayer); shipped engines linked, never duplicated.
 - Age changes the problem (counting 1–10 → 1–50 → 1–100+, ordering 3 → 4–5 → 5–7 nums, phonics letters → words → sentences); performance moves via existing per-skill skillLevels (±1, rolling, never one-mistake drops).
 - Results flow through game-events + academic/result → parent dashboards + academic engine with no new contracts; MCP/gateway untouched (advisory-only, fail-closed).
 
@@ -380,6 +380,24 @@ At the end of each session, update this section:
 1. Playwright pass: 4–5 / 6–7 / 8–9 learner Home → Category → Activity → Answer → Result → Next → Progress (incl. mobile 320px).
 2. Seed + KI-019 live-Mongo academic E2E incl. new activity skills; TTS pipeline (KI-020).
 3. Physical-device pass; parent-journey screenshot re-fetch.
+
+## Session 2026-09-18 (10) — Animal Wonderland Rich + Home Learning World + trace-write fix
+
+### Completed
+- Validated landing against new Stitch `d14a9b61` (Child-First 3D Play Home) + `4b8445bd` (ANIMATION_45 Rich) via `curl -L` (`.stitch/...` + `public/images/stitch/home-child-first-v2.png`); Rich scene: 5 candy mushrooms + 5 bobbing apples + 15 warm stars + 4 birds + tap jump burst + snappier camera. Updated `AnimalWonderland3D` to match (camera 4.5/20, mushrooms, apples, deterministic stars, 4-bird formation, `pointerdown` jump).
+- Landing now category-primary per spec §2/§3: hero → giant CTA → `HomeContinue` (Good-morning + plan-first Continue card, `GET .../plan` best-effort) → 7-category `CATEGORIES` grid (tactile, `→` affordance) → secondary 5-tile quick shortcuts → games gallery → voice board → safety. `BrandLogo` every header `→ /play`.
+- Bug: `genTraceWrite` `answerIndex: 0` (shuffle-blind) → `options.indexOf(answer)` with tightened `tests/activity-content.test.ts:18` (`options[answerIndex]==answer` across all bands/generators, expanded trace-write loop). Hygiene: `resolveComplexity` dead `nudge` branching removed.
+
+### Verified
+- `typecheck` ✅, `lint` ✅, `npm test` 189/189 (47 suites, was 182) ✅, `next build` ✅.
+
+### Known Issues / Notes
+- KI-019/020 still open; Playwright /learn + new HomeContinue mobile-320 pass not yet run in this env (requires `npm start` + browsers); physical devices outstanding.
+
+### Next Actions
+1. `npx playwright test e2e/learn.spec.ts e2e/child.spec.ts --project=mobile-320` against prod `npm start`.
+2. Seed + KI-019 live-Mongo E2E incl. new trace-write/complexity paths; KI-020 TTS for `voiceAssets`.
+3. Physical-device pass + re-fetch of any next Stitch revision.
 
 ## Session 2026-09-18 (8) — Stitch 12–20 live retrieval + attractiveness pass
 

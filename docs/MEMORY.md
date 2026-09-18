@@ -3,7 +3,7 @@
 **Document:** Persistent Project Context  
 **Version:** 1.1  
 **Status:** Active  
-**Last Updated:** 2026-09-18
+**Last Updated:** 2026-09-18 — Session 11 (Calm Warm Female Voice Companion)
 
 ---
 
@@ -689,3 +689,51 @@ thinking, read-aloud, completion via existing game-events +
 Characters guide meaningfully (Teddy/Owl/Bunny/Monkey/Parrot states);
 LEARN→REVIEW staging via instruction + hints before scoring. Verified:
 unit 182/182, typecheck, lint, `next build` 76 routes.
+
+# 28. Animal Wonderland Rich + Home Learning World — 2026-09-18 (Session 10)
+
+Landing (/) validated against new Stitch screens with `curl -L`:
+`d14a9b61423...` (Animal Wonderland Child-First 3D Play Home) + `4b8445bd...`
+(Three.js ANIMATION_45 Rich) under `.stitch/1495487808742926612/` and
+`public/images/stitch/home-child-first-v2.png`. These validate
+`f929a9c4a` + `b933...` (§4): copy/sections/badges identical; Rich scene
+adds 5 candy mushrooms + 5 bobbing counting apples + 15 deterministic
+warm stars + 4-bird formation + tap `jumpBoost` burst + snappier camera.
+Updated `src/components/child/AnimalWonderland3D.tsx` (camera 4.5/20,
+mushrooms, apples, 15 stars, 4 birds, `pointerdown` jump, deterministic
+seeds, reduced-motion static frame) + `src/styles/globals.css` motion.
+
+Landing is now category-primary per spec §2/§3 while keeping Stitch
+hierarchy: hero → giant CTA → personalized `HomeContinue` ("Good
+morning, N! Ready to explore?" + plan-first Continue card, `GET
+/api/learners/.../plan` best-effort) → Learning World category grid
+(7 `CATEGORIES`, `lib/categories.ts`, `tactile` cards, `→` affordance)
+→ quick-play shortcuts (5 Stitch tiles, secondary) → games gallery →
+voice board → parent safety. `BrandLogo` (every header) now `→ /play`
+(`src/components/brand/BrandLogo.tsx:3`).
+
+Bug + hygiene fixes: `genTraceWrite` had `answerIndex: 0` regardless of
+shuffle → `options.indexOf(answer)` with tightened
+`tests/activity-content.test.ts:18` (`options[answerIndex]==answer` for
+every generator/band + expanded trace-write loop); `resolveComplexity`
+dead `nudge` branching removed (no behavior change, `itemCount +1 @L4+`
+only). Verified: `tsc --noEmit` 0, `eslint` 0, `npm test` 189/189 (was
+182, now 47 suites), `next build` 0 (82 routes shown, First Load 148kB).
+
+# 29. Calm Warm Female Voice Companion — 2026-09-18 (Session 11)
+
+Voice is now a calm, warm, friendly female learning companion per spec:
+moderate speed (0.82–0.88), soft volume (0.85), clear articulation, short
+sentences, natural pauses (800ms default `pauseAfterMs` in `VoiceScript`),
+low-medium energy — "I'm learning with a friendly teacher," never shouting.
+Updated `src/lib/voice.ts` (13 events + `VoiceScript` {characterId,eventType,
+text,ageBand,language,emotion,speakingRate,volumeProfile,pauseAfterMs},
+`createVoiceScript`, `getVoiceProfile`, `addition/subtraction/ordering/
+tracingTeaching` calm lines, 5-locale soft scripts), `src/lib/audio.ts`
+(calm `CHARACTER_VOICES` 0.82–0.88 / pitch 0.97–1.05, throttle 900ms thinking
+gap, volume 0.85, rate/pitch clamped moderate/soft), `src/lib/characters.ts`
+`STATE_LINES` calm ("Wonderful. You got it.", "Not quite. Let's look
+carefully.", "Take your time."). TTS remains cached (`voiceAssets`) + device
+speech fallback; voice never blocks gameplay; mute respected; thinking moments
+(2–4s quiet) honored by caller gating. Verified: `tsc` 0, `npm test` 190/190
+(+1 calm-quality test), `next build` 0.

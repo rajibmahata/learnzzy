@@ -1,0 +1,13 @@
+{
+  "name": "learnzzy-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Learnzzy MCP shim servers — Tutor/OER/NCERT (Docker-first, HTTP REST over JSON).",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "dependencies": {}
+}

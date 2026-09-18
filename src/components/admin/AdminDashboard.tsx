@@ -74,7 +74,7 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
   const [pools, setPools] = useState<Pool[]>([]);
   const [stats, setStats] = useState<Stats[]>([]);
   const [health, setHealth] = useState<Record<string, string | number>>({});
-  const [providers, setProviders] = useState<{ provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number }[]>([]);
+  const [providers, setProviders] = useState<{ provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number; lastSuccessAt: string | null; lastFailureAt: string | null; lastErrorCode: string | null }[]>([]);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [command, setCommand] = useState("Refill the addition easy-content pool");
@@ -91,7 +91,7 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
       getJson<Pool[]>("/api/admin/pools"),
       getJson<{ stats: Stats[] }>("/api/admin/analytics"),
       getJson<Record<string, string | number>>("/api/admin/system-health"),
-      getJson<{ providers: { provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number }[] }>("/api/admin/education/health").catch(() => ({ providers: [] })),
+      getJson<{ providers: { provider: string; enabled: boolean; status: string; latencyMs: number | null; errorCount24h: number; lastSuccessAt: string | null; lastFailureAt: string | null; lastErrorCode: string | null }[] }>("/api/admin/education/health").catch(() => ({ providers: [] })),
       getJson<Task[]>("/api/admin/commands").catch(() => []),
       getJson<ContentRow[]>("/api/admin/content?limit=20").catch(() => []),
       getJson<{ plans: { planId: string; learnerId: string; concept: string; stage: string; source: string; reason: string }[]; voiceAssets: { cacheKey: string; characterId: string; event: string; locale: string; status: string }[]; signals: number; failedRecommendations: number }>("/api/admin/academic/plans").catch(() => null),
@@ -212,7 +212,7 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
           {tasks.length === 0 ? <p className="admin-empty">No agent tasks yet.</p> : <div className="task-list">{tasks.map((task) => <div className="task-row" key={task.taskId}><div><strong>{task.type}</strong><small>{task.agentId} · attempt {task.attempts}</small></div><span className={`task-${task.status}`}>{task.status}</span></div>)}</div>}
         </Panel>
         <Panel title="Education providers" kicker="TUTOR · OER · NCERT">
-          {providers.length === 0 ? <p className="admin-empty">Provider status unavailable.</p> : <div className="agent-list">{providers.map((pr) => <div className="agent-row" key={pr.provider}><span className={`agent-dot ${pr.enabled && pr.status === "healthy" ? "" : "offline"}`} /><div><strong>{pr.provider}</strong><small>{pr.enabled ? pr.status : "disabled"} · {pr.latencyMs ?? "-"} ms · {pr.errorCount24h} errors/24h</small></div><code>{pr.enabled ? "on" : "off"}</code></div>)}</div>}
+          {providers.length === 0 ? <p className="admin-empty">Provider status unavailable.</p> : <div className="agent-list">{providers.map((pr) => <div className="agent-row" key={pr.provider}><span className={`agent-dot ${pr.enabled && pr.status === "healthy" ? "" : "offline"}`} /><div><strong>{pr.provider}</strong><small>{pr.enabled ? pr.status : "disabled"} · {pr.latencyMs ?? "-"} ms · {pr.errorCount24h} errors/24h{pr.lastSuccessAt ? ` · last ok ${new Date(pr.lastSuccessAt).toLocaleTimeString()}` : ""}{pr.lastFailureAt ? ` · last fail ${new Date(pr.lastFailureAt).toLocaleTimeString()}` : ""}{pr.lastErrorCode ? ` · ${pr.lastErrorCode}` : ""}</small></div><code>{pr.enabled ? "on" : "off"}</code></div>)}</div>}
         </Panel>
         <Panel title="Academic engine" kicker="PLANS · VOICE · SIGNALS">
           {!academic ? <p className="admin-empty">Academic data unavailable.</p> : (

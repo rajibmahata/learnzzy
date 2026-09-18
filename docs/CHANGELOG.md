@@ -131,6 +131,30 @@
   unchanged; MCP/gateway untouched). Shipped engines linked, never
   duplicated. 8 new tests (`activity-registry` + `activity-content`);
   suite now 182/182 green; `next build` green (76 routes).
+- Animal Wonderland Rich + Home Learning World (2026-09-18, Session 10):
+  landing validated against new Stitch `d14a9b61` + `4b8445bd` (ANIMATION_45
+  Rich: 5 candy mushrooms + 5 bobbing apples + 15 warm stars + 4 birds +
+  tap jump burst) via `curl -L` under `.stitch/1495487808742926612/` and
+  `public/images/stitch/home-child-first-v2.png`; `AnimalWonderland3D`
+  updated to match (camera, mushrooms, apples, 15 stars, 4 birds,
+  `pointerdown` jump, deterministic). Landing now category-primary per spec
+  §2/§3 (hero → CTA → `HomeContinue` personalized Good-morning + plan card
+  → 7-category `CATEGORIES` grid → secondary 5-tile shortcuts → games
+  gallery → voice board → safety) while preserving Stitch hierarchy.
+  `BrandLogo` every header now → `/play`. Fixes: `genTraceWrite`
+  `answerIndex: 0` → `options.indexOf(answer)` with tightened
+  `activity-content` assertions (`options[answerIndex]==answer` across
+  bands) + `resolveComplexity` dead `nudge` removal. 189/189 unit
+  (47 suites), `tsc`/`eslint`/`next build` green.
+- Calm Warm Female Voice (2026-09-18 Session 11): `src/lib/voice.ts` 13
+  events + `VoiceScript` (ageBand/language/emotion/speakingRate/
+  volumeProfile/pauseAfterMs) + `createVoiceScript`/`getVoiceProfile` +
+  5-locale soft scripts ("Wonderful. You got it.", "Not quite. Let's look
+  carefully.", "Take your time."), `src/lib/audio.ts` calm presets
+  (0.82–0.88 rate, 0.97–1.05 pitch, volume 0.85, 900ms throttle for thinking
+  time), `src/lib/characters.ts` calm `STATE_LINES`. TTS stays cached +
+  device fallback, never blocks, mute respected. 190/190 unit (+calm-quality
+  test), `tsc`/`build` green.
 
 ### Changed
 - `/api/games` now exposes all five MVP games as active.

@@ -36,7 +36,7 @@ Learnzzy is a child-focused educational games PWA for short, visual, determinist
 
 ## Status
 - Phase: build / stabilize
-- Last updated: 2026-09-18, by OpenCode
+- Last updated: 2026-09-18 Session 10, by OpenCode — 189 unit, validated Stitch d14a/4b84, Home Learning World
 
 ## 2026-09-18 Stitch Retrieval + Attractiveness Update
 
@@ -47,6 +47,19 @@ Verified: 174 unit tests, typecheck, lint, production build, Playwright
 child/sketch/discover/adaptive/learning-journey, screenshot review, Docker
 image build. Open: live-Mongo E2E (KI-019), TTS binaries (KI-020),
 parent-journey screenshot re-fetch, physical devices.
+
+## 2026-09-18 Session 10 — Animal Wonderland Rich + Home Learning World
+
+Validated landing against new Stitch `d14a9b61` (Child-First 3D Play Home) +
+`4b8445bd` (ANIMATION_45 Rich) via `curl -L` (`.stitch/...` + `public/images/stitch/home-child-first-v2.png`).
+Rich scene: 5 candy mushrooms + 5 bobbing apples + 15 deterministic stars + 4
+birds + tap jump burst. Landing now category-primary (hero → CTA →
+`HomeContinue` personalized Good-morning + plan card → 7-category grid →
+secondary shortcuts → games) per spec §2/§3 while preserving Stitch
+hierarchy. `BrandLogo` → `/play`. Bug: `genTraceWrite` `answerIndex: 0` →
+`options.indexOf(answer)` with tightened assertions; `resolveComplexity`
+dead code removed. Verified: 189 unit (47 suites), `tsc`/`eslint`/`next
+build` green.
 
 ## 2026-09-17 Academic Engine Update
 

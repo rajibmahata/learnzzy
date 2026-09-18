@@ -318,14 +318,14 @@ function genTraceWrite(seed: string, c: ComplexityProfile): ActivityContent {
   const missingIdx = Math.floor(rng() * target.word.length);
   const answer = target.word[missingIdx];
   const prompt = target.word.split("").map((ch, i) => (i === missingIdx ? "_" : ch)).join(" ");
+  const options = shuffle(rng, [...new Set([answer, ...shuffle(rng, "abcdefghijklmnopqrstuvwxyz".split("")).slice(0, 3)])]);
   return {
     contentId: `tracewrite-${seed}-${target.word}-${missingIdx}`,
     templateId: "trace-write", skill: "writing", ageBand: c.ageBand, difficulty: c.difficulty,
     kind: "trace-write", prompt: `${target.emoji}  ${prompt}`,
     instruction: `Read “${target.word}”, trace it, then tap the missing letter.`,
     visual: [target.emoji], visualLabel: target.word,
-    options: shuffle(rng, [...new Set([answer, ...shuffle(rng, "abcdefghijklmnopqrstuvwxyz".split("")).slice(0, 3)])]),
-    answer, answerIndex: 0,
+    options, answer, answerIndex: options.indexOf(answer),
     hints: [`Say “${target.word}” slowly — hear the missing sound.`, `Trace each letter with your finger first.`],
     explanation: `Yes! ${target.word.split("").join(" ")} spells “${target.word}”.`,
     voiceLine: `Read, trace, then write the missing letter in ${target.word}.`,

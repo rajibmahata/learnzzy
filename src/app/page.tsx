@@ -3,14 +3,17 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 import { AnimalWonderland3D } from "@/components/child/AnimalWonderland3D";
 import { HomeVoiceBoard } from "@/components/child/HomeVoiceBoard";
 import { SoundToggle } from "@/components/child/SoundToggle";
+import { HomeContinue } from "@/components/child/HomeContinue";
+import { CATEGORIES } from "@/lib/categories";
 
-// Home — exact fit of Stitch screen f929a9c4a28f4ca39468668623e9c4e2
-// "Learnzzy — Animal Wonderland (Child-First 3D Play Home)"
-// 3D scene isolate: b93346430a0f44ef9f5f341459dd8d20 (ANIMATION_43)
+// Home — exact fit of Stitch screen d14a9b61423a49adb2d0a5bf05f5e5ed
+// (validates f929a9c4a — Child-First 3D Play Home)
+// 3D scene isolate: 4b8445bd757549bd9b59e61932c946c9 (ANIMATION_45 Rich: mushrooms + apples)
 // Downloaded with curl -L to .stitch/1495487808742926612/ + public/images/stitch/.
-// Fit to Learnzzy: same section order/copy/visual hierarchy as Stitch, but wired
-// to real routes (/welcome, /play/*, /parents, /parent/login), offline speech,
-// no CDN Tailwind, logo → /play, 56px+ touch targets.
+// Fit to Learnzzy: same section order/visual hierarchy as Stitch, but category
+// is primary navigation (§2), 56px+ targets, offline speech, logo → /play.
+// Spec §2 LEARNING WORLD categories live on the playground (/play) and now
+// also on the landing (§3/§26) so newcomers see the learning world immediately.
 
 const TILES = [
   { href: "/play/addition", icon: "🔢", label: "Numbers & Counting", buddy: "🧸 Teddy Bear", box: "bg-secondary-fixed", ring: "border-secondary-fixed/60 hover:border-secondary-container", shadow: "shadow-[0_6px_0_#ffddb8]", text: "text-secondary" },
@@ -156,7 +159,7 @@ export default function LandingPage() {
             </div>
 
             {/* Giant CTA */}
-            <div className="mb-12 flex flex-col items-center gap-3">
+            <div className="mb-8 flex flex-col items-center gap-3">
               <Link href="/welcome" className="animate-pulse-glow flex items-center gap-3 rounded-full bg-secondary-container px-10 py-5 text-2xl font-extrabold tracking-tight hover:bg-secondary-fixed">
                 <span aria-hidden className="text-3xl">🚀</span>
                 Start Playing Now!
@@ -172,8 +175,35 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* 5 category tiles */}
-            <div className="grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {/* Personalized continue (spec §26) — only when learner exists */}
+            <HomeContinue />
+
+            {/* Learning World categories — PRIMARY navigation (§2/§3) — Stitch styled */}
+            <section aria-labelledby="learning-world-title" className="mt-8 w-full max-w-5xl">
+              <h2 id="learning-world-title" className="text-center text-3xl font-extrabold">🌳 Learnzzy Learning World</h2>
+              <p className="mt-1 text-center font-medium text-on-surface-variant">Choose a land, then pick an activity inside!</p>
+              <nav aria-label="Learning categories" className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {CATEGORIES.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/learn/${c.id}`}
+                    aria-label={`Open ${c.name}: ${c.tagline}`}
+                    className={`tactile flex min-h-touch items-center gap-3 rounded-3xl bg-gradient-to-br p-4 text-left shadow-pillow ${c.gradient}`}
+                  >
+                    <span aria-hidden className="text-4xl">{c.icon}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-extrabold">{c.name}</span>
+                      <span className="block truncate text-sm opacity-80">{c.skillsLine}</span>
+                    </span>
+                    <span aria-hidden className="text-xl">→</span>
+                  </Link>
+                ))}
+              </nav>
+            </section>
+
+            {/* Quick tiles (Stitch hero 5-tile row) — kept as friendly shortcuts, now secondary */}
+            <p className="mt-8 text-center text-sm font-bold uppercase tracking-wider text-on-surface-variant">Quick play shortcuts</p>
+            <div className="mt-2 grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {TILES.map((t) => (
                 <Link key={t.label} href={t.href} className={`flex flex-col items-center rounded-2xl border-2 bg-white p-4 text-center transition-transform hover:-translate-y-1 ${t.ring} ${t.shadow}`}>
                   <span aria-hidden className={`mb-2 flex h-14 w-14 items-center justify-center rounded-2xl text-3xl ${t.box}`}>{t.icon}</span>

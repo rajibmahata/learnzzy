@@ -1532,7 +1532,7 @@ deviations from the fetched designs, per the DEC-186 hierarchy:
 ## DEC-188 — Category-First Learning Playground, Generic Activity Engine
 
 **Decision:**
-/play is now category-first (6 Learning World cards → /learn/[category] →
+/play is now category-first (7 Learning World cards → /learn/[category] →
 activities). Ten worksheet-inspired activities run on one generic engine:
 pure deterministic generators (`lib/activityContent.ts`) + reusable
 `ComplexityProfile` (`lib/complexity.ts`, spec §27 baseline) + registry
@@ -1548,6 +1548,56 @@ MCP/gateway untouched (advisory-only, fail-closed per DEC-183).
   without forking 16 game engines or breaking tested progression.
 - Complexity lives in one module (never hard-coded in components), so age
   changes the actual problem and performance moves ±1 level safely.
+
+**Status:** Active (2026-09-18)
+
+---
+
+## DEC-189 — Home Is Category-Primary + Animal Wonderland Rich (Stitch d14a/4b84)
+
+**Decision:**
+Landing (/) is now category-primary per spec §2/§3 while preserving Stitch
+child-first hierarchy (DEC-186/187): hero → CTA → `HomeContinue`
+personalized Good-morning + plan-first Continue card → 7-category
+`CATEGORIES` grid → secondary 5-tile quick shortcuts → games gallery.
+`BrandLogo` (all 26 headers) navigates `→ /play` (the playground) not `/`.
+Stitch `d14a9b61` + `4b8445bd` (ANIMATION_45 Rich) fetched via `curl -L`
+validate `f929a9c4`/`b933` (identical copy; Rich delta is 5 mushrooms + 5
+apples + 15 stars + 4 birds + tap jump burst). Trace-write correctness is
+hardened: `answerIndex` now tracks shuffle, enforced by
+`options[answerIndex]==answer` across bands/generators.
+
+**Reason:**
+- Spec §2 mandates category as primary navigation; Stitch hero is retained
+  but no longer competes with it. Personalized `HomeContinue` fulfills
+  spec §26 "not a random list" without new APIs.
+- Validated Rich scene keeps 3D delight performant (tap burst, not always-on WebGL).
+
+**Status:** Active (2026-09-18)
+
+---
+
+## DEC-190 — Calm Warm Female Voice Companion
+
+**Decision:**
+Voice is a calm, warm, friendly female learning companion: moderate speed
+(0.82–0.88), soft volume (0.85), clear articulation, short sentences,
+natural pauses (800ms `pauseAfterMs`), low-medium energy — "I'm learning
+with a friendly teacher," never shouting. `VoiceScript`
+{characterId,eventType,text,ageBand,language,emotion,speakingRate,
+volumeProfile,pauseAfterMs} + `createVoiceScript`/`getVoiceProfile` +
+13 calm events (INTRO/INSTRUCTION/LEARN/DEMONSTRATE/QUESTION/THINKING/
+HINT/CORRECT/GENTLE_RETRY/EXPLANATION/DISCOVERY/LEVEL_PROGRESS/REWARD) in
+5 locales share one warm quality; character personality (Teddy warm math,
+Owl calm thinking, etc.) varies but quality stays soft+moderate+clear.
+`CHARACTER_VOICES` 0.82–0.88 / pitch 0.97–1.05; TTS cached (`voiceAssets`) +
+device `speechSynthesis` fallback, throttle 900ms to protect 2–4s thinking
+time, mute + `prefers-reduced-motion` respected, never blocks gameplay.
+
+**Reason:**
+- Spec mandates calm over game-announcer; moderate+soft is comprehensible
+  for 4–5 and pleasant after 10 minutes.
+- Cached scripts (not per-click TTS) keep cost/latency zero.
 
 **Status:** Active (2026-09-18)
 

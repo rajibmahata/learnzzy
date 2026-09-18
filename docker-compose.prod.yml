@@ -1,11 +1,13 @@
 # Production override: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build`
 # Differences from local dev:
-# - mongo/redis NOT bound to host ports (internal only; no 27018/6379 exposure)
+# - mongo/redis/MCPs NOT bound to host ports (internal only; no 27018/6379/3001-3003/6333 exposure)
+# - MCPs stay private behind the learnzzy network; only Nginx (port 80/443) is public
 # - container log rotation (10 MiB x 3 files per service)
 # - production env expectations documented below (compose cannot enforce secrets)
 #
 # Required on the VPS before first deploy (never commit values):
 #   ADMIN_EMAIL, ADMIN_PASSWORD_HASH, ADMIN_AUTH_SECRET,
+#   TUTOR_MCP_API_KEY, OER_MCP_API_KEY, NCERT_MCP_API_KEY (if enabling MCPs),
 #   AI_API_KEY (optional), SENTRY_DSN (optional),
 #   NEXT_PUBLIC_APP_URL=https://<production-domain>
 services:
@@ -29,6 +31,38 @@ services:
       timeout: 5s
       retries: 3
       start_period: 60s
+
+  tutor-mcp:
+    ports: []
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  oer-mcp:
+    ports: []
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  ncert-mcp:
+    ports: []
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  qdrant:
+    ports: []
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mongo:
     ports: []
