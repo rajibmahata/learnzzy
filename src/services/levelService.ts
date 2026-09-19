@@ -19,20 +19,29 @@ const PROMOTION = {
   minSampleForAuto: 50, // for server-side aggregate (like DifficultyAgent)
 };
 
-export async function checkPromotion(learnerId: string, gameId: string, accuracy: number): Promise<PromotionCheck> {
+export async function checkPromotion(learnerId: string, _gameId: string, accuracy: number): Promise<PromotionCheck> {
   const learner = await getLearner(learnerId);
   if (!learner) return { shouldPromote: false, newLevel: 1, reason: "learner not found" };
   const cur = learner.level;
-  if (cur >= 5) return { shouldPromote: false, newLevel: cur, reason: "max level" };
-  const prog = learner.gameProgress?.[gameId];
-  const completions = prog?.completions ?? 0;
-  // Need sufficient practice before promotion
-  if (completions < PROMOTION.minCompletions) return { shouldPromote: false, newLevel: cur, reason: `need ${PROMOTION.minCompletions} completions, have ${completions}` };
-  if (accuracy < PROMOTION.minAccuracy) return { shouldPromote: false, newLevel: cur, reason: `accuracy ${accuracy} < ${PROMOTION.minAccuracy}` };
+  if (cur >= 6) return { shouldPromote: false, newLevel: cur, reason: "max level" };
+  // Global promotion: consider overall progress across all games, not single game
+  const allProgress = Object.values(learner.gameProgress ?? {});
+  const totalCompletions = allProgress.reduce((sum, p) => sum + (p.completions ?? 0), 0);
+  const allRecent = allProgress.flatMap((p) => p.recentAccuracy ?? []);
+  const recentAvg = allRecent.length ? allRecent.slice(-5).reduce((a, b) => a + b, 0) / Math.min(5, allRecent.length) : accuracy;
+  if (totalCompletions < PROMOTION.minCompletions) return { shouldPromote: false, newLevel: cur, reason: `need ${PROMOTION.minCompletions} total completions, have ${totalCompletions}` };
+  if (recentAvg < PROMOTION.minAccuracy) return { shouldPromote: false, newLevel: cur, reason: `recent avg ${recentAvg.toFixed(2)} < ${PROMOTION.minAccuracy}` };
+  // Also require at least 2 different games played for global journey
+  const distinctGames = Object.keys(learner.gameProgress ?? {}).length;
+  if (distinctGames < 2 && totalCompletions < 6) return { shouldPromote: false, newLevel: cur, reason: `need variety: ${distinctGames} games played` };
   // Also check age-band level config exists for next level
   const nextConfig = await getLevelConfig(cur + 1, learner.ageBand as AgeBand);
-  if (!nextConfig) return { shouldPromote: false, newLevel: cur, reason: "next level config missing" };
-  return { shouldPromote: true, newLevel: cur + 1, reason: `accuracy ${accuracy} over ${completions} completions` };
+  if (!nextConfig) {
+    // Allow up to level 6 even if config missing (fallback)
+    if (cur + 1 > 5) return { shouldPromote: true, newLevel: cur + 1, reason: `overall avg ${recentAvg.toFixed(2)} over ${totalCompletions} completions` };
+    return { shouldPromote: false, newLevel: cur, reason: "next level config missing" };
+  }
+  return { shouldPromote: true, newLevel: cur + 1, reason: `overall avg ${recentAvg.toFixed(2)} over ${totalCompletions} completions` };
 }
 
 export async function maybePromote(learnerId: string, gameId: string, accuracy: number): Promise<{ promoted: boolean; level: number; reason: string }> {

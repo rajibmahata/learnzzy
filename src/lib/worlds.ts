@@ -81,11 +81,14 @@ export const WORLDS: WorldMeta[] = [
   },
 ];
 
-/** Optimized Stitch-fetched scene postcards (WebP, ~40–55KB, lazy-loaded). */
+/** Optimized Stitch-fetched scene postcards (WebP/JPG, ~40–110KB, lazy-loaded) — 3D images for every world. */
 const WORLD_ART: Record<string, string> = {
+  addition: "/images/stitch/number-orchard.jpg",
+  subtraction: "/images/stitch/breeze-valley.jpg",
   "clean-up": "/assets/learnzzy/games/clean-up/scene.webp",
   puzzle: "/assets/learnzzy/games/puzzle/scene.webp",
   sketch: "/assets/learnzzy/games/sketch/scene.webp",
+  discover: "/images/stitch/level-island-map.png",
 };
 
 /** Scene art for a world, or null when the world uses a gradient scene. */

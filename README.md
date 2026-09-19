@@ -81,9 +81,10 @@ inside containers; host dev uses mapped `127.0.0.1` ports — see `.env.example`
 ```bash
 npm run typecheck
 npm run lint
-npm test          # 189 unit tests (47 suites; incl. activity-engine answerIndex + Stitch worlds)
+npm test          # 190 unit tests (47 suites; all 25 activities organized)
 npm run test:e2e  # 52 Playwright specs (uses system Chrome)
-npm run build     # 82 routes (landing category-primary + activity + academic + parent)
+npm run build     # 82 routes
+npm run docker:health  # web + tutor/oer/ncert/qdrant health (Docker-first MCP)
 ```
 
 ## Docs

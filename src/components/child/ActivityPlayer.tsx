@@ -155,11 +155,48 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
           <div className="safe-panel p-5">
             <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{def.title} • {index + 1} of {items.length}</p>
             <h2 className="mt-1 text-headline-md">{current.prompt}</h2>
-            <div aria-label={current.visualLabel} className="mt-3 flex flex-wrap items-center justify-center gap-2 rounded-2xl bg-surface-low p-4 text-4xl">
-              {current.visual.map((v, i) => (
-                <span key={i} aria-hidden>{v}</span>
-              ))}
+            <div aria-label={current.visualLabel} className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-2xl bg-surface-low p-4">
+              {current.visual.map((v, i) => {
+                // Big & Small: render actual size differences so maths is visible and correct
+                if (current.templateId === "big-small" && current.visualMeta?.sizes) {
+                  const sizes = current.visualMeta.sizes as number[];
+                  const sizeIdx = sizes[i] ?? 0;
+                  const n = sizes.length || 1;
+                  // Age-graded subtlety: 4-5 obvious (wide range), 8-9 subtle (narrow range)
+                  const isYoung = current.ageBand === "4-5";
+                  const isMid = current.ageBand === "6-7";
+                  const base = isYoung ? 0.7 : isMid ? 0.8 : 0.9;
+                  const range = isYoung ? 1.1 : isMid ? 0.7 : 0.4;
+                  const scale = n > 1 ? base + (sizeIdx / (n - 1)) * range : 1;
+                  const fontSize = `${(1.4 + scale * 0.9).toFixed(2)}rem`; // 2.0rem → 3.0rem range
+                  return (
+                    <span
+                      key={i}
+                      aria-hidden
+                      className="inline-flex items-center justify-center rounded-2xl bg-white px-2 py-1 shadow-sm border-2 border-surface-high"
+                      style={{ fontSize, lineHeight: 1, minWidth: "3rem", minHeight: "3rem" }}
+                      title={`Item ${i + 1}`}
+                    >
+                      {v}
+                    </span>
+                  );
+                }
+                return (
+                  <span key={i} aria-hidden className="text-4xl">
+                    {v}
+                  </span>
+                );
+              })}
             </div>
+            {current.templateId === "big-small" && (
+              <div className="mt-2 flex justify-center gap-1 text-xs font-bold text-on-surface-variant">
+                {current.visual.map((_, i) => (
+                  <span key={i} className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white border text-[11px] shadow-sm">
+                    {i + 1}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="mt-4 grid grid-cols-2 gap-2">
               {current.options.map((opt) => {
                 const chosen = picked === opt;

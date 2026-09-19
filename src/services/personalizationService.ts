@@ -2,6 +2,7 @@ import { getLearner } from "@/repositories/learners";
 import { GAMES } from "@/games/registry";
 import { classify } from "@/server/ai";
 import { mulberry32 } from "@/games/framework";
+import { buildPersonalizedSessionPlan } from "@/services/personalizedSessionPlanner";
 
 // Server-side deterministic hash (FNV-1a) — no Math.random, no window APIs.
 // Same learner + same data => same plan (DEC-050).
@@ -43,42 +44,45 @@ export interface LearningPlan {
   source: "deterministic" | "ai-assisted";
 }
 
-// Core deterministic planner
+// Core deterministic planner — now delegates to PersonalizedSessionPlanner
+// for global-level + skill-mastery → activity complexity. Keeps the same
+// LearningPlan shape for backward compatibility, but all items share the
+// learner's GLOBAL level (no per-game levels visible).
 export async function buildPlan(learnerId: string): Promise<LearningPlan> {
+  // Use the new adaptive session planner as the source of truth.
+  // It is deterministic and respects global level + mastery.
   const learner = await getLearner(learnerId);
-  // Fallback to defaults if no learner (anonymous)
-  const ageBand = (learner?.ageBand ?? "6-7") as string;
-  const level = learner?.level ?? 1;
+  const session = await buildPersonalizedSessionPlan(learnerId);
+  const ageBand = session.ageBand as string;
+  const level = session.globalLevel;
   const interests = learner?.interests ?? {};
   const progress = learner?.gameProgress ?? {};
 
-  // Score games: interest + need + variety (fully deterministic).
-  // Tie-break jitter comes from a seeded PRNG keyed on learnerId so the same
-  // learner with the same data always gets the same plan. Client-side window
-  // shuffling (windowSeed) still diversifies simultaneous open windows on top.
-  const jitterRand = mulberry32(hashSeed(`${learnerId}:jitter`));
+  // Map session activities back to the legacy game-based LearningPlan for
+  // existing consumers (GamePlan, ContinueLearning, tests). Each activity
+  // maps to its underlying gameId via href or direct id; duplicates collapsed.
+  const gameMap = new Map<string, { gameId: string; reason: string; priority: number }>();
+  for (const act of session.activities) {
+    // Prefer href gameId, fallback to activity skill/game mapping
+    const rawGameId = act.href ? act.href.split("/").pop()! : act.skill;
+    // Normalize to known GAMES ids where possible
+    const gameId = GAMES.some((g) => g.id === rawGameId) ? rawGameId : (GAMES.find((g) => act.skill.includes(g.id))?.id ?? rawGameId);
+    if (!gameMap.has(gameId)) {
+      gameMap.set(gameId, { gameId, reason: act.reason, priority: act.priority });
+    } else {
+      // Keep highest priority reason for this game
+      const cur = gameMap.get(gameId)!;
+      if (act.priority > cur.priority) gameMap.set(gameId, { gameId, reason: act.reason, priority: act.priority });
+    }
+  }
+  // Ensure all registered games appear exactly once (for validation), ordered by session priority
   const scored = GAMES.map((g) => {
-    const interest = interests[g.id] ?? 0;
-    const prog = progress[g.id];
-    const completions = prog?.completions ?? 0;
-    const accuracy = prog?.bestAccuracy ?? 0;
-    // Need: low completions or low accuracy => higher need score
-    let need = 0;
-    if (completions === 0) need = 2; // unplayed => high priority for variety
-    else if (accuracy < 0.7) need = 3; // struggling => highest need
-    else if (accuracy < 0.85) need = 1;
-    // Variety: penalize heavily-played games (completions as proxy)
-    const varietyPenalty = Math.min(2, completions * 0.3);
-    const total = interest * 0.6 + need * 1.2 - varietyPenalty + jitterRand() * 0.1;
-    let reason = "variety";
-    if (need >= 2) reason = "need-practice";
-    else if (interest > 2) reason = "interest";
-    return { gameId: g.id, score: total, reason };
+    const entry = gameMap.get(g.id);
+    if (entry) return entry;
+    // Unrepresented games get lowest priority variety
+    return { gameId: g.id, reason: "variety", priority: -1 };
   });
-
-  // Sort by score descending, then deterministic shuffle of non-top items so
-  // plans vary across learners but stay stable per learner.
-  scored.sort((a, b) => b.score - a.score);
+  scored.sort((a, b) => b.priority - a.priority);
   const top = scored[0];
   const rest = shuffleDeterministic(scored.slice(1), hashSeed(`${learnerId}:rest:${level}`));
   const ordered = [top, ...rest];
@@ -101,10 +105,10 @@ export async function buildPlan(learnerId: string): Promise<LearningPlan> {
     reason: s.reason,
   }));
 
-  // Validate final plan: every registered game exactly once, correct level.
+  // Validate final plan: every registered game exactly once, correct global level.
   // Sized by the registry (not a hardcoded count) so new games join safely.
   const validIds = new Set(GAMES.map((g) => g.id));
-  const validated = items.filter((it) => validIds.has(it.gameId) && it.level >= 1 && it.level <= 5);
+  const validated = items.filter((it) => validIds.has(it.gameId) && it.level >= 1 && it.level <= 10);
   if (validated.length !== GAMES.length || new Set(validated.map((i) => i.gameId)).size !== GAMES.length) {
     // Fallback to deterministic default order
     return {

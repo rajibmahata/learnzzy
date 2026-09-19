@@ -79,11 +79,11 @@ export default function PlayHome() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-surface">
-      {/* Fixed 3D Archipelago Background — Stitch ANIMATION_48 */}
-      <div className="fixed inset-0 z-0 pointer-events-auto">
+      {/* Fixed 3D Archipelago Background — Stitch ANIMATION_48 — child-friendly soft wonderland */}
+      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
         <WonderArchipelago3D />
       </div>
-      <div className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-surface/75 via-transparent to-surface/90" aria-hidden />
+      <div className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-surface/60 via-white/20 to-surface/90" aria-hidden />
 
       {/* Content overlay */}
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-28 pt-4 md:px-6">
@@ -225,12 +225,8 @@ export default function PlayHome() {
           </div>
         )}
 
-        {/* Living Wonder Worlds — Stitch 6 cards — Organized Featured Worlds */}
-        <section aria-labelledby="worlds-title" className="bg-white/60 backdrop-blur-md rounded-2xl p-3 md:p-5 mt-4 border-2 border-white/80 shadow-[0_8px_24px_rgba(180,160,130,0.12)]">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <h2 id="worlds-title" className="text-headline-md font-extrabold">✨ Featured Wonder Worlds</h2>
-            <span className="hidden sm:inline-flex items-center gap-1 text-xs font-bold bg-primary-fixed text-primary px-3 py-1 rounded-full">6 Worlds • Tap to Play</span>
-          </div>
+        {/* Living Wonder Worlds — 6 Box Tiles with 3D images — like All Wonder Adventures */}
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl p-3 md:p-5 mt-4 border-2 border-white/80 shadow-[0_8px_24px_rgba(180,160,130,0.12)]">
           <WonderWorlds games={games} />
           {/* Hidden game names for e2e that expects registry names */}
           <div className="sr-only" aria-hidden>
@@ -238,7 +234,7 @@ export default function PlayHome() {
               <span key={g.id}>{g.name}</span>
             ))}
           </div>
-        </section>
+        </div>
 
         {/* All Games — Complete, Organized by Wonder World — Child-Friendly 3D */}
         <section aria-labelledby="more-title" className="mt-6 bg-white/70 backdrop-blur-md rounded-2xl p-4 md:p-5 border-2 border-white/80 shadow-[0_8px_24px_rgba(180,160,130,0.12)]">

@@ -81,36 +81,19 @@ export default function ParentProgressPage() {
               </div>
             )}
             {progress.skills && progress.skills.length > 0 && (
-              <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Skill levels">
-                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Skill levels · adapt independently</p>
+              <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Skill mastery">
+                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Skill mastery · Global Level {progress.level} · complexity personalized</p>
                 <ul className="mt-2 flex flex-col gap-2">
                   {progress.skills.map((s) => (
                     <li key={s.gameId}>
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-bold">{s.name}</span>
-                        <span className="text-xs font-black">Level {s.level} · {TREND_LABEL[s.trend] ?? s.trend}</span>
+                        <span className="text-xs font-black">{TREND_LABEL[s.trend] ?? s.trend} · {s.masteryPct}%</span>
                       </div>
                       <MasteryBar pct={s.masteryPct} />
-                      <p className="mt-0.5 text-xs text-on-surface-variant">{s.completions} plays · {s.recentAccuracyPct}% recent</p>
+                      <p className="mt-0.5 text-xs text-on-surface-variant">{s.completions} plays · {s.recentAccuracyPct}% recent · {s.summary}</p>
                     </li>
                   ))}
-                </ul>
-              </div>
-            )}
-            {progress.skills && progress.skills.length > 0 && (
-              <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Level-up forecast">
-                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Level-up forecast</p>
-                <ul className="mt-2 flex flex-col gap-2">
-                  {progress.skills.map((s) => {
-                    const next = Math.min(5, s.level + 1);
-                    const pace = s.trend === "strong" || s.trend === "improving" ? "On track" : s.trend === "steady" ? "Getting there" : "Practicing";
-                    return (
-                      <li key={s.gameId} className="flex items-center justify-between gap-2 text-sm">
-                        <span className="font-bold">{s.name} · L{s.level} → L{next}</span>
-                        <span className="shrink-0 text-xs font-black">{s.masteryPct}% · {pace}</span>
-                      </li>
-                    );
-                  })}
                 </ul>
               </div>
             )}

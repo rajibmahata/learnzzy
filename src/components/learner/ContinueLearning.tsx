@@ -27,7 +27,7 @@ export function ContinueLearning() {
   return (
     <section aria-labelledby="continue-title" className="safe-panel tactile mt-3 block p-4 text-left">
       <p className="text-[11px] font-black uppercase tracking-wider text-primary">
-        ⭐ Continue learning{nickname ? `, ${nickname}` : ""}
+        ⭐ Continue learning{nickname ? `, ${nickname}` : ""} • Global Level {next.level}
       </p>
       <div className="mt-1 flex items-center gap-3">
         <span aria-hidden className="text-4xl">{ICONS[next.gameId] ?? "🎮"}</span>
@@ -36,7 +36,7 @@ export function ContinueLearning() {
             Let&apos;s practice {next.gameId}!
           </h2>
           <p className="text-sm text-on-surface-variant">
-            Level {next.level} • {next.reason === "interest" ? "Because you love it" : next.reason === "need-practice" ? "Extra practice" : "Something new"}
+            {next.reason === "interest" ? "Because you love it" : next.reason === "need-practice" ? "Extra practice" : next.reason === "discovery" ? "New discovery" : "Something new"} • complexity adapts to you
           </p>
         </div>
         <Link

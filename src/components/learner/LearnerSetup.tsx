@@ -69,10 +69,38 @@ export function LearnerSetup() {
       router.push("/play");
     } catch (e) {
       const message = e instanceof Error ? e.message : "Something went wrong.";
+      // Connection refused / server not running → graceful offline fallback
+      // so child can still play (deterministic local content, BR-221).
+      const isNetworkError =
+        message.includes("Failed to fetch") ||
+        message.includes("ERR_CONNECTION_REFUSED") ||
+        message.includes("NetworkError") ||
+        message.includes("Load failed");
+      if (isNetworkError) {
+        try {
+          const fallbackId =
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? `learner_${(crypto as { randomUUID: () => string }).randomUUID()}`
+              : `learner_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+          const fallbackLevel = 1;
+          setLearnerId(fallbackId);
+          cacheProfile({ learnerId: fallbackId, nickname: nickname.trim() || undefined, ageBand: selectedAgeBand as "4-5" | "6-7" | "8-9", level: fallbackLevel });
+          // also store session for offline event queue
+          try {
+            localStorage.setItem("learnzzy.sessionId", fallbackId);
+          } catch {}
+          router.push("/play");
+          return;
+        } catch {
+          // fall through to error display if fallback also fails
+        }
+      }
       setError(
         message.includes("abort") || message.includes("Abort")
-          ? "Could not reach Learnzzy. Check your connection and try again."
-          : message
+          ? "Could not reach Learnzzy. Check your connection and try again. If the server is not running, run `npm run dev` or `docker compose up -d` and refresh."
+          : isNetworkError
+            ? "Could not reach Learnzzy server at localhost:3000 (ERR_CONNECTION_REFUSED). Start the server with `npm run dev` (or `run.bat dev` on Windows) or `docker compose up -d`, then try again. Offline play will start automatically."
+            : message
       );
     } finally {
       setBusy(false);

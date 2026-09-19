@@ -19,6 +19,8 @@ export interface ActivityContent {
   /** Visual items rendered big (emoji / numbers / words). */
   visual: string[];
   visualLabel: string;
+  /** Optional sizing for big-small: maps visual index to relative scale (0..1). */
+  visualMeta?: { sizes?: number[]; wantBiggest?: boolean };
   options: string[];
   answer: string;
   answerIndex: number;
@@ -240,7 +242,10 @@ function genBigSmall(seed: string, c: ComplexityProfile): ActivityContent {
   const rng = mulberry32(hashSeed(`bigsmall:${seed}`));
   const emoji = pick(rng, ["🍎", "🎈", "🧸", "🐟", "🌸", "🚗"] as const);
   const n = c.itemCount;
-  const sizes = shuffle(rng, Array.from({ length: n }, (_, i) => i));
+  // Age-graded size subtlety: 4–5 obvious gaps, 8–9 very close sizes
+  // Generate distinct scales then shuffle: ensures answer is deterministic and visual actually differs
+  const rawSizes = Array.from({ length: n }, (_, i) => i);
+  const sizes = shuffle(rng, rawSizes);
   const wantBiggest = rng() < 0.5;
   const targetPos = wantBiggest ? sizes.indexOf(n - 1) : sizes.indexOf(0);
   const answer = String(targetPos + 1);
@@ -252,10 +257,11 @@ function genBigSmall(seed: string, c: ComplexityProfile): ActivityContent {
     templateId: "big-small", skill: "size-comparison", ageBand: c.ageBand, difficulty: c.difficulty,
     kind: "single-choice",
     prompt: wantBiggest ? "Which one is the BIGGEST?" : "Which one is the SMALLEST?",
-    instruction: "Sizes are shuffled — look carefully, then tap the position number (1 is left).",
+    instruction: "Look carefully at the sizes — tap the correct position number (1 is leftmost).",
     visual: sizes.map((s) => `${emoji}`), visualLabel: `sizes ${sizes.join(",")}`,
+    visualMeta: { sizes, wantBiggest },
     options, answer, answerIndex,
-    hints: ["Compare two at a time — keep the winner.", wantBiggest ? "Look for the one that towers over the rest." : "Look for the teeny-tiny one."],
+    hints: ["Compare two neighbours at a time — keep the winner.", wantBiggest ? "Look for the one that towers over the rest." : "Look for the teeny-tiny one."],
     explanation: wantBiggest ? `Yes! Number ${answer} is the biggest.` : `Yes! Number ${answer} is the smallest.`,
     voiceLine: wantBiggest ? "Which one is the biggest?" : "Which one is the smallest?",
   };

@@ -7,8 +7,10 @@ export interface LearnerDoc {
   sessionId: string;
   nickname?: string;
   ageBand: AgeBand;
-  level: number; // 1..5 — global journey/unlock authority
-  /** Per-skill adaptive levels (1..5). Absent game ⇒ falls back to global level. */
+  level: number; // 1..6+ — GLOBAL journey (single source, shared across all games)
+  /** Per-skill adaptive levels (1..5) — legacy internal storage, not visible as game level.
+   *  Skill mastery is the new internal signal; gameLevels kept for migration only.
+   *  Absent game ⇒ falls back to global level. */
   gameLevels?: Record<string, number>;
   /** Fast latest-result projection for dashboards (history stays in events). */
   lastResult?: {
@@ -238,7 +240,7 @@ export async function setGameLevel(learnerId: string, gameId: string, level: num
 }
 
 export async function setLearnerLevel(learnerId: string, level: number): Promise<LearnerDoc | null> {
-  const clamped = Math.max(1, Math.min(5, Math.floor(level)));
+  const clamped = Math.max(1, Math.min(10, Math.floor(level)));
   const db = await getDb().catch(() => null);
   if (!db) return null;
   await db.collection("learners").updateOne({ learnerId }, { $set: { level: clamped, updatedAt: new Date(), lastActivityAt: new Date() } }).catch(() => null);

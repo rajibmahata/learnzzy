@@ -3,7 +3,7 @@ import { activityFor } from "@/lib/activityRegistry";
 import { normalizeAgeBand, resolveComplexity } from "@/lib/complexity";
 import { generateActivityContent } from "@/lib/activityContent";
 import { getDb } from "@/db/mongodb";
-import { skillLevelFor } from "@/lib/skillLevels";
+import { evaluateSkill } from "@/lib/skillLevels";
 
 // GET /api/activities/[activityId]/content?learnerId=&ageBand=&seed=&limit=&recentIds=
 // Deterministic generators (no LLM, no arithmetic-by-AI). Learner lookup is
@@ -21,19 +21,39 @@ export async function GET(req: NextRequest, { params }: { params: { activityId: 
   const limit = Math.max(1, Math.min(8, Number(url.searchParams.get("limit") ?? "3") || 3));
   const recentIds = new Set((url.searchParams.get("recentIds") ?? "").split(",").filter(Boolean));
 
-  let skillLevel = Math.max(1, Math.min(5, Number(url.searchParams.get("skillLevel") ?? "1") || 1));
+  // Global level is the journey; skill mastery adjusts complexity within age band.
+  let globalLevel = Math.max(1, Math.min(10, Number(url.searchParams.get("skillLevel") ?? url.searchParams.get("globalLevel") ?? "1") || 1));
+  let mastery = 0.5;
   if (learnerId) {
     try {
       const db = await getDb();
-      const learner = db ? await db.collection("learners").findOne({ learnerId }) : null;
-      if (learner) skillLevel = skillLevelFor(learner as never, activity.id);
+      const learner = db ? await db.collection("learners").findOne({ learnerId } as never) : null;
+      if (learner) {
+        const doc = learner as unknown as { level?: number; gameProgress?: Record<string, { completions: number; recentAccuracy?: number[] }> };
+        globalLevel = Math.max(1, Math.min(10, doc.level ?? globalLevel));
+        // Compute mastery for this activity's primary skill from recent accuracy
+        const skillKey = activity.skills[0] ?? activity.id;
+        // Aggregate progress for this skill across related keys
+        const prog = (doc.gameProgress as Record<string, { completions: number; recentAccuracy?: number[] } | undefined> | undefined)?.[activity.id] ??
+          (doc.gameProgress as Record<string, { completions: number; recentAccuracy?: number[] } | undefined> | undefined)?.[skillKey] ??
+          (doc.gameProgress as Record<string, { completions: number; recentAccuracy?: number[] } | undefined> | undefined)?.[activity.skills[0]];
+        if (prog && Array.isArray(prog.recentAccuracy) && prog.recentAccuracy.length) {
+          const evaled = evaluateSkill({ completions: prog.completions ?? prog.recentAccuracy.length, recentAccuracy: prog.recentAccuracy.slice(-5) });
+          mastery = evaled.avgAccuracy;
+        } else if (prog) {
+          mastery = 0.5;
+        }
+      }
     } catch {
-      // best-effort: fall back to query skillLevel
+      // best-effort: fall back to query level
     }
   }
+  // Mastery adjusts effective level within global level: strong → +1, needs practice → -1, clamped
+  const masteryAdj = mastery >= 0.85 ? 1 : mastery < 0.5 ? -1 : 0;
+  const effectiveLevel = Math.max(1, Math.min(5, globalLevel + masteryAdj));
 
   const skill = activity.skills[0] ?? activity.id;
-  const complexity = resolveComplexity(skill, ageBand, skillLevel);
+  const complexity = resolveComplexity(skill, ageBand, effectiveLevel);
   const items = [];
   let guard = 0;
   let i = 0;
@@ -50,7 +70,9 @@ export async function GET(req: NextRequest, { params }: { params: { activityId: 
     category: activity.category,
     skill,
     ageBand,
-    skillLevel,
+    skillLevel: effectiveLevel,
+    globalLevel,
+    mastery: Math.round(mastery * 100) / 100,
     complexity,
     items,
   });

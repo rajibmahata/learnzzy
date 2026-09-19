@@ -155,6 +155,48 @@
   time), `src/lib/characters.ts` calm `STATE_LINES`. TTS stays cached +
   device fallback, never blocks, mute respected. 190/190 unit (+calm-quality
   test), `tsc`/`build` green.
+- Organized Wonder Play + Docker-First MCP (2026-09-18 Session 12):
+  Gaps closed: `/play` had 18/25 activities and generic hubs; now all **25**
+  activities shown organized by World (Numbers 8, Words 2, Write 3, Think 7,
+  Shapes 3, Discover&Puzzles 2) in `More Adventures` + 6 Stitch Category Hub
+  cards (Math Kingdom, Language Nest, Logic Grove, Rainbow Studio, Nature
+  Savannah, Wooden Playroom) with tactile `0_5px_0` shadows. Fixed
+  `WonderArchipelago3D` (`ANIMATION_48` archipelago, fog, 3 biomes) full-screen
+  wonderland, child-friendly soft gradients, 56px+ targets. Missing tiles added:
+  `more-less`, `count-by-tens`, `trace-number-name`, `matching`,
+  `odd-one-out`, `pattern`, `shape-match`. Docker-first MCP shim `services/mcp`
+  (`node:20-alpine`, non-root, `HEALTHCHECK`, `/health`/`/capabilities`/`/metrics`,
+  Bearer auth, `/data` volumes) for `tutor-mcp:3001`, `oer-mcp:3002`,
+  `ncert-mcp:3003` + `qdrant:6333` on private `learnzzy` bridge, service DNS,
+  prod override hides host ports, `scripts/docker-health.mjs` + `npm run
+  docker:health`. Education Gateway unchanged (advisory, fallback to mocks).
+  Stitch `1b8480cd` Category Hub + `a1812/9fa2` Archipelago + `00259/3f852`
+  level maps + `f66f/38d8/77cc` games fetched via `curl -L`.
+  `docker compose config` OK, 190/190 unit, `tsc`/`build` green.
+- All 25 Validated — Big & Small Fix (2026-09-18 Session 13): child reported
+  `Big & Small` identical visuals and wrong maths; `ActivityContent` now
+  carries `visualMeta {sizes, wantBiggest}` and `ActivityPlayer` renders scaled
+  pills (`0.7→1.8` for 4–5, `0.9→1.3` for 8–9) with `1..n` badges so maths is
+  visible and deterministic (`answer = indexOf biggest/smallest +1`). Full
+  validation of `All Wonder Adventures` 25 tiles (generic 19 + game-route 6)
+  across all age bands: `exactly-one-correct`, `unique`, `index-points-at-answer`,
+  `visual length == n`. `GET /api/activities/...` still globalLevel+mastery.
+  No MCP needed; `npm test` 190/190 remains green.
+- Global Level + Personalized Session Planner (2026-09-18 Session 14): one
+  global `level 1..6+`, no per-game visible levels; `skill mastery` internal
+  (`evaluateSkill` on `recentAccuracy`), `complexity = global + masteryAdj`
+  via `resolveComplexity`; new `PersonalizedSessionPlanner` deterministic
+  (`hashSeed`/`mulberry32`, interest+need+variety, top-stays+shuffled rest,
+  expiresAt+1day); `buildPlan` all items `level = globalLevel`;
+  `levelService` global promotion (total completions ≥3, avg ≥0.80, variety);
+  new `GET /api/learners/[id]/session`; UI shows `Global Level` + mastery
+  strengths. `npm test` 190/190, `tsc` 0.
+- Natural Human-Like Female Voice — Root Cause (2026-09-18 Session 15):
+  inspection of `speechSynthesis`/`SpeechSynthesisUtterance`/`getVoices`/
+  `voiceAssetService` shows `voiceAssets` pending (KI-020), `rate/pitch` only,
+  no SSML/breath, `pauseAfterMs` unused, robotic eSpeak fallback. Decision:
+  server `ttsProvider` (`tts-1-hd` warm female) → `voiceAssets.audioUrl` →
+  `HTMLAudio` preload, `speechSynthesis` only offline fallback.
 
 ### Changed
 - `/api/games` now exposes all five MVP games as active.

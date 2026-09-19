@@ -25,11 +25,13 @@ describe("worlds metadata (real code)", () => {
       assert.equal(worldForGame(id)?.dark ?? false, false);
     }
   });
-  test("scene art resolves only for fetched Stitch boards", () => {
+  test("scene art resolves for all worlds with 3D images (box-tile design)", () => {
     assert.ok((artForGame("clean-up") ?? "").endsWith("clean-up/scene.webp"));
     assert.ok((artForGame("puzzle") ?? "").endsWith("puzzle/scene.webp"));
     assert.ok((artForGame("sketch") ?? "").endsWith("sketch/scene.webp"));
-    assert.equal(artForGame("addition"), null);
+    assert.ok((artForGame("addition") ?? "").includes("number-orchard"));
+    assert.ok((artForGame("subtraction") ?? "").includes("breeze-valley"));
+    assert.ok((artForGame("discover") ?? "").includes("level-"));
     assert.equal(artForGame("nope"), null);
   });
   test("unknown games resolve to null (caller falls back)", () => {

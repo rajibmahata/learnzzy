@@ -19,42 +19,102 @@ export function speak(text: string, lang = "en-US"): boolean {
   return speakWithCharacter(text, { lang, rate: 0.84, pitch: 1.01 });
 }
 
-// Throttle: give child thinking time — don't speak on every click.
-// 900ms minimum gap; thinking/hint events bypass via `force` is not needed
-// because callers already gate (ActivityPlayer waits 2–4s before hint voice).
+// Throttle: gentle — allow explicit taps but avoid overlapping chatter.
 let lastSpeakAt = 0;
-const SPEAK_THROTTLE_MS = 900;
+const SPEAK_THROTTLE_MS = 350;
+let cachedFemaleVoice: SpeechSynthesisVoice | null = null;
+
+function pickCalmFemaleVoice(lang: string): SpeechSynthesisVoice | null {
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return null;
+    const l = lang.toLowerCase();
+    // Prefer warm female voices: Google, Microsoft, Samantha, Karen, etc.
+    const femaleHints = ["female", "samantha", "karen", "moira", "tessa", "veena", "google uk english female", "microsoft zira", "microsoft hazel"];
+    let best = voices.find((v) => v.lang.toLowerCase().startsWith(l.split("-")[0]) && femaleHints.some((h) => v.name.toLowerCase().includes(h)));
+    if (best) return best;
+    // Fallback: any en female-like or first en voice
+    best = voices.find((v) => v.lang.toLowerCase().startsWith("en") && v.name.toLowerCase().includes("female"));
+    if (best) return best;
+    // Fallback: first matching lang
+    best = voices.find((v) => v.lang.toLowerCase() === l.toLowerCase());
+    if (best) return best;
+    best = voices.find((v) => v.lang.toLowerCase().startsWith(l.split("-")[0]));
+    if (best) return best;
+    return voices[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function ensureVoices(): void {
+  try {
+    const synth = window.speechSynthesis;
+    if (synth.getVoices().length === 0) {
+      // Trigger async load; browser will fire voiceschanged
+      synth.getVoices();
+    }
+    if (!cachedFemaleVoice) {
+      const v = pickCalmFemaleVoice("en-US");
+      if (v) cachedFemaleVoice = v;
+    }
+  } catch {}
+}
+
+if (typeof window !== "undefined") {
+  try {
+    window.speechSynthesis?.addEventListener?.("voiceschanged", () => {
+      ensureVoices();
+    });
+    // initial attempt
+    ensureVoices();
+  } catch {}
+}
 
 /** Calm character-aware speech: warm, soft, moderate, clear.
- * Respects mute, reduced-motion is handled by caller (no auto-play if needed),
- * and throttles rapid repeats so the child gets quiet thinking time. */
+ * Respects mute, ensures female voice, gentle throttle for thinking time. */
 export function speakWithCharacter(
   text: string,
   opts: { lang?: string; rate?: number; pitch?: number } = {}
 ): boolean {
   try {
-    if (isSoundMuted()) return false;
+    if (isSoundMuted()) {
+      // Ensure UI reflects muted state but don't block — return false so caller knows
+      return false;
+    }
     if (!audioAvailable()) return false;
     const now = Date.now();
     if (now - lastSpeakAt < SPEAK_THROTTLE_MS) {
-      // Allow immediate correct/gentle retry? Caller already throttles;
-      // soft drop here ensures the child isn't talked over.
-      // For now, respect throttle — next valid utterance will play.
-      // To keep thinking time, we drop rather than queue.
-      if (now - lastSpeakAt < 300) return false;
+      if (now - lastSpeakAt < 150) return false;
     }
     lastSpeakAt = now;
+    ensureVoices();
     const synth = window.speechSynthesis;
-    synth.cancel();
+    // Don't cancel if already speaking the same text within 1s — let it finish for child
+    try {
+      if (synth.speaking) synth.cancel();
+    } catch {}
     const clean = text.replace(/\s+/g, " ").trim().slice(0, 200);
     if (!clean) return false;
     const utter = new SpeechSynthesisUtterance(clean);
-    utter.lang = opts.lang ?? "en-US";
+    const lang = opts.lang ?? "en-US";
+    utter.lang = lang;
     // Calm female: moderate rate (0.82–0.88), soft pitch (≈1.0), never loud/fast
     utter.rate = Math.max(0.7, Math.min(1.0, opts.rate ?? 0.84));
     utter.pitch = Math.max(0.9, Math.min(1.1, opts.pitch ?? 1.01));
     utter.volume = 0.85; // low-to-medium, respects device volume
+    const voice = cachedFemaleVoice ?? pickCalmFemaleVoice(lang);
+    if (voice) {
+      utter.voice = voice;
+      // Align lang to voice lang for natural pronunciation
+      utter.lang = voice.lang;
+    }
+    utter.onerror = () => {
+      // Silent fallback — never break gameplay, child sees text anyway
+    };
     synth.speak(utter);
+    // Safari requires resume if paused
+    if (synth.paused) synth.resume();
     return true;
   } catch {
     return false;

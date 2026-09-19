@@ -1603,6 +1603,47 @@ time, mute + `prefers-reduced-motion` respected, never blocks gameplay.
 
 ---
 
+## DEC-192 — Docker-First MCP (Private Network, Qdrant, Health)
+
+**Decision:**
+Tutor/OER/NCERT run as unified `services/mcp` shim (`node:20-alpine`,
+non-root, `HEALTHCHECK`, `/health`/`/capabilities`/`/metrics`, Bearer auth,
+`/data` volumes) on private `learnzzy` bridge + `qdrant:6333`
+(`qdrant/qdrant:v1.9.4`). `docker-compose.yml` service DNS
+(`http://tutor-mcp:3001` etc.), host `127.0.0.1:` mapping, `depends_on:
+service_healthy` chain, `docker-compose.prod.yml` hides host ports and adds
+log rotation. Gateway (`gateway.ts`, `config.ts` fail-closed) is sole
+entry, private, validated, cached, with `npm run docker:health` and admin
+`/api/admin/education/health` now showing `lastSuccess/lastFailure`.
+
+**Reason:**
+- Local/VPS parity, no MCP ports public, MCP failure never breaks child;
+  shim satisfies documented REST contracts without inventing ports/auth.
+
+**Status:** Active (2026-09-18)
+
+---
+
+## DEC-191 — All 25 Activities on Organized Wonder Play (Stitch Category Hub)
+
+**Decision:**
+`/play` now surfaces **all 25** `activityRegistry` activities organized by
+Wonder World (Numbers 8, Words 2, Write 3, Think 7, Shapes 3, Discover &
+Puzzles 2) in `All Wonder Adventures` with Stitch Category Hub 6-hub cards
+(`1b8480cd` gradients/tactile shadows) and `WonderArchipelago3D`
+(`a1812/9fa2` ANIMATION_48) wonderland. Missing 7 tiles added: `more-less`,
+`count-by-tens`, `trace-number-name`, `matching`, `odd-one-out`, `pattern`,
+`shape-match`. Tiles remain age-adaptive via `complexity.ts` and child-friendly.
+
+**Reason:**
+- Gaps: play showed 18/25 and generic hubs; spec requires complete, organized,
+  child-friendly wonderland, not random grid.
+- Grouping by World preserves Stitch hierarchy and Learnzzy complexity.
+
+**Status:** Active (2026-09-18)
+
+---
+
 # 27. Decision Ownership
 
 The decision log should be reviewed whenever:

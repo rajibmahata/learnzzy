@@ -24,9 +24,9 @@ export function HomeContinue() {
       <div className="mt-3 flex items-center gap-3 rounded-2xl border-2 border-surface-high bg-white p-4 shadow-pillow">
         <span aria-hidden className="text-4xl">⭐</span>
         <div className="min-w-0 flex-1 text-left">
-          <p className="text-xs font-black uppercase tracking-wider text-primary">Continue learning</p>
-          <p className="truncate font-extrabold capitalize">Let&apos;s practice {next.gameId} — Level {next.level}</p>
-          <p className="text-sm text-on-surface-variant truncate">{next.reason === "need-practice" ? "Extra practice, just for you" : next.reason === "interest" ? "Because you love it" : "Something new to discover"}</p>
+          <p className="text-xs font-black uppercase tracking-wider text-primary">Continue learning • Global Level {next.level}</p>
+          <p className="truncate font-extrabold capitalize">Let&apos;s practice {next.gameId}!</p>
+          <p className="text-sm text-on-surface-variant truncate">{next.reason === "need-practice" ? "Extra practice, just for you" : next.reason === "interest" ? "Because you love it" : next.reason === "discovery" ? "New discovery" : "Something new to discover"} • complexity adapts to you</p>
         </div>
         <Link href={`/play/${next.gameId}`} className="tactile-button shrink-0 bg-primary px-5 py-2 text-white">Go →</Link>
       </div>

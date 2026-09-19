@@ -716,7 +716,7 @@ Child Game → Gameplay Events → Analytics → Learning Signals
     → Content Pool → Game → Result → Parent Dashboard (academic rollup)
 ```
 
-Invariants (DEC-183/184/185/189, BR-260–266): MCP advisory-only with
+Invariants (DEC-183/184/185/189/191/192, BR-260–266): MCP advisory-only with
 failure-isolated gateway calls; LEARN→MASTER with no skips/jumps;
 voice prepared-per-language and cached, never live in gameplay; visual
 theme independent of difficulty. New collections: `academicPlans`,
@@ -724,18 +724,19 @@ theme independent of difficulty. New collections: `academicPlans`,
 result` + `GET /api/admin/academic/plans`. Living Wonder layer (2026-09-18):
 `lib/worlds.ts` + `WonderBits.tsx` presentation bits, 3 optimized Stitch
 scene postcards in `public/assets/`; deviations in DEC-187. Learning
-Playground layer (2026-09-18, DEC-188): category-first `/play` (7 Learning
-Worlds) → `/learn/[category]` → 16 activities; 10 worksheet-inspired
-activities share one generic engine (`lib/categories.ts`,
-`lib/complexity.ts` §27 baseline, `lib/activityRegistry.ts`,
-`lib/activityContent.ts` deterministic generators) served by
-`GET /api/activities/[activityId]/content` and rendered by one
-`ActivityPlayer`; shipped engines linked, never duplicated; completions
-reuse game-events + `academic/result` (no new collections/routes for
-adaptation, parent, or academic flow). Session 10 (2026-09-18, DEC-189):
-landing category-primary (CATEGORIES grid + `HomeContinue` +
-`BrandLogo→/play` + `d14a`/`4b84` ANIMATION_45 Rich mushrooms/apples/stars) ;
-`genTraceWrite` `answerIndex` hardening. Verified: 189
-unit tests (47 suites), typecheck, lint, production build, Docker image build.
-Open: Playwright `/learn` + HomeContinue pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
+Playground layer (2026-09-18, DEC-188/191): category-first `/play` (7 Learning
+Worlds) → `/learn/[category]` → 25 activities (all organized: Featured
+Worlds 6 + All Wonder Adventures 25 grouped by World); worksheet-inspired
+generic engine (`lib/categories.ts`, `lib/complexity.ts` §27 baseline,
+`lib/activityRegistry.ts`, `lib/activityContent.ts` deterministic) served by
+`GET /api/activities/[activityId]/content` + `ActivityPlayer`; shipped
+engines linked, never duplicated; completions reuse game-events +
+`academic/result`. Session 10 (DEC-189): landing category-primary
+(`HomeContinue` + `BrandLogo→/play` + `d14a`/`4b84` mushrooms/apples/stars)
++ Session 11/12 (DEC-190/191/192): calm VoiceScript (13 events, 5 locales)
++ organized 25-tile Play + Docker-first MCP (`services/mcp` + `qdrant` on
+private `learnzzy` network, `docker:health`) + Session 13 (Big & Small
+`visualMeta` fix, 300-seed validation). Verified: 190
+unit tests (47 suites), typecheck, lint, production build, `docker compose config` OK.
+Open: Playwright `/play` 25-tile + HomeContinue + Big & Small scale pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
 Playwright academic pass, parent-journey screenshot re-fetch, physical devices.

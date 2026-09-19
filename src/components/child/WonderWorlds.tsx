@@ -21,17 +21,15 @@ const ARROW_BG: Record<string, string> = {
 export function WonderWorlds({ games }: { games: GameInfo[] }) {
   const byId = new Map(games.map((g) => [g.id, g]));
   return (
-    <section aria-labelledby="worlds-title" className="mt-4">
-      <div className="flex items-center justify-center gap-2 text-center">
-        <h2 id="worlds-title" className="text-headline-md">
-          ✨ Living Wonder Worlds
-        </h2>
-        <span className="rounded-full bg-surface-container px-2.5 py-0.5 text-xs font-black text-primary">
-          {WORLDS.filter((w) => byId.has(w.gameId)).length} Worlds
+    <section aria-labelledby="worlds-title">
+      <div className="flex items-center justify-between gap-2">
+        <h2 id="worlds-title" className="text-headline-md font-extrabold flex items-center gap-2">✨ Featured Wonder Worlds</h2>
+        <span className="rounded-full bg-primary-fixed text-primary text-xs font-black px-3 py-1 hidden sm:inline-flex">
+          {WORLDS.filter((w) => byId.has(w.gameId)).length} Worlds • Tap to Play
         </span>
       </div>
-      <p className="mt-1 text-center text-sm text-on-surface-variant">Tap an enchanted world to jump in!</p>
-      <nav aria-label="Wonder worlds" className="mt-3 flex flex-col gap-4 pb-4">
+      <p className="mt-1 text-sm text-on-surface-variant">Magical 3D islands — every world adapts to age 4–5, 6–7, 8–9</p>
+      <nav aria-label="Wonder worlds" className="mt-4 grid grid-cols-2 lg:grid-cols-3 gap-3">
         {WORLDS.map((w) => {
           const game = byId.get(w.gameId);
           if (!game) return null;
@@ -43,39 +41,40 @@ export function WonderWorlds({ games }: { games: GameInfo[] }) {
               key={w.gameId}
               href={game.href}
               aria-label={`Enter ${w.world}: ${w.tagline}`}
-              className={`play-card tactile flex flex-col p-3 text-left ${dark ? "bg-[#1c2450] text-white" : "bg-white"}`}
+              className={`tactile group flex flex-col overflow-hidden rounded-2xl border-2 bg-white text-left shadow-[0_4px_0_rgba(180,160,130,0.18)] hover:shadow-[0_6px_0_rgba(180,160,130,0.22)] hover:-translate-y-1 transition-all ${dark ? "border-[#232a55] bg-[#1c2450] text-white" : "border-white"}`}
             >
-              <span className={`relative block h-44 overflow-hidden rounded-2xl bg-gradient-to-br ${w.gradient}`}>
+              <span className={`relative block h-36 sm:h-40 overflow-hidden ${dark ? "bg-[#1c2450]" : `bg-gradient-to-br ${w.gradient}`}`}>
                 {art ? (
-                  <img src={art} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  <img src={art} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
-                  <span aria-hidden className="absolute inset-0 flex items-center justify-center text-8xl">
+                  <span aria-hidden className="absolute inset-0 flex items-center justify-center text-7xl">
                     {w.islandTag.split(" ")[0]}
                   </span>
                 )}
-                <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-on-surface shadow-sm">
+                <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-black text-on-surface shadow-sm">
                   {w.islandTag}
                 </span>
-                <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-black text-secondary shadow-sm">
+                <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-black text-secondary shadow-sm">
                   ⭐ {w.spark}
                 </span>
-                <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-black text-on-surface shadow-sm">
+                <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-black text-on-surface shadow-sm max-w-[60%] truncate">
                   {w.host}
                 </span>
-                <span aria-hidden className="char char-idle absolute bottom-2 right-2 text-4xl leading-none drop-shadow">
+                <span aria-hidden className="absolute bottom-2 right-2 text-3xl leading-none drop-shadow char char-idle">
                   {guide.emoji}
                 </span>
               </span>
-              <span className="flex items-center justify-between gap-3 px-1 pb-1 pt-3">
-                <span className="min-w-0">
-                  <span className={`block text-xl font-black leading-tight ${dark ? "text-white" : "text-on-surface"}`}>{w.world}</span>
-                  <span className={`mt-0.5 block text-sm ${dark ? "text-white/85" : "text-on-surface-variant"}`}>{w.tagline}</span>
-                </span>
-                <span
-                  aria-hidden
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl font-black ${ARROW_BG[w.gameId] ?? ARROW_BG.addition}`}
-                >
-                  →
+              <span className="flex flex-col p-3 text-left flex-1">
+                <span className={`block text-[15px] font-black leading-tight ${dark ? "text-white" : "text-on-surface"}`}>{w.world}</span>
+                <span className={`mt-1 line-clamp-2 text-xs leading-snug ${dark ? "text-white/80" : "text-on-surface-variant"}`}>{w.tagline}</span>
+                <span className="mt-3 flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-surface-container-low border text-on-surface-variant">Tap to Play</span>
+                  <span
+                    aria-hidden
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg font-black ${ARROW_BG[w.gameId] ?? ARROW_BG.addition}`}
+                  >
+                    →
+                  </span>
                 </span>
               </span>
             </Link>

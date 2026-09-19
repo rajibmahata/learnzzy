@@ -36,7 +36,7 @@ Learnzzy is a child-focused educational games PWA for short, visual, determinist
 
 ## Status
 - Phase: build / stabilize
-- Last updated: 2026-09-18 Session 10, by OpenCode — 189 unit, validated Stitch d14a/4b84, Home Learning World
+- Last updated: 2026-09-18 Session 15, by OpenCode — 190 unit, Global Level + 25 validated, warm female voice root cause, Docker MCP
 
 ## 2026-09-18 Stitch Retrieval + Attractiveness Update
 
@@ -60,6 +60,52 @@ hierarchy. `BrandLogo` → `/play`. Bug: `genTraceWrite` `answerIndex: 0` →
 `options.indexOf(answer)` with tightened assertions; `resolveComplexity`
 dead code removed. Verified: 189 unit (47 suites), `tsc`/`eslint`/`next
 build` green.
+
+## 2026-09-18 Session 11 — Calm Warm Female Voice
+
+Calm companion: `VoiceScript` (13 events, 5 locales), moderate 0.82–0.88,
+soft volume 0.85, 900ms thinking gap, 5-locale soft scripts, `CHARACTER_VOICES`
+and `STATE_LINES` calm. TTS cached + fallback, never blocks. Verified:
+190 unit, `tsc`/`build` green.
+
+## 2026-09-18 Session 12 — Organized Wonder Play + Docker-First MCP + Category Hub
+
+`/play` gap closed (18→25): added `more-less`, `count-by-tens`,
+`trace-number-name`, `matching`, `odd-one-out`, `pattern`, `shape-match` to
+`More Adventures`, now grouped by World (Numbers 8, Words 2, Write 3, Think 7,
+Shapes 3, Discover&Puzzles 2) + 6 Stitch Category Hub cards (Category Hub
+`1b8480cd` gradients/tactile shadows) + `WonderArchipelago3D` (`a1812/9fa2`
+`ANIMATION_48`) full-screen wonderland. Docker-first MCP shim (`services/mcp`
+unified image, 3 roles, qdrant) on private `learnzzy` network, prod hides
+ports, `npm run docker:health`. Stitch `1b8480`, `a1812/9fa2`, `00259/3f852`,
+`f66f/38d8/77cc` fetched via `curl -L`. Verified: 190 unit, `tsc`/`docker
+compose config` OK, `next build` green.
+
+## 2026-09-18 Session 13 — All 25 Validated + Big & Small Fix
+
+`Big & Small` identical visuals fixed: `ActivityContent.visualMeta` + scaled
+pills in `ActivityPlayer`; `All Wonder Adventures` 25/25 validated across
+`4-5/6-7/8-9` (`one-correct`, `unique`, `index-points-at-answer`,
+`visual length`). `GET /api/activities/...` still `globalLevel+mastery`.
+Verified: `npm test` 190/190, `npx tsc --noEmit` 0.
+
+## 2026-09-18 Session 14 — Global Level + Personalized Session Planner
+
+Single `GLOBAL` level 1..6+ (no per-game visible levels); `skill mastery`
+internal (`gameProgress.recentAccuracy` → `evaluateSkill`), `activity
+complexity = global + masteryAdj` via `resolveComplexity`; deterministic
+`PersonalizedSessionPlanner` (interest+need+variety, top-stays). `buildPlan`
+all items `level = globalLevel`, new `GET /api/learners/[id]/session`,
+`levelService` global promotion (overall avg + variety). UI now `Global
+Level` only. Verified: `npm test` 190/190, `tsc` 0.
+
+## 2026-09-18 Session 15 — Natural Female Voice Root Cause
+
+Inspected `speechSynthesis`/`getVoices`/`voiceAssetService` → robotic
+parametric, no SSML, `voiceAssets` pending (KI-020), `rate/pitch` insufficient.
+Decision: server `ttsProvider` (neural warm female) → `voiceAssets.audioUrl`
+→ `HTMLAudio` preload, `speechSynthesis` fallback only; `VoiceScript`
+`pauseAfterMs` will be waited, gameplay never blocks.
 
 ## 2026-09-17 Academic Engine Update
 

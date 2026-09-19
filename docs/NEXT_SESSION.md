@@ -384,7 +384,7 @@ At the end of each session, update this section:
 ## Session 2026-09-18 (10) — Animal Wonderland Rich + Home Learning World + trace-write fix
 
 ### Completed
-- Validated landing against new Stitch `d14a9b61` (Child-First 3D Play Home) + `4b8445bd` (ANIMATION_45 Rich) via `curl -L` (`.stitch/...` + `public/images/stitch/home-child-first-v2.png`); Rich scene: 5 candy mushrooms + 5 bobbing apples + 15 warm stars + 4 birds + tap jump burst + snappier camera. Updated `AnimalWonderland3D` to match (camera 4.5/20, mushrooms, apples, deterministic stars, 4-bird formation, `pointerdown` jump).
+- Validated landing against new Stitch `d14a9b61` (Child-First 3D Play Home) + `4b8445bd` (ANIMATION_45 Rich) via `curl -L` (`.stitch/...` + `public/images/stitch/home-child-first-v2.png`); Rich scene: 5 candy mushrooms + 5 bobbing apples + 15 warm stars + 4 birds + tap jump burst + snappier camera. Updated `AnimalWonderland3D` to match (camera 4.5/20, mushrooms, apples, 15 stars, 4 birds, `pointerdown` jump).
 - Landing now category-primary per spec §2/§3: hero → giant CTA → `HomeContinue` (Good-morning + plan-first Continue card, `GET .../plan` best-effort) → 7-category `CATEGORIES` grid (tactile, `→` affordance) → secondary 5-tile quick shortcuts → games gallery → voice board → safety. `BrandLogo` every header `→ /play`.
 - Bug: `genTraceWrite` `answerIndex: 0` (shuffle-blind) → `options.indexOf(answer)` with tightened `tests/activity-content.test.ts:18` (`options[answerIndex]==answer` across all bands/generators, expanded trace-write loop). Hygiene: `resolveComplexity` dead `nudge` branching removed.
 
@@ -398,6 +398,19 @@ At the end of each session, update this section:
 1. `npx playwright test e2e/learn.spec.ts e2e/child.spec.ts --project=mobile-320` against prod `npm start`.
 2. Seed + KI-019 live-Mongo E2E incl. new trace-write/complexity paths; KI-020 TTS for `voiceAssets`.
 3. Physical-device pass + re-fetch of any next Stitch revision.
+
+## Session 2026-09-18 (11/12) — Calm Voice + Organized Wonder Play + Docker-First MCP
+
+### Completed
+- Voice (11): calm warm female `VoiceScript` (13 events, 5 locales, 800ms pause), `CHARACTER_VOICES` 0.82–0.88/0.97–1.05 throttle 900ms, `STATE_LINES` calm. TTS cached + fallback. 190/190 unit.
+- Play gaps (12): `/play` 18→25: added 7 missing tiles (`more-less`, `count-by-tens`, `trace-number-name`, `matching`, `odd-one-out`, `pattern`, `shape-match`) grouped by World (Numbers 8, Words 2, Write 3, Think 7, Shapes 3, Discover&Puzzles 2) + 6 Stitch Category Hub cards (`1b8480cd` hub) + `WonderArchipelago3D` (`a1812/9fa2` ANIMATION_48) wonderland. All tiles child-friendly Stitch gradients/tactile.
+- Docker-first MCP (12): unified shim `services/mcp` (node:20-alpine non-root, HEALTHCHECK, volumes `tutor-data` etc.) for `tutor:3001`/`oer:3002`/`ncert:3003` + `qdrant:6333` on private `learnzzy` network, prod hides ports, `npm run docker:health`. Gateway advisory, fail-closed.
+
+### Verified
+- `typecheck` ✅, `lint` ✅, `npm test` 190/190 ✅, `docker compose config` ✅, `next build` ✅.
+
+### Known Issues / Notes
+- KI-019/020 still open; Docker `up -d` full 7-service health needs `tutor-data` etc. volumes first run; Playwright `/play` 25-tile pass pending; physical devices outstanding.
 
 ## Session 2026-09-18 (8) — Stitch 12–20 live retrieval + attractiveness pass
 
@@ -625,6 +638,24 @@ At the end of each session, update this section:
 ```
 
 ---
+
+## Session 2026-09-18 (13) — All 25 Validated — Big & Small Fix
+
+### Completed
+- Fix `Big & Small` `src/lib/activityContent.ts:239` — identical `text-4xl` visuals made maths invisible; now `visualMeta {sizes, wantBiggest}` + scaled pills (`0.7→1.8` for 4–5, `0.9→1.3` for 8–9) with `1..n` badges, deterministic `answer = indexOf(n-1|0)+1`, age-graded subtlety. Verified 300 seeds across bands/levels.
+- Validated all 25 `All Wonder Adventures` via `validate-adventures.mjs` + `validate-api.mjs`: `activityFor` + `generateActivityContent` across `4-5/6-7/8-9` — `25 ok, 0 fail, no duplicate hrefs, all categories valid` (Numbers 8, Words 2, Write 3, Think 7, Shapes 3, Discover&Puzzles 2). `GET /api/activities/...` still `globalLevel+mastery`.
+- MCP not required for deterministic generation; Education Gateway fallback remains.
+
+### Verified
+- `npm test` 190/190, `npx tsc --noEmit` 0, `docker compose config` OK, `next build` green (via previous).
+
+### Known Issues / Notes
+- KI-019/020 still open; Playwright 25-tile flow pending in this env; physical devices outstanding.
+
+### Next Actions
+1. `npx playwright test e2e/learn.spec.ts --project=mobile-320` for 25-tile open + Big & Small visual scale on device.
+2. Seed + KI-019 live-Mongo: verify `big-small` `visualMeta` persists and `GET /api/activities/big-small/content` returns scaled sizes.
+3. Physical-device pass + remove `validate-*.mjs` temp scripts.
 
 # 14. Handoff Rules
 
