@@ -1,4 +1,4 @@
-# Learnzzy — Architecture & Product Decisions
+﻿# Learnzzy â€” Architecture & Product Decisions
 
 **Document:** Decision Log / Architecture Decision Record (ADR) Summary  
 **Version:** 1.0  
@@ -19,7 +19,7 @@ These decisions are the current source of truth unless a later decision explicit
 
 # 2. Product Decisions
 
-## DEC-001 — Learnzzy Is a Learning Playground
+## DEC-001 â€” Learnzzy Is a Learning Playground
 
 **Decision:**  
 Learnzzy will be positioned as a small, magical, child-friendly learning playground rather than a conventional educational portal or complex game platform.
@@ -37,7 +37,7 @@ Learnzzy will be positioned as a small, magical, child-friendly learning playgro
 
 ---
 
-## DEC-002 — MVP Has Five Core Games
+## DEC-002 â€” MVP Has Five Core Games
 
 **Decision:**  
 The initial MVP will contain five games:
@@ -55,7 +55,7 @@ Five simple game types provide enough variety to validate the platform without o
 
 ---
 
-## DEC-003 — Games Must Be Modular
+## DEC-003 â€” Games Must Be Modular
 
 **Decision:**  
 Each game must be implemented as an independent module on top of a shared game framework.
@@ -71,7 +71,7 @@ Each game must be implemented as an independent module on top of a shared game f
 
 # 3. UX Decisions
 
-## DEC-010 — Child UX Is Visual-First
+## DEC-010 â€” Child UX Is Visual-First
 
 **Decision:**  
 Child-facing screens will use minimal text and obvious visual interactions.
@@ -87,7 +87,7 @@ Young children should be able to understand what to tap without requiring an adu
 
 ---
 
-## DEC-011 — One Primary Task Per Screen
+## DEC-011 â€” One Primary Task Per Screen
 
 **Decision:**  
 Gameplay screens should focus on one primary learning task.
@@ -99,7 +99,7 @@ Reduces cognitive load and makes interactions easier for young children.
 
 ---
 
-## DEC-012 — Large Touch Targets
+## DEC-012 â€” Large Touch Targets
 
 **Decision:**  
 Primary interactions must use large, touch-friendly controls.
@@ -115,7 +115,7 @@ Primary interactions must use large, touch-friendly controls.
 
 ---
 
-## DEC-013 — Portrait and Landscape
+## DEC-013 â€” Portrait and Landscape
 
 **Decision:**  
 The application must support both portrait and landscape layouts.
@@ -127,7 +127,7 @@ The platform is intended for phones, tablets, iPads, and desktop devices.
 
 ---
 
-## DEC-014 — Positive Failure Experience
+## DEC-014 â€” Positive Failure Experience
 
 **Decision:**  
 Incorrect answers should provide gentle feedback rather than punishment.
@@ -139,7 +139,7 @@ The platform is designed for learning, not failure avoidance or competition.
 
 ---
 
-## DEC-015 — No Child Social Features in MVP
+## DEC-015 â€” No Child Social Features in MVP
 
 **Decision:**  
 The MVP will not include:
@@ -158,7 +158,7 @@ Minimize privacy and safety risks and keep the product focused.
 
 # 4. PWA Decisions
 
-## DEC-020 — PWA-First
+## DEC-020 â€” PWA-First
 
 **Decision:**  
 Learnzzy will be built as a Progressive Web App.
@@ -176,7 +176,7 @@ Learnzzy will be built as a Progressive Web App.
 
 ---
 
-## DEC-021 — Offline-Friendly Architecture
+## DEC-021 â€” Offline-Friendly Architecture
 
 **Decision:**  
 Previously downloaded/validated game content should remain usable when connectivity is temporarily unavailable where technically practical.
@@ -190,7 +190,7 @@ Children should not experience a broken game because of a temporary network inte
 
 # 5. Frontend Technology Decisions
 
-## DEC-030 — Next.js
+## DEC-030 â€” Next.js
 
 **Decision:**  
 Use Next.js for the web application.
@@ -206,7 +206,7 @@ Use Next.js for the web application.
 
 ---
 
-## DEC-031 — TypeScript
+## DEC-031 â€” TypeScript
 
 **Decision:**  
 Use TypeScript across the application.
@@ -221,7 +221,7 @@ Use TypeScript across the application.
 
 ---
 
-## DEC-032 — Phaser 3
+## DEC-032 â€” Phaser 3
 
 **Decision:**  
 Use Phaser 3 as the game engine.
@@ -236,7 +236,7 @@ Use Phaser 3 as the game engine.
 
 ---
 
-## DEC-033 — Tailwind CSS + Reusable UI Library
+## DEC-033 â€” Tailwind CSS + Reusable UI Library
 
 **Decision:**  
 Use Tailwind CSS together with a centralized reusable component library.
@@ -253,7 +253,7 @@ Use Tailwind CSS together with a centralized reusable component library.
 
 # 6. Database Decisions
 
-## DEC-040 — MongoDB Is the Primary Database
+## DEC-040 â€” MongoDB Is the Primary Database
 
 **Decision:**  
 MongoDB is the authoritative application database.
@@ -271,7 +271,7 @@ MongoDB replaces the previously considered relational database direction.
 
 ---
 
-## DEC-041 — MongoDB Stores Structured Data, Not Normal Binary Assets
+## DEC-041 â€” MongoDB Stores Structured Data, Not Normal Binary Assets
 
 **Decision:**  
 Images, audio, and other large binary assets will be stored in S3-compatible object storage.
@@ -288,7 +288,7 @@ MongoDB stores asset metadata and references.
 
 ---
 
-## DEC-042 — Repository/Data Access Boundary
+## DEC-042 â€” Repository/Data Access Boundary
 
 **Decision:**  
 Application code should access MongoDB through repositories/data-access services.
@@ -297,13 +297,13 @@ Application code should access MongoDB through repositories/data-access services
 
 ```text
 UI / Game
-    ↓
+    â†“
 API
-    ↓
+    â†“
 Application Service
-    ↓
+    â†“
 Repository
-    ↓
+    â†“
 MongoDB
 ```
 
@@ -314,7 +314,7 @@ Prevents database logic from spreading throughout the application.
 
 ---
 
-## DEC-043 — Zod + Deterministic Validation
+## DEC-043 â€” Zod + Deterministic Validation
 
 **Decision:**  
 Use schema validation such as Zod together with deterministic business rules.
@@ -328,12 +328,12 @@ Schemas protect data structure; deterministic rules protect learning correctness
 
 # 7. Game Logic Decisions
 
-## DEC-050 — Deterministic Game Engine
+## DEC-050 â€” Deterministic Game Engine
 
 **Decision:**  
 Game state and core game behavior must be deterministic.
 
-The application code—not an LLM—controls:
+The application codeâ€”not an LLMâ€”controls:
 
 - arithmetic;
 - answer correctness;
@@ -350,7 +350,7 @@ The application code—not an LLM—controls:
 
 ---
 
-## DEC-051 — Never Use LLM for Arithmetic
+## DEC-051 â€” Never Use LLM for Arithmetic
 
 **Decision:**  
 LLMs must never calculate the authoritative answer for addition or subtraction.
@@ -374,7 +374,7 @@ Mathematical correctness must be deterministic and testable.
 
 ---
 
-## DEC-052 — Browser Is Not Authoritative
+## DEC-052 â€” Browser Is Not Authoritative
 
 **Decision:**  
 The client must not be trusted as the source of truth for protected:
@@ -394,7 +394,7 @@ Client-side state can be manipulated.
 
 # 8. AI Architecture Decisions
 
-## DEC-060 — AI Is a Supporting Intelligence Layer
+## DEC-060 â€” AI Is a Supporting Intelligence Layer
 
 **Decision:**  
 AI supports the platform but does not operate the game engine.
@@ -413,7 +413,7 @@ AI may:
 
 ---
 
-## DEC-061 — No LLM in the Gameplay Critical Path
+## DEC-061 â€” No LLM in the Gameplay Critical Path
 
 **Decision:**  
 Children must never need to wait for an LLM to answer a normal game interaction.
@@ -429,7 +429,7 @@ Children must never need to wait for an LLM to answer a normal game interaction.
 
 ---
 
-## DEC-062 — AI Model Abstraction
+## DEC-062 â€” AI Model Abstraction
 
 **Decision:**  
 AI providers/models must be accessed through an abstraction layer.
@@ -448,7 +448,7 @@ Model choice should be configurable and replaceable without changing business lo
 
 ---
 
-## DEC-063 — Cost-Aware Model Routing
+## DEC-063 â€” Cost-Aware Model Routing
 
 **Decision:**  
 Use cheaper/smaller models for simple tasks and stronger models only when needed.
@@ -462,7 +462,7 @@ Simple:
 - metadata
 - lightweight validation
 
-→ GPT-5 nano
+â†’ GPT-5 nano
 
 Complex:
 - rich content generation
@@ -470,14 +470,14 @@ Complex:
 - difficult recommendations
 - complex agent tasks
 
-→ GPT-5 mini
+â†’ GPT-5 mini
 ```
 
 **Status:** Active
 
 ---
 
-## DEC-064 — AI Keys Remain Server-Side
+## DEC-064 â€” AI Keys Remain Server-Side
 
 **Decision:**  
 AI provider credentials must never be exposed to the browser.
@@ -488,7 +488,7 @@ AI provider credentials must never be exposed to the browser.
 
 # 9. AI Content Decisions
 
-## DEC-070 — Content Is Generated Before Gameplay
+## DEC-070 â€” Content Is Generated Before Gameplay
 
 **Decision:**  
 AI-generated content is created asynchronously and stored before it is served to children.
@@ -500,7 +500,7 @@ Gameplay must remain fast and deterministic.
 
 ---
 
-## DEC-071 — AI Output Is Untrusted
+## DEC-071 â€” AI Output Is Untrusted
 
 **Decision:**  
 AI output is treated as a proposal until validated.
@@ -509,15 +509,15 @@ Pipeline:
 
 ```text
 AI Generation
-    ↓
+    â†“
 Schema Validation
-    ↓
+    â†“
 Deterministic Validation
-    ↓
+    â†“
 Quality/Safety Validation
-    ↓
+    â†“
 Approval
-    ↓
+    â†“
 Active Content
 ```
 
@@ -525,7 +525,7 @@ Active Content
 
 ---
 
-## DEC-072 — Only Approved/Active Content Is Playable
+## DEC-072 â€” Only Approved/Active Content Is Playable
 
 **Decision:**  
 Child gameplay can use only content that has passed the required validation and publication workflow.
@@ -534,7 +534,7 @@ Child gameplay can use only content that has passed the required validation and 
 
 ---
 
-## DEC-073 — Content Pools
+## DEC-073 â€” Content Pools
 
 **Decision:**  
 Learnzzy will maintain content pools for each game/difficulty combination.
@@ -555,7 +555,7 @@ These are configurable targets, not permanent limits.
 
 ---
 
-## DEC-074 — Automatic Pool Refill
+## DEC-074 â€” Automatic Pool Refill
 
 **Decision:**  
 When a content pool falls below its configured threshold, a background task can trigger content generation.
@@ -566,19 +566,19 @@ Example:
 Pool = 17
 Threshold = 30
 
-        ↓
+        â†“
 
 Content Agent generates 50
 
-        ↓
+        â†“
 
 Validation
 
-        ↓
+        â†“
 
 Approved content stored
 
-        ↓
+        â†“
 
 Pool increases
 ```
@@ -589,7 +589,7 @@ Pool increases
 
 # 10. Asset Decisions
 
-## DEC-080 — Reuse Assets Before Generating
+## DEC-080 â€” Reuse Assets Before Generating
 
 **Decision:**  
 The Asset Agent should search for a suitable existing approved asset before generating a new one.
@@ -604,7 +604,7 @@ The Asset Agent should search for a suitable existing approved asset before gene
 
 ---
 
-## DEC-081 — Central Asset Storage
+## DEC-081 â€” Central Asset Storage
 
 **Decision:**  
 Use S3-compatible object storage for game images and other large assets, with CDN delivery.
@@ -613,7 +613,7 @@ Use S3-compatible object storage for game images and other large assets, with CD
 
 ---
 
-## DEC-082 — Child-Safe Asset Style
+## DEC-082 â€” Child-Safe Asset Style
 
 **Decision:**  
 Generated assets should follow a consistent style:
@@ -633,7 +633,7 @@ Generated assets should follow a consistent style:
 
 # 11. Agent Workforce Decisions
 
-## DEC-090 — Agentic Backend
+## DEC-090 â€” Agentic Backend
 
 **Decision:**  
 The backend will use an agentic workforce rather than a simple chatbot-only AI integration.
@@ -652,7 +652,7 @@ Difficulty Agent
 
 ---
 
-## DEC-091 — Background Agent Execution
+## DEC-091 â€” Background Agent Execution
 
 **Decision:**  
 Long-running AI/agent tasks must run asynchronously.
@@ -675,7 +675,7 @@ BullMQ
 
 ---
 
-## DEC-092 — Agent Least Privilege
+## DEC-092 â€” Agent Least Privilege
 
 **Decision:**  
 Each agent receives only the permissions required for its role.
@@ -686,7 +686,7 @@ Agents must not receive unrestricted database or system access.
 
 ---
 
-## DEC-093 — Agent Auditability
+## DEC-093 â€” Agent Auditability
 
 **Decision:**  
 Agent tasks/runs must record operational information such as:
@@ -704,7 +704,7 @@ Agent tasks/runs must record operational information such as:
 
 ---
 
-## DEC-094 — No Chain-of-Thought Storage/Exposure
+## DEC-094 â€” No Chain-of-Thought Storage/Exposure
 
 **Decision:**  
 The platform must not expose private chain-of-thought through admin screens, APIs, logs, or child interfaces.
@@ -717,7 +717,7 @@ Store operational summaries and results instead.
 
 # 12. Admin Decisions
 
-## DEC-100 — Protected Admin Area
+## DEC-100 â€” Protected Admin Area
 
 **Decision:**  
 Admin functionality requires authentication and authorization.
@@ -740,7 +740,7 @@ Primary routes:
 
 ---
 
-## DEC-101 — Agentic Admin Command Center
+## DEC-101 â€” Agentic Admin Command Center
 
 **Decision:**  
 The admin experience should be agentic rather than a traditional form-heavy CRUD interface.
@@ -755,7 +755,7 @@ The system should interpret the command, validate it, authorize it, create a bac
 
 ---
 
-## DEC-102 — Natural Language Must Not Become Raw Database Access
+## DEC-102 â€” Natural Language Must Not Become Raw Database Access
 
 **Decision:**  
 Admin natural-language commands must be converted into structured intents and executed through normal services/repositories.
@@ -763,26 +763,26 @@ Admin natural-language commands must be converted into structured intents and ex
 Never:
 
 ```text
-LLM → raw MongoDB query
+LLM â†’ raw MongoDB query
 ```
 
 Instead:
 
 ```text
 Command
- ↓
+ â†“
 Intent
- ↓
+ â†“
 Validation
- ↓
+ â†“
 Authorization
- ↓
+ â†“
 Business Service
- ↓
+ â†“
 Repository
- ↓
+ â†“
 MongoDB
- ↓
+ â†“
 Audit
 ```
 
@@ -790,7 +790,7 @@ Audit
 
 ---
 
-## DEC-103 — Confirmation for Consequential Actions
+## DEC-103 â€” Confirmation for Consequential Actions
 
 **Decision:**  
 Consequential/destructive actions should require explicit confirmation where configured.
@@ -808,7 +808,7 @@ Examples:
 
 # 13. Analytics Decisions
 
-## DEC-110 — Structured Gameplay Events
+## DEC-110 â€” Structured Gameplay Events
 
 **Decision:**  
 Gameplay behavior is captured through structured events.
@@ -835,7 +835,7 @@ drawing_completed
 
 ---
 
-## DEC-111 — Events Are Append-Oriented
+## DEC-111 â€” Events Are Append-Oriented
 
 **Decision:**  
 Historical gameplay events should not be silently rewritten.
@@ -846,7 +846,7 @@ Corrections should use additional events or controlled administrative mechanisms
 
 ---
 
-## DEC-112 — Aggregate Analytics
+## DEC-112 â€” Aggregate Analytics
 
 **Decision:**  
 Analytics should focus on aggregate product/learning signals such as:
@@ -864,7 +864,7 @@ Analytics should focus on aggregate product/learning signals such as:
 
 ---
 
-## DEC-113 — Analytics Must Not Slow Gameplay
+## DEC-113 â€” Analytics Must Not Slow Gameplay
 
 **Decision:**  
 Analytics processing must happen asynchronously where possible.
@@ -877,7 +877,7 @@ Expensive aggregation must not run synchronously in the child gameplay request.
 
 # 14. Privacy Decisions
 
-## DEC-120 — No Mandatory Child Account
+## DEC-120 â€” No Mandatory Child Account
 
 **Decision:**  
 The MVP does not require children to create accounts.
@@ -889,7 +889,7 @@ Simpler onboarding and reduced collection of personal data.
 
 ---
 
-## DEC-121 — Data Minimization
+## DEC-121 â€” Data Minimization
 
 **Decision:**  
 Do not unnecessarily collect:
@@ -905,7 +905,7 @@ Do not unnecessarily collect:
 
 ---
 
-## DEC-122 — No Public Child Activity
+## DEC-122 â€” No Public Child Activity
 
 **Decision:**  
 Child gameplay/activity must not be publicly exposed.
@@ -916,7 +916,7 @@ Child gameplay/activity must not be publicly exposed.
 
 # 15. Reward Decisions
 
-## DEC-130 — Educational Rewards Only
+## DEC-130 â€” Educational Rewards Only
 
 **Decision:**  
 Rewards may include:
@@ -933,7 +933,7 @@ Encourage learning without manipulative engagement patterns.
 
 ---
 
-## DEC-131 — No Gambling-Like Mechanics
+## DEC-131 â€” No Gambling-Like Mechanics
 
 **Decision:**  
 Do not introduce:
@@ -946,7 +946,7 @@ Do not introduce:
 
 ---
 
-## DEC-132 — No Pay-to-Progress
+## DEC-132 â€” No Pay-to-Progress
 
 **Decision:**  
 Learning progress must not depend on payment or purchases in the MVP.
@@ -957,7 +957,7 @@ Learning progress must not depend on payment or purchases in the MVP.
 
 # 16. Security Decisions
 
-## DEC-140 — Validate All External Input
+## DEC-140 â€” Validate All External Input
 
 **Decision:**  
 All API, admin, event, and agent inputs must be schema validated.
@@ -966,7 +966,7 @@ All API, admin, event, and agent inputs must be schema validated.
 
 ---
 
-## DEC-141 — Validate All AI Output
+## DEC-141 â€” Validate All AI Output
 
 **Decision:**  
 No AI-generated object may be used directly without validation.
@@ -975,7 +975,7 @@ No AI-generated object may be used directly without validation.
 
 ---
 
-## DEC-142 — Rate Limit Expensive Operations
+## DEC-142 â€” Rate Limit Expensive Operations
 
 **Decision:**  
 Rate limit public APIs and especially expensive operations such as:
@@ -989,7 +989,7 @@ Rate limit public APIs and especially expensive operations such as:
 
 ---
 
-## DEC-143 — Least-Privilege Credentials
+## DEC-143 â€” Least-Privilege Credentials
 
 **Decision:**  
 Application services, workers, agents, and database users should receive only required permissions.
@@ -1000,7 +1000,7 @@ Application services, workers, agents, and database users should receive only re
 
 # 17. Infrastructure Decisions
 
-## DEC-150 — Redis for Cache and Jobs
+## DEC-150 â€” Redis for Cache and Jobs
 
 **Decision:**  
 Redis will be used for:
@@ -1014,7 +1014,7 @@ Redis will be used for:
 
 ---
 
-## DEC-151 — BullMQ for Background Jobs
+## DEC-151 â€” BullMQ for Background Jobs
 
 **Decision:**  
 BullMQ will manage asynchronous jobs.
@@ -1034,7 +1034,7 @@ pool refill
 
 ---
 
-## DEC-152 — Cloudflare/CDN
+## DEC-152 â€” Cloudflare/CDN
 
 **Decision:**  
 Use CDN delivery for static/large assets where appropriate.
@@ -1043,7 +1043,7 @@ Use CDN delivery for static/large assets where appropriate.
 
 ---
 
-## DEC-153 — Docker + Nginx + VPS
+## DEC-153 â€” Docker + Nginx + VPS
 
 **Decision:**  
 Initial deployment direction:
@@ -1063,7 +1063,7 @@ Simple, controllable deployment architecture suitable for the MVP.
 
 ---
 
-## DEC-154 — Monitoring
+## DEC-154 â€” Monitoring
 
 **Decision:**  
 Use:
@@ -1084,7 +1084,7 @@ for production observability.
 
 # 18. Performance Decisions
 
-## DEC-160 — Fast Startup
+## DEC-160 â€” Fast Startup
 
 **Decision:**  
 Prioritize:
@@ -1100,7 +1100,7 @@ Prioritize:
 
 ---
 
-## DEC-161 — No Synchronous AI Generation
+## DEC-161 â€” No Synchronous AI Generation
 
 **Decision:**  
 There must be no unnecessary synchronous AI generation during gameplay.
@@ -1109,7 +1109,7 @@ There must be no unnecessary synchronous AI generation during gameplay.
 
 ---
 
-## DEC-162 — Prefetch Content
+## DEC-162 â€” Prefetch Content
 
 **Decision:**  
 The client should receive enough validated content to continue gameplay without waiting for content generation.
@@ -1120,7 +1120,7 @@ The client should receive enough validated content to continue gameplay without 
 
 # 19. Development Decisions
 
-## DEC-170 — Build Deterministic Foundation First
+## DEC-170 â€” Build Deterministic Foundation First
 
 **Decision:**  
 Build and validate the game foundation before implementing the agent workforce.
@@ -1129,27 +1129,27 @@ Recommended order:
 
 ```text
 Foundation
- ↓
+ â†“
 UI Library + PWA
- ↓
+ â†“
 Game Framework
- ↓
+ â†“
 Five Games
- ↓
+ â†“
 MongoDB + Content Pool
- ↓
+ â†“
 AI Service
- ↓
+ â†“
 Agent Infrastructure
- ↓
+ â†“
 Agents
- ↓
+ â†“
 Admin Command Center
- ↓
+ â†“
 Analytics + Difficulty
- ↓
+ â†“
 Security + Performance
- ↓
+ â†“
 Production
 ```
 
@@ -1160,7 +1160,7 @@ AI must improve a functioning deterministic platform rather than become a depend
 
 ---
 
-## DEC-171 — Reuse Existing Infrastructure
+## DEC-171 â€” Reuse Existing Infrastructure
 
 **Decision:**  
 Where an existing repository/infrastructure component is suitable, reuse it rather than unnecessarily replacing it.
@@ -1169,7 +1169,7 @@ Where an existing repository/infrastructure component is suitable, reuse it rath
 
 ---
 
-## DEC-172 — Every Completed Feature Must Be Tested
+## DEC-172 â€” Every Completed Feature Must Be Tested
 
 **Decision:**  
 A backlog item is not considered complete until its relevant tests and validation are complete.
@@ -1180,7 +1180,7 @@ A backlog item is not considered complete until its relevant tests and validatio
 
 # 20. Documentation Decisions
 
-## DEC-180 — Documentation Is Part of the Architecture
+## DEC-180 â€” Documentation Is Part of the Architecture
 
 **Decision:**  
 Important architecture and product decisions must be documented in Markdown files.
@@ -1205,7 +1205,7 @@ DECISIONS.md
 
 ---
 
-## DEC-181 — Business Rules Are Not Prompt-Only
+## DEC-181 â€” Business Rules Are Not Prompt-Only
 
 **Decision:**  
 Business rules must exist in application/domain logic and documentation, not only inside AI prompts.
@@ -1279,10 +1279,10 @@ When an architectural or product decision changes:
 Example:
 
 ```text
-DEC-040 — MongoDB as Primary Database
+DEC-040 â€” MongoDB as Primary Database
 Status: Superseded by DEC-200
 
-DEC-200 — New Database Strategy
+DEC-200 â€” New Database Strategy
 Status: Active
 Supersedes: DEC-040
 Reason: ...
@@ -1382,7 +1382,7 @@ In practical terms:
 
 The child should experience:
 
-> **“I want to play this!”**
+> **â€œI want to play this!â€**
 
 while the backend quietly performs the complex work of content generation, validation, analytics, asset management, difficulty analysis, and operational automation.
 
@@ -1431,7 +1431,7 @@ the journey/unlock authority; per-skill levels drive content complexity only.
 
 ---
 
-## DEC-183 — Academic Orchestrator Is Advisory-Only
+## DEC-183 â€” Academic Orchestrator Is Advisory-Only
 
 **Decision:**
 The Academic Orchestrator (`src/services/academicEngine.ts`) answers "what
@@ -1451,7 +1451,7 @@ never stop gameplay.
 
 ---
 
-## DEC-184 — Voice Is Prepared, Cached, Never Live in Gameplay
+## DEC-184 â€” Voice Is Prepared, Cached, Never Live in Gameplay
 
 **Decision:**
 Voice content is prepared per language (en/hi/bn/ta/te), keyed
@@ -1468,13 +1468,13 @@ voice never blocks play.
 
 ---
 
-## DEC-185 — Visual Theme and Difficulty Are Independent Axes
+## DEC-185 â€” Visual Theme and Difficulty Are Independent Axes
 
 **Decision:**
 Dynamic visual themes vary presentation only; the Difficulty Engine owns
 the numbers. Theme selection is a pure function of (seed, activityType)
 and `verifyThemeMath` proves answers are invariant under theme changes.
-Cross-domain combos (fruit+addition, bird+classification, …) resolve to
+Cross-domain combos (fruit+addition, bird+classification, â€¦) resolve to
 validated games and concepts.
 
 **Reason:**
@@ -1485,7 +1485,7 @@ validated games and concepts.
 
 ---
 
-## DEC-186 — Stitch Is Visual Reference; Code Is Truth
+## DEC-186 â€” Stitch Is Visual Reference; Code Is Truth
 
 **Decision:**
 Stitch screens guide visual/UX language only. When Stitch artifacts cannot
@@ -1503,17 +1503,17 @@ scoring, progression, APIs, or security boundaries.
 
 ---
 
-## DEC-187 — Stitch Deviations: Shader, Hosts, Mechanics, Names
+## DEC-187 â€” Stitch Deviations: Shader, Hosts, Mechanics, Names
 
 **Decision:**
-After live-retrieving Stitch screens 12–20 (2026-09-18), four deliberate
+After live-retrieving Stitch screens 12â€“20 (2026-09-18), four deliberate
 deviations from the fetched designs, per the DEC-186 hierarchy:
 1. The `Shader` WebGL simplex-noise background is NOT shipped as live
-   WebGL — continuous fragment-shader rendering conflicts with documented
+   WebGL â€” continuous fragment-shader rendering conflicts with documented
    PWA performance/battery rules; calm CSS ambient motion instead.
-2. Breeze Valley keeps Teddy as guide (Stitch shows Bella) — the tested
+2. Breeze Valley keeps Teddy as guide (Stitch shows Bella) â€” the tested
    `characterForGame("subtraction") === "teddy"` mapping wins.
-3. Clean Up keeps tap-to-tidy mechanics (Stitch shows basket sorting) —
+3. Clean Up keeps tap-to-tidy mechanics (Stitch shows basket sorting) â€”
    presentation aligned only, no mechanic rewrite.
 4. Stitch display names ("Bella Bunny", "Prof. Hoot", "Pip the Puppy") are
    labels only; `characters.ts` roster/ids/roles are unchanged. Fetched art
@@ -1529,13 +1529,13 @@ deviations from the fetched designs, per the DEC-186 hierarchy:
 
 ---
 
-## DEC-188 — Category-First Learning Playground, Generic Activity Engine
+## DEC-188 â€” Category-First Learning Playground, Generic Activity Engine
 
 **Decision:**
-/play is now category-first (7 Learning World cards → /learn/[category] →
+/play is now category-first (7 Learning World cards â†’ /learn/[category] â†’
 activities). Ten worksheet-inspired activities run on one generic engine:
 pure deterministic generators (`lib/activityContent.ts`) + reusable
-`ComplexityProfile` (`lib/complexity.ts`, spec §27 baseline) + registry
+`ComplexityProfile` (`lib/complexity.ts`, spec Â§27 baseline) + registry
 (`lib/activityRegistry.ts`) + `GET /api/activities/[id]/content` + one
 `ActivityPlayer`. Shipped game engines (addition/subtraction/clean-up/
 puzzle/sketch/discover) are linked, never duplicated. Results flow through
@@ -1547,20 +1547,20 @@ MCP/gateway untouched (advisory-only, fail-closed per DEC-183).
 - Worksheet patterns become interaction + story + character + complexity
   without forking 16 game engines or breaking tested progression.
 - Complexity lives in one module (never hard-coded in components), so age
-  changes the actual problem and performance moves ±1 level safely.
+  changes the actual problem and performance moves Â±1 level safely.
 
 **Status:** Active (2026-09-18)
 
 ---
 
-## DEC-189 — Home Is Category-Primary + Animal Wonderland Rich (Stitch d14a/4b84)
+## DEC-189 â€” Home Is Category-Primary + Animal Wonderland Rich (Stitch d14a/4b84)
 
 **Decision:**
-Landing (/) is now category-primary per spec §2/§3 while preserving Stitch
-child-first hierarchy (DEC-186/187): hero → CTA → `HomeContinue`
-personalized Good-morning + plan-first Continue card → 7-category
-`CATEGORIES` grid → secondary 5-tile quick shortcuts → games gallery.
-`BrandLogo` (all 26 headers) navigates `→ /play` (the playground) not `/`.
+Landing (/) is now category-primary per spec Â§2/Â§3 while preserving Stitch
+child-first hierarchy (DEC-186/187): hero â†’ CTA â†’ `HomeContinue`
+personalized Good-morning + plan-first Continue card â†’ 7-category
+`CATEGORIES` grid â†’ secondary 5-tile quick shortcuts â†’ games gallery.
+`BrandLogo` (all 26 headers) navigates `â†’ /play` (the playground) not `/`.
 Stitch `d14a9b61` + `4b8445bd` (ANIMATION_45 Rich) fetched via `curl -L`
 validate `f929a9c4`/`b933` (identical copy; Rich delta is 5 mushrooms + 5
 apples + 15 stars + 4 birds + tap jump burst). Trace-write correctness is
@@ -1568,21 +1568,21 @@ hardened: `answerIndex` now tracks shuffle, enforced by
 `options[answerIndex]==answer` across bands/generators.
 
 **Reason:**
-- Spec §2 mandates category as primary navigation; Stitch hero is retained
+- Spec Â§2 mandates category as primary navigation; Stitch hero is retained
   but no longer competes with it. Personalized `HomeContinue` fulfills
-  spec §26 "not a random list" without new APIs.
+  spec Â§26 "not a random list" without new APIs.
 - Validated Rich scene keeps 3D delight performant (tap burst, not always-on WebGL).
 
 **Status:** Active (2026-09-18)
 
 ---
 
-## DEC-190 — Calm Warm Female Voice Companion
+## DEC-190 â€” Calm Warm Female Voice Companion
 
 **Decision:**
 Voice is a calm, warm, friendly female learning companion: moderate speed
-(0.82–0.88), soft volume (0.85), clear articulation, short sentences,
-natural pauses (800ms `pauseAfterMs`), low-medium energy — "I'm learning
+(0.82â€“0.88), soft volume (0.85), clear articulation, short sentences,
+natural pauses (800ms `pauseAfterMs`), low-medium energy â€” "I'm learning
 with a friendly teacher," never shouting. `VoiceScript`
 {characterId,eventType,text,ageBand,language,emotion,speakingRate,
 volumeProfile,pauseAfterMs} + `createVoiceScript`/`getVoiceProfile` +
@@ -1590,20 +1590,20 @@ volumeProfile,pauseAfterMs} + `createVoiceScript`/`getVoiceProfile` +
 HINT/CORRECT/GENTLE_RETRY/EXPLANATION/DISCOVERY/LEVEL_PROGRESS/REWARD) in
 5 locales share one warm quality; character personality (Teddy warm math,
 Owl calm thinking, etc.) varies but quality stays soft+moderate+clear.
-`CHARACTER_VOICES` 0.82–0.88 / pitch 0.97–1.05; TTS cached (`voiceAssets`) +
-device `speechSynthesis` fallback, throttle 900ms to protect 2–4s thinking
+`CHARACTER_VOICES` 0.82â€“0.88 / pitch 0.97â€“1.05; TTS cached (`voiceAssets`) +
+device `speechSynthesis` fallback, throttle 900ms to protect 2â€“4s thinking
 time, mute + `prefers-reduced-motion` respected, never blocks gameplay.
 
 **Reason:**
 - Spec mandates calm over game-announcer; moderate+soft is comprehensible
-  for 4–5 and pleasant after 10 minutes.
+  for 4â€“5 and pleasant after 10 minutes.
 - Cached scripts (not per-click TTS) keep cost/latency zero.
 
 **Status:** Active (2026-09-18)
 
 ---
 
-## DEC-192 — Docker-First MCP (Private Network, Qdrant, Health)
+## DEC-192 â€” Docker-First MCP (Private Network, Qdrant, Health)
 
 **Decision:**
 Tutor/OER/NCERT run as unified `services/mcp` shim (`node:20-alpine`,
@@ -1624,7 +1624,7 @@ entry, private, validated, cached, with `npm run docker:health` and admin
 
 ---
 
-## DEC-191 — All 25 Activities on Organized Wonder Play (Stitch Category Hub)
+## DEC-191 â€” All 25 Activities on Organized Wonder Play (Stitch Category Hub)
 
 **Decision:**
 `/play` now surfaces **all 25** `activityRegistry` activities organized by
@@ -1644,6 +1644,15 @@ Puzzles 2) in `All Wonder Adventures` with Stitch Category Hub 6-hub cards
 
 ---
 
+
+## DEC-193 -- Global Level Journey + Auto-Next + Interactive Feedback (Session 16)
+
+**Decision:** One GLOBAL Level (1..6) visible as LEVEL N on every exercise (ActivityPlayer, AdditionPlay, SubtractionPlay); no per-game visible levels, skill mastery internal. Exercise lifecycle: Exercise starts -> Child solves -> Server validates -> Correct? SUCCESS (green) : RETRY (red) -> Feedback -> Next enabled -> 10s countdown (progress bar + Next in Xs) -> Automatic next (setTimeout 10000, cancel on manual). Implemented via countdown state + useEffect + cancel.
+
+**Complexity:** GLOBAL + AGE BAND + PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity with age-band boundaries (4-5 simple, 6-7 intermediate, 8-9 advanced) and MCP advisory (Tutor via Gateway, 800ms timeout, 7 validations: schema, age-band, global-level, skill, bounds, game capability, safety, fallback). MCP failure never blocks child.
+
+**Status:** Active (2026-09-19)
+
 # 27. Decision Ownership
 
 The decision log should be reviewed whenever:
@@ -1660,16 +1669,17 @@ The decision log should be reviewed whenever:
 
 ```text
 Product Decisions
-       ↓
+       â†“
 Business Rules
-       ↓
+       â†“
 Architecture Decisions
-       ↓
+       â†“
 Database/API/UI Specifications
-       ↓
+       â†“
 Implementation
-       ↓
+       â†“
 Tests
 ```
 
 If implementation conflicts with an active documented decision, the conflict must be resolved explicitly rather than silently choosing one.
+

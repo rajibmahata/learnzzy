@@ -676,3 +676,18 @@ The next session must not:
 # 15. Final Handoff Principle
 
 > **Start every new session by reconciling the documented plan with the actual codebase. Then implement the smallest correct next step, test it, and update the project memory.**
+
+## Session 2026-09-19 (16) -- Global Level Journey + Auto-Next + Interactive Feedback
+
+### Completed
+- Global Level Journey: ONE GLOBAL Level visible as LEVEL N on every exercise (ActivityPlayer + Addition/Subtraction). No per-game visible levels; skill mastery internal.
+- Exercise flow: Exercise starts -> Child solves -> Server validates -> Correct? SUCCESS (green) : RETRY (red) -> Feedback -> Next enabled -> 10s countdown (progress bar) -> Automatic next (setTimeout 10000, cancel on manual). Implemented countdown state + useEffect.
+- Complexity: GLOBAL + AGE BAND + PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity with boundaries and MCP advisory (Tutor via Gateway, 800ms timeout, 7 validations, fallback).
+
+### Verified
+- npm test 190/190, tsc 0
+
+### Next Actions
+1. Extend auto-next to Clean Up / Puzzle / Sketch / Discover plays.
+2. Add MCP complexity A/B logging for parent insights.
+3. Playwright 25-tile + auto-next countdown e2e.

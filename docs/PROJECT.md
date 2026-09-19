@@ -1,4 +1,4 @@
-# PROJECT: Learnzzy
+﻿# PROJECT: Learnzzy
 
 ## Summary
 Learnzzy is a child-focused educational games PWA for short, visual, deterministic learning sessions. Children play without accounts, ads, or synchronous AI; administrators manage validated content and an asynchronous agent workforce.
@@ -36,41 +36,41 @@ Learnzzy is a child-focused educational games PWA for short, visual, determinist
 
 ## Status
 - Phase: build / stabilize
-- Last updated: 2026-09-18 Session 15, by OpenCode — 190 unit, Global Level + 25 validated, warm female voice root cause, Docker MCP
+- Last updated: 2026-09-19 Session 16, by OpenCode -- 190 unit, Global Level Journey + Auto-Next, 3D, Docker MCP
 
 ## 2026-09-18 Stitch Retrieval + Attractiveness Update
 
-Retrieved: Stitch screens 12–20 live (7 HTML + 9 screenshots) + 3 optimized
+Retrieved: Stitch screens 12â€“20 live (7 HTML + 9 screenshots) + 3 optimized
 WebP scene postcards. Restyled: Worlds banner cards, Play Home Pip/Spin,
-Addition, Subtraction, Clean Up, Puzzle, Sketch — presentation only.
+Addition, Subtraction, Clean Up, Puzzle, Sketch â€” presentation only.
 Verified: 174 unit tests, typecheck, lint, production build, Playwright
 child/sketch/discover/adaptive/learning-journey, screenshot review, Docker
 image build. Open: live-Mongo E2E (KI-019), TTS binaries (KI-020),
 parent-journey screenshot re-fetch, physical devices.
 
-## 2026-09-18 Session 10 — Animal Wonderland Rich + Home Learning World
+## 2026-09-18 Session 10 â€” Animal Wonderland Rich + Home Learning World
 
 Validated landing against new Stitch `d14a9b61` (Child-First 3D Play Home) +
 `4b8445bd` (ANIMATION_45 Rich) via `curl -L` (`.stitch/...` + `public/images/stitch/home-child-first-v2.png`).
 Rich scene: 5 candy mushrooms + 5 bobbing apples + 15 deterministic stars + 4
-birds + tap jump burst. Landing now category-primary (hero → CTA →
-`HomeContinue` personalized Good-morning + plan card → 7-category grid →
-secondary shortcuts → games) per spec §2/§3 while preserving Stitch
-hierarchy. `BrandLogo` → `/play`. Bug: `genTraceWrite` `answerIndex: 0` →
+birds + tap jump burst. Landing now category-primary (hero â†’ CTA â†’
+`HomeContinue` personalized Good-morning + plan card â†’ 7-category grid â†’
+secondary shortcuts â†’ games) per spec Â§2/Â§3 while preserving Stitch
+hierarchy. `BrandLogo` â†’ `/play`. Bug: `genTraceWrite` `answerIndex: 0` â†’
 `options.indexOf(answer)` with tightened assertions; `resolveComplexity`
 dead code removed. Verified: 189 unit (47 suites), `tsc`/`eslint`/`next
 build` green.
 
-## 2026-09-18 Session 11 — Calm Warm Female Voice
+## 2026-09-18 Session 11 â€” Calm Warm Female Voice
 
-Calm companion: `VoiceScript` (13 events, 5 locales), moderate 0.82–0.88,
+Calm companion: `VoiceScript` (13 events, 5 locales), moderate 0.82â€“0.88,
 soft volume 0.85, 900ms thinking gap, 5-locale soft scripts, `CHARACTER_VOICES`
 and `STATE_LINES` calm. TTS cached + fallback, never blocks. Verified:
 190 unit, `tsc`/`build` green.
 
-## 2026-09-18 Session 12 — Organized Wonder Play + Docker-First MCP + Category Hub
+## 2026-09-18 Session 12 â€” Organized Wonder Play + Docker-First MCP + Category Hub
 
-`/play` gap closed (18→25): added `more-less`, `count-by-tens`,
+`/play` gap closed (18â†’25): added `more-less`, `count-by-tens`,
 `trace-number-name`, `matching`, `odd-one-out`, `pattern`, `shape-match` to
 `More Adventures`, now grouped by World (Numbers 8, Words 2, Write 3, Think 7,
 Shapes 3, Discover&Puzzles 2) + 6 Stitch Category Hub cards (Category Hub
@@ -81,7 +81,7 @@ ports, `npm run docker:health`. Stitch `1b8480`, `a1812/9fa2`, `00259/3f852`,
 `f66f/38d8/77cc` fetched via `curl -L`. Verified: 190 unit, `tsc`/`docker
 compose config` OK, `next build` green.
 
-## 2026-09-18 Session 13 — All 25 Validated + Big & Small Fix
+## 2026-09-18 Session 13 â€” All 25 Validated + Big & Small Fix
 
 `Big & Small` identical visuals fixed: `ActivityContent.visualMeta` + scaled
 pills in `ActivityPlayer`; `All Wonder Adventures` 25/25 validated across
@@ -89,28 +89,28 @@ pills in `ActivityPlayer`; `All Wonder Adventures` 25/25 validated across
 `visual length`). `GET /api/activities/...` still `globalLevel+mastery`.
 Verified: `npm test` 190/190, `npx tsc --noEmit` 0.
 
-## 2026-09-18 Session 14 — Global Level + Personalized Session Planner
+## 2026-09-18 Session 14 â€” Global Level + Personalized Session Planner
 
 Single `GLOBAL` level 1..6+ (no per-game visible levels); `skill mastery`
-internal (`gameProgress.recentAccuracy` → `evaluateSkill`), `activity
+internal (`gameProgress.recentAccuracy` â†’ `evaluateSkill`), `activity
 complexity = global + masteryAdj` via `resolveComplexity`; deterministic
 `PersonalizedSessionPlanner` (interest+need+variety, top-stays). `buildPlan`
 all items `level = globalLevel`, new `GET /api/learners/[id]/session`,
 `levelService` global promotion (overall avg + variety). UI now `Global
 Level` only. Verified: `npm test` 190/190, `tsc` 0.
 
-## 2026-09-18 Session 15 — Natural Female Voice Root Cause
+## 2026-09-19 Session 16, by OpenCode -- 190 unit, Global Level Journey + Auto-Next, 3D, Docker MCP
 
-Inspected `speechSynthesis`/`getVoices`/`voiceAssetService` → robotic
+Inspected `speechSynthesis`/`getVoices`/`voiceAssetService` â†’ robotic
 parametric, no SSML, `voiceAssets` pending (KI-020), `rate/pitch` insufficient.
-Decision: server `ttsProvider` (neural warm female) → `voiceAssets.audioUrl`
-→ `HTMLAudio` preload, `speechSynthesis` fallback only; `VoiceScript`
+Decision: server `ttsProvider` (neural warm female) â†’ `voiceAssets.audioUrl`
+â†’ `HTMLAudio` preload, `speechSynthesis` fallback only; `VoiceScript`
 `pauseAfterMs` will be waited, gameplay never blocks.
 
 ## 2026-09-17 Academic Engine Update
 
 Added: Academic Orchestrator + Validated Learning Plan (+ 4 learner APIs),
-8th `academic-agent`, Voice Character Engine (5×11×5, `voiceAssets` cache),
+8th `academic-agent`, Voice Character Engine (5Ã—11Ã—5, `voiceAssets` cache),
 dynamic visual themes + 5 cross-domain combos, numbers/vocabulary catalog
 growth (13 categories), parent academic rollup + streak, admin academic
 panel. Verified: 156 unit tests, typecheck, lint, production build
@@ -124,3 +124,8 @@ The latest verified implementation has progressed beyond the original project su
 The Parent Experience is an approved architectural direction but is not yet verified as implemented. It should be introduced through a secure parent-child relationship rather than name/age matching.
 
 The current session evidence verifies Addition and Subtraction gameplay strongly; do not infer completion of Clean Up, Picture Puzzle, or Shadow Sketch from the roadmap alone.
+
+
+## 2026-09-19 Session 16 -- Global Level Journey + Auto-Next + Interactive Feedback
+
+ONE GLOBAL Level (1..6) visible as LEVEL N on every exercise (ActivityPlayer, AdditionPlay, SubtractionPlay); no per-game visible levels, skill mastery internal. Exercise flow: Exercise starts -> Child solves -> Server validates -> Correct? SUCCESS (green) : RETRY (red, sad) -> Feedback -> Next enabled -> 10s countdown (progress bar + Next in Xs) -> Automatic next (setTimeout 10000, cancel on manual). Implemented countdown state + useEffect + cancel. Complexity: GLOBAL + AGE BAND + PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity with age-band boundaries (4-5 simple, 6-7 intermediate, 8-9 advanced) and MCP advisory (Tutor via Gateway, 800ms timeout, 7 validations: schema, age-band, global-level, skill, bounds, game capability, safety, fallback). MCP failure never blocks child. Verified: npm test 190/190, tsc 0.

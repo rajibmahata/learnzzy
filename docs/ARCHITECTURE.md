@@ -1,4 +1,4 @@
-# Learnzzy — System Architecture
+﻿# Learnzzy â€” System Architecture
 
 ## 1. Architecture Objective
 
@@ -125,27 +125,27 @@ Conceptually:
 
 ```text
 GameDefinition
-├── id
-├── name
-├── learningObjectives
-├── difficultyLevels
-├── contentSchema
-├── createScene()
-├── handleInteraction()
-├── validate()
-├── calculateScore()
-└── complete()
+â”œâ”€â”€ id
+â”œâ”€â”€ name
+â”œâ”€â”€ learningObjectives
+â”œâ”€â”€ difficultyLevels
+â”œâ”€â”€ contentSchema
+â”œâ”€â”€ createScene()
+â”œâ”€â”€ handleInteraction()
+â”œâ”€â”€ validate()
+â”œâ”€â”€ calculateScore()
+â””â”€â”€ complete()
 ```
 
 Initial implementations:
 
 ```text
 games/
-├── addition/
-├── subtraction/
-├── clean-up/
-├── puzzle/
-└── sketch/
+â”œâ”€â”€ addition/
+â”œâ”€â”€ subtraction/
+â”œâ”€â”€ clean-up/
+â”œâ”€â”€ puzzle/
+â””â”€â”€ sketch/
 ```
 
 Future games can be added without changing the core game framework.
@@ -306,11 +306,11 @@ Conceptually:
 
 ```text
 AIService
-├── generateStructuredContent()
-├── classify()
-├── summarize()
-├── recommendDifficulty()
-└── generateAssetPrompt()
+â”œâ”€â”€ generateStructuredContent()
+â”œâ”€â”€ classify()
+â”œâ”€â”€ summarize()
+â”œâ”€â”€ recommendDifficulty()
+â””â”€â”€ generateAssetPrompt()
 ```
 
 The rest of the application must not directly depend on provider-specific SDK calls.
@@ -541,11 +541,11 @@ Initial deployment can use Docker Compose.
 
 ```text
 docker-compose
-├── web
-├── worker
-├── postgres
-├── redis
-└── nginx
+â”œâ”€â”€ web
+â”œâ”€â”€ worker
+â”œâ”€â”€ postgres
+â”œâ”€â”€ redis
+â””â”€â”€ nginx
 ```
 
 External:
@@ -615,7 +615,7 @@ Do not introduce distributed infrastructure before it is required.
 11. Existing infrastructure should be reused.
 12. Do not over-engineer the MVP.
 
-# 56. Implementation Reconciliation — 2026-09-14
+# 56. Implementation Reconciliation â€” 2026-09-14
 
 This section records the verified implementation state from the latest OpenCode session. It takes precedence over older aspirational status statements in this document.
 
@@ -704,20 +704,20 @@ Automated verification currently includes lint, typecheck, unit tests, productio
 
 The Test & QA Agent remains a planned extension unless verified in the repository.
 
-# 57. Academic Engine Reconciliation — 2026-09-17
+# 57. Academic Engine Reconciliation â€” 2026-09-17
 
-Supersedes the agent-count statement in §56 (five → eight) for the
-workforce only; all §56 precedence rules still apply.
+Supersedes the agent-count statement in Â§56 (five â†’ eight) for the
+workforce only; all Â§56 precedence rules still apply.
 
 ```text
-Child Game → Gameplay Events → Analytics → Learning Signals
-    → Academic Orchestrator (deterministic core + advisory Tutor/OER/NCERT)
-    → Validated Learning Plan (academicPlans)
-    → Content Pool → Game → Result → Parent Dashboard (academic rollup)
+Child Game â†’ Gameplay Events â†’ Analytics â†’ Learning Signals
+    â†’ Academic Orchestrator (deterministic core + advisory Tutor/OER/NCERT)
+    â†’ Validated Learning Plan (academicPlans)
+    â†’ Content Pool â†’ Game â†’ Result â†’ Parent Dashboard (academic rollup)
 ```
 
-Invariants (DEC-183/184/185/189/191/192, BR-260–266): MCP advisory-only with
-failure-isolated gateway calls; LEARN→MASTER with no skips/jumps;
+Invariants (DEC-183/184/185/189/191/192, BR-260â€“266): MCP advisory-only with
+failure-isolated gateway calls; LEARNâ†’MASTER with no skips/jumps;
 voice prepared-per-language and cached, never live in gameplay; visual
 theme independent of difficulty. New collections: `academicPlans`,
 `voiceAssets`. New routes: learner `/academic/plan|recommendation|voice|
@@ -725,14 +725,14 @@ result` + `GET /api/admin/academic/plans`. Living Wonder layer (2026-09-18):
 `lib/worlds.ts` + `WonderBits.tsx` presentation bits, 3 optimized Stitch
 scene postcards in `public/assets/`; deviations in DEC-187. Learning
 Playground layer (2026-09-18, DEC-188/191): category-first `/play` (7 Learning
-Worlds) → `/learn/[category]` → 25 activities (all organized: Featured
+Worlds) â†’ `/learn/[category]` â†’ 25 activities (all organized: Featured
 Worlds 6 + All Wonder Adventures 25 grouped by World); worksheet-inspired
-generic engine (`lib/categories.ts`, `lib/complexity.ts` §27 baseline,
+generic engine (`lib/categories.ts`, `lib/complexity.ts` Â§27 baseline,
 `lib/activityRegistry.ts`, `lib/activityContent.ts` deterministic) served by
 `GET /api/activities/[activityId]/content` + `ActivityPlayer`; shipped
 engines linked, never duplicated; completions reuse game-events +
 `academic/result`. Session 10 (DEC-189): landing category-primary
-(`HomeContinue` + `BrandLogo→/play` + `d14a`/`4b84` mushrooms/apples/stars)
+(`HomeContinue` + `BrandLogoâ†’/play` + `d14a`/`4b84` mushrooms/apples/stars)
 + Session 11/12 (DEC-190/191/192): calm VoiceScript (13 events, 5 locales)
 + organized 25-tile Play + Docker-first MCP (`services/mcp` + `qdrant` on
 private `learnzzy` network, `docker:health`) + Session 13 (Big & Small
@@ -740,3 +740,4 @@ private `learnzzy` network, `docker:health`) + Session 13 (Big & Small
 unit tests (47 suites), typecheck, lint, production build, `docker compose config` OK.
 Open: Playwright `/play` 25-tile + HomeContinue + Big & Small scale pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
 Playwright academic pass, parent-journey screenshot re-fetch, physical devices.
+

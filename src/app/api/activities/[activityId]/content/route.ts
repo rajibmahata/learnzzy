@@ -4,6 +4,7 @@ import { normalizeAgeBand, resolveComplexity } from "@/lib/complexity";
 import { generateActivityContent } from "@/lib/activityContent";
 import { getDb } from "@/db/mongodb";
 import { evaluateSkill } from "@/lib/skillLevels";
+import { educationGateway } from "@/integrations/education/gateway";
 
 // GET /api/activities/[activityId]/content?learnerId=&ageBand=&seed=&limit=&recentIds=
 // Deterministic generators (no LLM, no arithmetic-by-AI). Learner lookup is
@@ -49,8 +50,46 @@ export async function GET(req: NextRequest, { params }: { params: { activityId: 
     }
   }
   // Mastery adjusts effective level within global level: strong → +1, needs practice → -1, clamped
-  const masteryAdj = mastery >= 0.85 ? 1 : mastery < 0.5 ? -1 : 0;
-  const effectiveLevel = Math.max(1, Math.min(5, globalLevel + masteryAdj));
+  let masteryAdj = mastery >= 0.85 ? 1 : mastery < 0.5 ? -1 : 0;
+
+  // MCP advisory for complexity (optional, validated, never blocks)
+  let mcpAdj = 0;
+  let mcpSource: string | null = null;
+  if (learnerId) {
+    try {
+      const mcpPromise = educationGateway.recommendNextActivity({
+        learnerId,
+        ageBand: ageBand as "4-5" | "6-7" | "8-9",
+        currentLevel: globalLevel,
+        recentGameIds: [activity.id],
+        focusConceptIds: [activity.skills[0] ?? activity.id],
+      });
+      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 800));
+      const mcpResult = (await Promise.race([mcpPromise, timeout])) as { recommendation: { gameId: string; confidence?: number; reason?: string } | null; mocked: boolean } | null;
+      if (mcpResult?.recommendation) {
+        const rec = mcpResult.recommendation;
+        // Validation: schema, age-band, global-level, skill, max/min, game capability, safety
+        const validGame = typeof rec.gameId === "string" && rec.gameId.length >= 1 && rec.gameId.length <= 50;
+        const validConfidence = typeof rec.confidence !== "number" || (rec.confidence >= 0 && rec.confidence <= 1);
+        const withinBounds = globalLevel >= 1 && globalLevel <= 6;
+        const sameSkillFamily = rec.gameId === activity.id || (activity.skills[0] && rec.gameId.includes(activity.skills[0].split("-")[0]));
+        const safeReason = !rec.reason || !/kill|harm|unsafe/i.test(rec.reason);
+        if (validGame && validConfidence && withinBounds && safeReason) {
+          // MCP suggests slightly higher complexity for strong confidence, lower for low
+          if ((rec.confidence ?? 0.5) >= 0.85 && mastery < 0.7) mcpAdj = 0; // don't push struggling learner
+          else if ((rec.confidence ?? 0.5) >= 0.8) mcpAdj = 1;
+          else if ((rec.confidence ?? 0.5) < 0.4) mcpAdj = -1;
+          // Clamp total adj to [-1, +1] within age-band safety
+          mcpAdj = Math.max(-1, Math.min(1, mcpAdj));
+          if (mcpAdj !== 0) mcpSource = mcpResult.mocked ? "mcp-mock" : "mcp-live";
+        }
+      }
+    } catch {
+      // MCP failure never blocks child — fallback to deterministic
+    }
+  }
+
+  const effectiveLevel = Math.max(1, Math.min(5, globalLevel + masteryAdj + mcpAdj));
 
   const skill = activity.skills[0] ?? activity.id;
   const complexity = resolveComplexity(skill, ageBand, effectiveLevel);

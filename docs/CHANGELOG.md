@@ -1,4 +1,4 @@
-# CHANGELOG: Learnzzy
+﻿# CHANGELOG: Learnzzy
 
 ## [Unreleased]
 
@@ -30,7 +30,7 @@
   tracks, `/api/learners/:learnerId/journey`, child journey UI, parent journey
   summary, and focused learning-progress tests.
 - Agentic Academic Engine (2026-09-17, MCP-powered, advisory-only): new
-  deterministic core `src/lib/academic.ts` (LEARN→PRACTICE→PLAY→RECALL→REVIEW→
+  deterministic core `src/lib/academic.ts` (LEARNâ†’PRACTICEâ†’PLAYâ†’RECALLâ†’REVIEWâ†’
   MASTER stage machine, review-first next-concept ordering, interest+need
   balance, spec-shaped game recommendations, no-jump post-activity decisions,
   `validateAcademicPlan` authority gate rejecting chain-of-thought/banned
@@ -45,8 +45,8 @@
   insights/progress carry `academic {conceptsLearned/Mastered/Practicing,
   streakDays, nextActivity}` with parent-safe reasons only.
 - Multi-character Voice Engine (2026-09-17): Teddy/Bunny/Owl/Monkey/Parrot in
-  `src/lib/voice.ts` with 11 voice events × 5 locales (en/hi/bn/ta/te,
-  prepared scripts incl. the Parrot ladder — never live-translated);
+  `src/lib/voice.ts` with 11 voice events Ã— 5 locales (en/hi/bn/ta/te,
+  prepared scripts incl. the Parrot ladder â€” never live-translated);
   `voiceAssets` Mongo cache (`src/services/voiceAssetService.ts`) so gameplay
   resolves cached audio or instant device speech and never calls TTS inline;
   client `audio.ts` extended with `speakWithCharacter` (backward compatible);
@@ -58,41 +58,41 @@
   content-agent object pool widened to the 10 spec visuals (math unchanged).
 - Knowledge catalog growth (2026-09-17): `numbers` + `words` (basic
   vocabulary) categories (13 total, ~120 concepts) with prepared hi/bn/ta/te
-  names (e.g. Parrot → तोता / টিয়া পাখি); OER mock +4 discovery summaries;
+  names (e.g. Parrot â†’ à¤¤à¥‹à¤¤à¤¾ / à¦Ÿà¦¿à¦¯à¦¼à¦¾ à¦ªà¦¾à¦-à¦¿); OER mock +4 discovery summaries;
   NCERT mock returns foundational-stage (Grade 1) rows with explicit
   non-official `learnzzy-native` provenance instead of invented CBSE
   alignment.
 - Academic Admin + parent surfaces (2026-09-17): command-center "Academic
   engine" panel (plans/voice/signals/failures); parent Progress page "Learning
-  · streak N days" + "Next:" card.
+  Â· streak N days" + "Next:" card.
 - 22 new `tests/academic-voice-themes.test.ts` tests (stages, ordering, plan
   gate, recommendation, decisions, voice i18n/cache, theme math-invariance);
   suite now 156/156 green; production build passes with 4 new academic
   routes + 1 admin route.
-- Living Wonder visual upgrade (2026-09-17, Stitch screens 12–20 followed
-  from written specs — live retrieval blocked, see STITCH_INSTRUCTIONS.md;
+- Living Wonder visual upgrade (2026-09-17, Stitch screens 12â€“20 followed
+  from written specs â€” live retrieval blocked, see STITCH_INSTRUCTIONS.md;
   game logic, scoring, pools, and agents untouched): `src/lib/characters.ts`
-  + `CharacterGuide` (8 purposeful friends × 8 states, calm CSS loops under
+  + `CharacterGuide` (8 purposeful friends Ã— 8 states, calm CSS loops under
   the existing reduced-motion kill-switch) integrated into all 6 plays +
   `Celebration`; Number Orchard / Breeze Valley per-round themes via pool
   `objects.type` passthrough (`pool-client` allowlist) with deterministic
-  fallback — Phaser apple/bird sprites stay the default path, math never
-  reads the theme; working "🔊 Read aloud" buttons in addition/subtraction
+  fallback â€” Phaser apple/bird sprites stay the default path, math never
+  reads the theme; working "ðŸ”Š Read aloud" buttons in addition/subtraction
   (mute-aware); persisted mute preference (`learnzzy.soundMuted.v1`) honored
   by every voice call with GameShell + Play Home toggles; `WonderWorlds`
   world-selector on `/play` (game names/taglines/hrefs preserved);
   CSS-only `SkyDrift` landing hero; Starlight night frame + Starlight-gold
-  crayon for Sketch (guides remain vector — asset trace found zero image
+  crayon for Sketch (guides remain vector â€” asset trace found zero image
   dependencies, so no broken-image class of bug exists there).
 - 13 new `tests/characters.test.ts` tests; suite now 169/169 green;
   Playwright 51/51 green (child/discover/canvas/sketch/adaptive/parent/
   admin/learning-journey across mobile-320/mobile/tablet/desktop on system
   Chrome against the fresh production build).
-- Stitch screens 12–20 retrieved live (2026-09-18): `list_screens` +
+- Stitch screens 12â€“20 retrieved live (2026-09-18): `list_screens` +
   `get_screen` over the Stitch MCP (`STITCH_API_KEY`) then `curl -L`
-  downloads — 7 game/world HTML files + 9 screenshots (7 screens + 3 square
+  downloads â€” 7 game/world HTML files + 9 screenshots (7 screens + 3 square
   art boards) under `docs/stitch_learnzzy_educational_kids_playground/`;
-  the 3 art boards optimized via `sharp` to 640px WebP postcards (36–54KB)
+  the 3 art boards optimized via `sharp` to 640px WebP postcards (36â€“54KB)
   at `public/assets/learnzzy/games/{clean-up,puzzle,sketch}/scene.webp`.
   Child surfaces restyled from the actual designs (game logic, scoring,
   pools, agents, e2e contracts untouched): `src/lib/worlds.ts` world
@@ -114,19 +114,19 @@
   `/play/clean-up` screenshot-verified; production `docker build`
   (`learnzzy:stitch-check`) succeeds.
 - Worksheet-inspired Learning Playground (2026-09-18, DEC-188): `/play` is
-  now category-first — 6 Learning World cards (numbers/words/think/create/
-  discover/puzzles, `src/lib/categories.ts`) → `/learn/[category]` → 16
+  now category-first â€” 6 Learning World cards (numbers/words/think/create/
+  discover/puzzles, `src/lib/categories.ts`) â†’ `/learn/[category]` â†’ 16
   activities (`src/lib/activityRegistry.ts`). Ten new activities (count,
   order, before-after, shape-count, big-small, word-family, word-match,
   trace-write, pattern, find-object) run on one generic engine:
-  deterministic generators (`src/lib/activityContent.ts` — no LLM, exactly-
+  deterministic generators (`src/lib/activityContent.ts` â€” no LLM, exactly-
   one-correct, rotated answers/visuals, teaching hints) + reusable
-  `ComplexityProfile` (`src/lib/complexity.ts`, spec §27 baseline, age
+  `ComplexityProfile` (`src/lib/complexity.ts`, spec Â§27 baseline, age
   changes the actual problem, `timePressure` always 0) +
   `GET /api/activities/[activityId]/content` (learner skill lookup
   best-effort, `recentIds` exclusion, works without Mongo) + one
   `ActivityPlayer` (character states, hint ladder, read-aloud, completion
-  via existing game-events + `academic/result` — no new contracts, so
+  via existing game-events + `academic/result` â€” no new contracts, so
   per-skill `skillLevels`, parent dashboards, and the academic engine work
   unchanged; MCP/gateway untouched). Shipped engines linked, never
   duplicated. 8 new tests (`activity-registry` + `activity-content`);
@@ -138,11 +138,11 @@
   `public/images/stitch/home-child-first-v2.png`; `AnimalWonderland3D`
   updated to match (camera, mushrooms, apples, 15 stars, 4 birds,
   `pointerdown` jump, deterministic). Landing now category-primary per spec
-  §2/§3 (hero → CTA → `HomeContinue` personalized Good-morning + plan card
-  → 7-category `CATEGORIES` grid → secondary 5-tile shortcuts → games
-  gallery → voice board → safety) while preserving Stitch hierarchy.
-  `BrandLogo` every header now → `/play`. Fixes: `genTraceWrite`
-  `answerIndex: 0` → `options.indexOf(answer)` with tightened
+  Â§2/Â§3 (hero â†’ CTA â†’ `HomeContinue` personalized Good-morning + plan card
+  â†’ 7-category `CATEGORIES` grid â†’ secondary 5-tile shortcuts â†’ games
+  gallery â†’ voice board â†’ safety) while preserving Stitch hierarchy.
+  `BrandLogo` every header now â†’ `/play`. Fixes: `genTraceWrite`
+  `answerIndex: 0` â†’ `options.indexOf(answer)` with tightened
   `activity-content` assertions (`options[answerIndex]==answer` across
   bands) + `resolveComplexity` dead `nudge` removal. 189/189 unit
   (47 suites), `tsc`/`eslint`/`next build` green.
@@ -151,7 +151,7 @@
   volumeProfile/pauseAfterMs) + `createVoiceScript`/`getVoiceProfile` +
   5-locale soft scripts ("Wonderful. You got it.", "Not quite. Let's look
   carefully.", "Take your time."), `src/lib/audio.ts` calm presets
-  (0.82–0.88 rate, 0.97–1.05 pitch, volume 0.85, 900ms throttle for thinking
+  (0.82â€“0.88 rate, 0.97â€“1.05 pitch, volume 0.85, 900ms throttle for thinking
   time), `src/lib/characters.ts` calm `STATE_LINES`. TTS stays cached +
   device fallback, never blocks, mute respected. 190/190 unit (+calm-quality
   test), `tsc`/`build` green.
@@ -173,10 +173,10 @@
   Stitch `1b8480cd` Category Hub + `a1812/9fa2` Archipelago + `00259/3f852`
   level maps + `f66f/38d8/77cc` games fetched via `curl -L`.
   `docker compose config` OK, 190/190 unit, `tsc`/`build` green.
-- All 25 Validated — Big & Small Fix (2026-09-18 Session 13): child reported
+- All 25 Validated â€” Big & Small Fix (2026-09-18 Session 13): child reported
   `Big & Small` identical visuals and wrong maths; `ActivityContent` now
   carries `visualMeta {sizes, wantBiggest}` and `ActivityPlayer` renders scaled
-  pills (`0.7→1.8` for 4–5, `0.9→1.3` for 8–9) with `1..n` badges so maths is
+  pills (`0.7â†’1.8` for 4â€“5, `0.9â†’1.3` for 8â€“9) with `1..n` badges so maths is
   visible and deterministic (`answer = indexOf biggest/smallest +1`). Full
   validation of `All Wonder Adventures` 25 tiles (generic 19 + game-route 6)
   across all age bands: `exactly-one-correct`, `unique`, `index-points-at-answer`,
@@ -188,15 +188,18 @@
   via `resolveComplexity`; new `PersonalizedSessionPlanner` deterministic
   (`hashSeed`/`mulberry32`, interest+need+variety, top-stays+shuffled rest,
   expiresAt+1day); `buildPlan` all items `level = globalLevel`;
-  `levelService` global promotion (total completions ≥3, avg ≥0.80, variety);
+  `levelService` global promotion (total completions â‰¥3, avg â‰¥0.80, variety);
   new `GET /api/learners/[id]/session`; UI shows `Global Level` + mastery
   strengths. `npm test` 190/190, `tsc` 0.
-- Natural Human-Like Female Voice — Root Cause (2026-09-18 Session 15):
+- Natural Human-Like Female Voice â€” Root Cause (2026-09-18 Session 15):
   inspection of `speechSynthesis`/`SpeechSynthesisUtterance`/`getVoices`/
   `voiceAssetService` shows `voiceAssets` pending (KI-020), `rate/pitch` only,
   no SSML/breath, `pauseAfterMs` unused, robotic eSpeak fallback. Decision:
-  server `ttsProvider` (`tts-1-hd` warm female) → `voiceAssets.audioUrl` →
+  server `ttsProvider` (`tts-1-hd` warm female) â†’ `voiceAssets.audioUrl` â†’
   `HTMLAudio` preload, `speechSynthesis` only offline fallback.
+
+
+- Global Level Journey + Auto-Next + Interactive Feedback (2026-09-19 Session 16): all exercises share GLOBAL Level (visible LEVEL N badge on ActivityPlayer/Addition/Subtraction), no per-game levels; skill mastery internal. Exercise lifecycle: Exercise starts -> Child solves -> Server validates -> Correct? SUCCESS/RETRY -> Feedback (green/red) -> Next enabled -> 10s countdown (progress bar) -> Automatic next (setTimeout 10000, cancel on manual). Implemented in ActivityPlayer (countdown, success/retry UI) and math games (globalLevel from getCachedProfile, difficulty = ceil(global/2), goNext). Complexity: GLOBAL + AGE BAND + PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity with age-band boundaries (4-5 simple, 6-7 intermediate, 8-9 advanced) and MCP advisory (Tutor via Education Gateway, 800ms timeout, 7 validations, fallback to deterministic). MCP failure never blocks child. Verified: npm test 190/190, tsc 0.
 
 ### Changed
 - `/api/games` now exposes all five MVP games as active.
@@ -208,3 +211,5 @@
 
 ### Removed
 - None.
+
+

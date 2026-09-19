@@ -18,15 +18,38 @@ import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
+import { getCachedProfile } from "@/lib/learner";
 
 export default function SubtractionPlay() {
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
+  const [globalLevel, setGlobalLevel] = React.useState(1);
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const countdownRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoNextRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  function cancelCountdown() {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (autoNextRef.current) clearTimeout(autoNextRef.current);
+    setCountdown(null);
+  }
+  function startCountdown(onDone: () => void) {
+    setCountdown(10);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (autoNextRef.current) clearTimeout(autoNextRef.current);
+    countdownRef.current = setInterval(() => setCountdown((c) => (c !== null && c > 0 ? c - 1 : 0)), 1000);
+    autoNextRef.current = setTimeout(() => { if (countdownRef.current) clearInterval(countdownRef.current); setCountdown(null); onDone(); }, 10000);
+  }
+  React.useEffect(() => () => { if (countdownRef.current) clearInterval(countdownRef.current); if (autoNextRef.current) clearTimeout(autoNextRef.current); }, []);
+  React.useEffect(() => {
+    const p = getCachedProfile();
+    if (p && typeof p.level === "number") setGlobalLevel(Math.max(1, Math.min(6, p.level)));
+  }, []);
+  const difficulty = Math.max(1, Math.min(3, Math.ceil(globalLevel / 2))) as 1 | 2 | 3;
   // Pool-first per-window shuffled — open windows never see identical subtraction sets.
   const { rounds, reload, locked } = useGameRounds<SubtractionLike>({
     gameId: "subtraction",
-    difficulty: 1,
+    difficulty,
     total: GAME_ROUNDS,
     mapItem: toSubtractionContent,
     makeLocal: (r) => subtractionGame.createRound({ difficulty: 1, round: r }),
@@ -61,6 +84,23 @@ export default function SubtractionPlay() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rounds, round, done]);
 
+  function goNext() {
+    cancelCountdown();
+    if (round + 1 >= GAME_ROUNDS) {
+      const r = award("subtraction", 3);
+      setReward(r);
+      setDone(true);
+      queueEvent({ event: "game_completed", gameId: "subtraction", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
+      const accuracy = Math.max(0, Math.min(1, (GAME_ROUNDS - mistakeRounds.current.size) / GAME_ROUNDS));
+      reportGameCompletion({ gameId: "subtraction", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
+    } else {
+      setRound(round + 1);
+      setPicked(null);
+      setFeedback("idle");
+      setHintOpen(false);
+    }
+  }
+
   function pick(v: number) {
     if (!content || feedback === "correct" || done) return;
     const ok = subtractionGame.validate(content, v);
@@ -71,31 +111,13 @@ export default function SubtractionPlay() {
       setSuccessTick((t) => t + 1);
       queueEvent({ event: "answer_correct", gameId: "subtraction", contentId });
       teddyVoice(subtractionPraise(content.start, content.removed, content.objectType ?? "teddy"));
-      setTimeout(() => {
-        if (round + 1 >= GAME_ROUNDS) {
-          const r = award("subtraction", 3);
-          setReward(r);
-          setDone(true);
-          queueEvent({ event: "game_completed", gameId: "subtraction", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
-          const accuracy = Math.max(0, Math.min(1, (GAME_ROUNDS - mistakeRounds.current.size) / GAME_ROUNDS));
-          reportGameCompletion({ gameId: "subtraction", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
-        } else {
-          setRound(round + 1);
-          setPicked(null);
-          setFeedback("idle");
-          setHintOpen(false);
-        }
-      }, 900);
+      startCountdown(goNext);
     } else {
       setFeedback("retry");
       mistakeRounds.current.add(round);
       queueEvent({ event: "answer_incorrect", gameId: "subtraction", contentId });
       teddyVoice(gentleRetry("look"));
-      setTimeout(() => {
-        setPicked(null);
-        setFeedback("idle");
-        setHintOpen(false);
-      }, 900);
+      startCountdown(goNext);
     }
   }
 
@@ -136,6 +158,14 @@ export default function SubtractionPlay() {
 
   return (
     <GameShell title="Fly Away" stars={totalStars}>
+      <div className="flex items-center justify-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-black text-white shadow-[0_3px_0_#004395]">
+          <span aria-hidden>🌟</span> LEVEL {globalLevel}
+        </span>
+        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-on-surface-variant">
+          Fly Away • {globalLevel <= 2 ? "Building basics" : globalLevel <= 4 ? "Growing strong" : "Master explorer"}
+        </span>
+      </div>
       <StepperTrail round={round} total={GAME_ROUNDS} />
 
       <div className="mt-2 flex flex-col items-center text-center">
@@ -228,11 +258,22 @@ export default function SubtractionPlay() {
       </div>
 
        <div className="mt-4" aria-live="polite">
-         <QuestFeedbackBar
-           title={feedback === "correct" ? "✨ Great job!" : feedback === "retry" ? "Try again!" : "Count the birds still on the branch!"}
-           hint={feedback === "retry" ? "Look carefully, take your time!" : `Take away: start at ${content.start}, ${content.removed} flew!`}
-         />
-       </div>
+          <QuestFeedbackBar
+            title={feedback === "correct" ? "✨ Great job!" : feedback === "retry" ? "😢 Try again — Let's look again!" : "Count the birds still on the branch!"}
+            hint={feedback === "retry" ? "Take your time. Look carefully — you can do it!" : `Take away: start at ${content.start}, ${content.removed} flew!`}
+          />
+          {feedback !== "idle" && countdown !== null && (
+            <div className="mt-2 flex flex-col items-center gap-1">
+              <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/60">
+                <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(countdown / 10) * 100}%` }} />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-on-surface-variant">Next in {countdown}s</span>
+                <button type="button" onClick={goNext} className="rounded-full bg-primary px-4 py-1 text-xs font-black text-white shadow-[0_2px_0_#004395]">Next →</button>
+              </div>
+            </div>
+          )}
+        </div>
     </GameShell>
   );
 }

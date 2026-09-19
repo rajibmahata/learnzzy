@@ -33,6 +33,7 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
 
   const profile = getCachedProfile();
   const ageBand = normalizeAgeBand(profile?.ageBand);
+  const globalLevel = Math.max(1, Math.min(6, profile?.level ?? 1));
   // Purposeful guide per category (spec §4/§34): Teddy → numbers,
   // Parrot → words/discover, Bunny → write/create, Owl → think/shapes,
   // Monkey → puzzles. characterForGame maps those engines to friends.
@@ -97,7 +98,46 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
     if (ok) speakWithCharacter(current.explanation, { lang: "en-US" });
   }
 
+  // Auto-next countdown state — must be before next() so next can cancel it
+  const [countdown, setCountdown] = React.useState<number | null>(null);
+  const countdownRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoNextRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      if (autoNextRef.current) clearTimeout(autoNextRef.current);
+    };
+  }, []);
+
+  function cancelCountdown() {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (autoNextRef.current) clearTimeout(autoNextRef.current);
+    setCountdown(null);
+  }
+
+  function startCountdown() {
+    setCountdown(10);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (autoNextRef.current) clearTimeout(autoNextRef.current);
+    countdownRef.current = setInterval(() => {
+      setCountdown((c) => {
+        if (c === null || c <= 1) {
+          if (countdownRef.current) clearInterval(countdownRef.current);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    autoNextRef.current = setTimeout(() => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      setCountdown(null);
+      next();
+    }, 10000);
+  }
+
   function next() {
+    cancelCountdown();
     if (index + 1 >= items.length) {
       const accuracy = attempts > 0 ? correct / Math.max(1, attempts) : 0;
       queueEvent({
@@ -109,7 +149,6 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
         },
       });
       syncEvents().catch(() => {});
-      // Academic/skill loop (best-effort, never blocks the child).
       const learnerId = getLearnerId();
       if (learnerId) {
         fetch(`/api/learners/${learnerId}/academic/result`, {
@@ -125,9 +164,28 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
     }
   }
 
+  // Trigger countdown after feedback is shown
+  React.useEffect(() => {
+    if (picked != null && !done) {
+      startCountdown();
+    } else if (picked == null) {
+      cancelCountdown();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [picked, done]);
+
   return (
     <GameShell title={def.title} stars={correct}>
       <div className="mx-auto flex w-full max-w-game flex-col gap-3 px-4 pb-24 pt-4">
+        {/* GLOBAL LEVEL — visible on every exercise, same across all games */}
+        <div className="flex items-center justify-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-black text-white shadow-[0_3px_0_#004395]">
+            <span aria-hidden>🌟</span> LEVEL {globalLevel}
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-on-surface-variant">
+            {def.title} • {ageBand}
+          </span>
+        </div>
         <CharacterGuide
           character={character}
           state={done ? "celebrating" : feedback === "correct" ? "happy" : feedback === "retry" ? "encouraging" : "thinking"}
@@ -218,22 +276,41 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
               })}
             </div>
             {picked != null && (
-              <p role="status" className="mt-3 text-center font-bold">
-                {picked === current.answer ? `✅ ${current.explanation}` : "Not quite. Try the next one — look once more together! 💛"}
-              </p>
+              <div role="status" className={`mt-3 rounded-2xl p-3 text-center font-bold border-2 ${picked === current.answer ? "bg-tertiary-fixed/30 border-tertiary text-on-tertiary-fixed" : "bg-error-container/40 border-error text-on-error-container"}`}>
+                <p className="text-base">{picked === current.answer ? `✅ ${current.explanation}` : `😢 ${current.explanation} — Not quite, let's try the next one!`}</p>
+                {picked === current.answer ? (
+                  <p className="mt-1 text-xs font-normal">Wonderful! You got it — LEVEL {globalLevel} keeps going!</p>
+                ) : (
+                  <p className="mt-1 text-xs font-normal">Take your time. Look carefully — you can do it!</p>
+                )}
+                {countdown !== null && (
+                  <div className="mt-2 flex flex-col items-center gap-1">
+                    <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/60">
+                      <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(countdown / 10) * 100}%` }} />
+                    </div>
+                    <span className="text-xs font-bold">Next in {countdown}s — tap Next to go now</span>
+                  </div>
+                )}
+              </div>
             )}
             <div className="mt-3 flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => { setHint((h) => Math.min(h + 1, current.hints.length)); setHintsUsed((h) => h + 1); }}
                 className="tactile rounded-full bg-secondary-fixed px-4 py-2 text-sm font-bold"
+                disabled={picked != null}
               >
                 💡 Hint{hint > 0 ? ` (${hint}/${current.hints.length})` : ""}
               </button>
               <button type="button" aria-label="Read aloud" onClick={() => speakWithCharacter(current.voiceLine, { lang: "en-US" })} className="tactile rounded-full bg-surface-high px-4 py-2 text-sm font-bold">🔊 Read aloud</button>
               {picked != null && (
-                <button type="button" onClick={next} className="tactile-button ml-auto bg-primary px-6 py-2 text-white">
+                <button
+                  type="button"
+                  onClick={next}
+                  className="tactile-button ml-auto flex items-center gap-2 bg-primary px-6 py-2 text-white shadow-[0_4px_0_#004395] hover:shadow-[0_6px_0_#004395] hover:-translate-y-0.5 transition-all"
+                >
                   {index + 1 >= items.length ? "Finish 🎉" : "Next →"}
+                  {countdown !== null && <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">{countdown}</span>}
                 </button>
               )}
             </div>

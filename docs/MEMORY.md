@@ -847,3 +847,14 @@ Decision: do NOT rely on speechSynthesis as primary. Next implementation
 will use server ttsProvider (tts-1-hd warm nova) -> voiceAssets
 audioUrl -> HTMLAudio preload, speechSynthesis only offline fallback; cache keys stay deterministic,
 gameplay never waits for TTS.
+
+
+# 34. Global Level Journey + Auto-Next + Interactive Feedback — 2026-09-19 (Session 16)
+
+Exercise flow redesigned as ONE continuous journey: all games share GLOBAL Level (1..6) visible as "LEVEL N" on every screen (ActivityPlayer, AdditionPlay, SubtractionPlay). No per-game levels visible; skill mastery stays internal via evaluateSkill.
+
+Flow: Exercise starts -> Child solves -> Answer submitted -> Server validates -> Correct? YES -> SUCCESS (green) : NO -> RETRY (red, sad) -> Feedback -> Next enabled -> 10s countdown (progress bar + Next in Xs) -> Automatic next exercise (setTimeout 10000, cancel on manual Next/unmount). Implemented in ActivityPlayer (countdown state + useEffect) and Addition/Subtraction plays (globalLevel from getCachedProfile, difficulty = ceil(global/2), goNext + startCountdown).
+
+Complexity: GLOBAL + AGE BAND + LEARNER PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity. Age bands provide safe boundaries (4-5 simple, 6-7 intermediate, 8-9 advanced) but do not alone determine exercise. MCP (Tutor) advisory for complexity via Education Gateway (recommendNextActivity, 800ms timeout, validated: schema, age-band, global-level, skill, bounds, safety, game capability) with deterministic fallback (PersonalizationService + age rules). MCP failure never blocks child (catch -> fallback).
+
+Files: src/components/child/ActivityPlayer.tsx (LEVEL N badge, success/retry UI, countdown), src/app/play/addition/AdditionPlay.tsx + subtraction (globalLevel, countdown, difficulty from global), src/app/api/activities/[id]/content (globalLevel+masteryAdj+mcpAdj -> effectiveLevel), src/services/personalizedSessionPlanner.ts, src/services/levelService.ts (overall promotion). Verified: npm test 190/190, tsc 0.
