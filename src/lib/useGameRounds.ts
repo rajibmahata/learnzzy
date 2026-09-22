@@ -145,5 +145,5 @@ function readRecentIds(key: string): string[] {
 function readRequestedLevel(): number | undefined {
   if (typeof window === "undefined") return undefined;
   const value = Number(new URLSearchParams(window.location.search).get("level"));
-  return Number.isInteger(value) && value >= 1 && value <= 5 ? value : undefined;
+  return Number.isInteger(value) && value >= 1 && value <= 100 ? value : undefined;
 }

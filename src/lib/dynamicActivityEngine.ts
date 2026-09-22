@@ -8,6 +8,7 @@ import { LEARNING_WORLDS } from "./learningWorlds.ts";
 import { selectWorldEvent } from "./worldRewards.ts";
 import { educationGateway } from "@/integrations/education/gateway";
 import { z } from "zod";
+import { mechanicForSkillAtLevel } from "./mechanics.ts";
 
 export interface DynamicActivity {
   activity: LearningActivity;
@@ -40,7 +41,15 @@ function pickEnvironment(input: AdventureEngineInput, activity: LearningActivity
 }
 
 function pickMechanic(activity: LearningActivity, input: AdventureEngineInput): string {
-  // Activity already has mechanics; pick one not recently used
+  // Multi-level: same skill mechanic evolves per level (e.g. addition 1→ balloon-pop, 4→ dino-eggs)
+  const leveled = mechanicForSkillAtLevel(activity.skill, input.globalLevel);
+  if (leveled) {
+    // If leveled mechanic is available in this activity's mechanics, prefer it; otherwise use leveled for composition
+    if (activity.mechanics.includes(leveled.mechanic)) return leveled.mechanic;
+    // For composition: BalloonPop + Addition + Dinosaur Theme = Dinosaur Balloon Addition
+    // Return leveled mechanic so the same skill is taught via many experiences (§2)
+    return leveled.mechanic;
+  }
   const recent = new Set(input.recentMechanics);
   for (const m of activity.mechanics) if (!recent.has(m)) return m;
   return activity.mechanics[0]!;

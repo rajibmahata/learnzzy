@@ -20,6 +20,8 @@ import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
+import { getCachedProfile } from "@/lib/learner";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Starlight wand palette (Stitch sketch): same six ink slots, Stitch color
 // story names. "Red" keeps its e2e-pinned accessible name.
@@ -33,6 +35,12 @@ const INK_COLORS = [
 ] as const;
 
 export default function SketchPlay() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlLevel = React.useMemo(() => {
+    const v = Number(searchParams.get("level"));
+    return Number.isFinite(v) && v >= 1 && v <= 100 ? v : null;
+  }, [searchParams]);
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
@@ -44,14 +52,21 @@ export default function SketchPlay() {
   const retryRounds = React.useRef<Set<number>>(new Set());
   const hintOpens = React.useRef(0);
   const gameStart = React.useRef(Date.now());
+  const [globalLevel, setGlobalLevel] = React.useState<number>(() => urlLevel ?? 1);
+  React.useEffect(() => {
+    if (urlLevel !== null) { setGlobalLevel(urlLevel); return; }
+    const p = getCachedProfile();
+    if (p && typeof p.level === "number") setGlobalLevel(Math.max(1, Math.min(100, p.level)));
+  }, [urlLevel]);
 
   const [hintOpen, setHintOpen] = React.useState(false);
+  const difficulty = Math.max(1, Math.min(3, Math.ceil(globalLevel / 2))) as 1 | 2 | 3;
   const { rounds, reload, locked } = useGameRounds<SketchActivity>({
     gameId: "sketch",
-    difficulty: 1,
+    difficulty,
     total: GAME_ROUNDS,
     mapItem: toSketchContent,
-    makeLocal: (r) => createSketchActivity(`local-skt-${Date.now() % 2147483647}-${r}`, 1),
+    makeLocal: (r) => createSketchActivity(`local-skt-${Date.now() % 2147483647}-${r}`, difficulty),
   });
   const sketch = rounds?.[round]?.content;
   const contentId = rounds?.[round]?.contentId;
@@ -114,6 +129,9 @@ export default function SketchPlay() {
     });
     if (evalResult.completed) {
       setResult("good");
+      // Celebratory voice — good job / wonderful job as requested
+      const v = CHARACTER_VOICES.bunny ?? CHARACTER_VOICES.teddy;
+      speakWithCharacter("Wonderful job! Beautiful tracing!", { lang: "en-US", rate: v.rate, pitch: v.pitch, characterId: "bunny" });
       setTimeout(() => {
         if (round + 1 >= GAME_ROUNDS) {
           const r = award("sketch", 3);
@@ -122,6 +140,8 @@ export default function SketchPlay() {
           queueEvent({ event: "game_completed", gameId: "sketch", metadata: { stars: r.stars, sticker: r.sticker.emoji } });
           const accuracy = Math.max(0, Math.min(1, (GAME_ROUNDS - retryRounds.current.size) / GAME_ROUNDS));
           reportGameCompletion({ gameId: "sketch", accuracy, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed: hintOpens.current, durationMs: Date.now() - gameStart.current });
+          // Final celebration voice
+          speakWithCharacter("Wonderful job! You finished all tracings!", { lang: "en-US", rate: v.rate, pitch: v.pitch, characterId: "bunny" });
         } else {
           setRound(round + 1);
         }
@@ -130,14 +150,33 @@ export default function SketchPlay() {
       setResult("retry");
       retryRounds.current.add(round);
       queueEvent({ event: "retry_started", gameId: "sketch", contentId, metadata: { round: round + 1 } });
+      const v = CHARACTER_VOICES.bunny ?? CHARACTER_VOICES.teddy;
+      speakWithCharacter("Good try! Follow the dots slowly.", { lang: "en-US", rate: v.rate, pitch: v.pitch, characterId: "bunny" });
     }
   }
 
+  const handleContinueHarder = React.useCallback(() => {
+    const next = Math.min(100, globalLevel + 1);
+    try {
+      const raw = localStorage.getItem("learnzzy.learner.v1");
+      if (raw) { const p = JSON.parse(raw); if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next })); }
+      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
+    } catch {}
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("level", String(next));
+    router.push(`/play/sketch?${params.toString()}`);
+    setRound(0); setDone(false); setReward(null); setResult("idle");
+  }, [globalLevel, reload, router, searchParams]);
+
   if (done) {
-    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="bunny" variantSeed={reward.sticker.id} onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />;
+    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="bunny" variantSeed={reward.sticker.id} continueLabel="Continue → Next Level" onReplay={() => { setRound(0); setDone(false); setReward(null); setResult("idle"); reload(); }} onContinue={handleContinueHarder} />;
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
-        <Celebration title="BEAUTIFUL!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="bunny" onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />
+        <Celebration title="Wonderful job!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="bunny" onReplay={() => { setRound(0); setDone(false); setReward(null); setResult("idle"); reload(); }} />
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4">
+          <button type="button" onClick={handleContinueHarder} className="w-full h-14 rounded-full bg-primary text-on-primary font-black text-base shadow-[0_5px_0_#004395] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"><span>Continue → Next Level</span><span className="material-symbols-outlined text-[20px]">arrow_forward</span></button>
+          <p className="text-center text-xs font-bold text-on-surface-variant mt-2">LEVEL {globalLevel} → {Math.min(100, globalLevel + 1)} • Harder!</p>
+        </div>
       </div>
     );
   }
@@ -239,7 +278,7 @@ export default function SketchPlay() {
         </Button>
       </div>
       <p aria-live="polite" className="mt-3 min-h-[1.75rem] text-center text-lg font-bold">
-        {result === "good" ? "✨ Wonderful tracing!" : result === "retry" ? "Nice try — follow the dots!" : ""}
+        {result === "good" ? "✨ Good job! Wonderful tracing!" : result === "retry" ? "Good try — follow the dots slowly!" : ""}
       </p>
     </GameShell>
   );

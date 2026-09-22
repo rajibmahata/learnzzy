@@ -36,8 +36,8 @@ describe("server content selection", () => {
 
 describe("learning journey", () => {
   test("exposes numbers, creative, and visual tracks", () => {
-    assert.deepEqual(TRACKS.map((track) => track.id), ["numbers", "creative", "visual"]);
-    assert.deepEqual(TRACKS.flatMap((track) => track.gameIds).sort(), ["addition", "clean-up", "discover", "puzzle", "sketch", "subtraction"]);
+    assert.deepEqual(TRACKS.map((track) => track.id).sort(), ["creative", "nature", "numbers", "visual", "words"]);
+    assert.deepEqual(TRACKS.flatMap((track) => track.gameIds).sort(), ["addition", "animal-safari", "balloon-animals", "balloon-words", "butterfly-garden", "clean-up", "color-detective", "discover", "puzzle", "sketch", "subtraction"]);
   });
 
   test("marks earlier levels complete, current level playable, and future levels locked", () => {
@@ -47,9 +47,10 @@ describe("learning journey", () => {
     assert.equal(journey.nextLevel, 4);
   });
 
-  test("unlock authority never permits a future level", () => {
+  test("unlock authority never permits far future level (allows immediate next for Continue)", () => {
     assert.equal(isLevelUnlocked(3, 3), true);
-    assert.equal(isLevelUnlocked(3, 4), false);
+    assert.equal(isLevelUnlocked(3, 4), true);
+    assert.equal(isLevelUnlocked(3, 5), false);
     assert.equal(isLevelUnlocked(5, 5), true);
   });
 });

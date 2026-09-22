@@ -83,9 +83,10 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState<ContentDetail | null>(null);
   const [academic, setAcademic] = useState<{ plans: { planId: string; learnerId: string; concept: string; stage: string; source: string; reason: string }[]; voiceAssets: { cacheKey: string; characterId: string; event: string; locale: string; status: string }[]; signals: number; failedRecommendations: number } | null>(null);
+  const [activities, setActivities] = useState<{ activities: { id: string; type: string; world: string; skill: string; ageBands: string[]; safetyStatus: string; provenance: { source: string } | undefined; title: string; icon: string }[]; worlds: { id: string; name: string; icon: string }[] } | null>(null);
 
   async function refresh() {
-    const [a, t, p, analytics, h, edu, hist, content, acad] = await Promise.all([
+    const [a, t, p, analytics, h, edu, hist, content, acad, acts] = await Promise.all([
       getJson<Agent[]>("/api/admin/agents"),
       getJson<Task[]>("/api/admin/tasks?limit=8"),
       getJson<Pool[]>("/api/admin/pools"),
@@ -95,9 +96,10 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
       getJson<Task[]>("/api/admin/commands").catch(() => []),
       getJson<ContentRow[]>("/api/admin/content?limit=20").catch(() => []),
       getJson<{ plans: { planId: string; learnerId: string; concept: string; stage: string; source: string; reason: string }[]; voiceAssets: { cacheKey: string; characterId: string; event: string; locale: string; status: string }[]; signals: number; failedRecommendations: number }>("/api/admin/academic/plans").catch(() => null),
+      getJson<{ activities: { id: string; type: string; world: string; skill: string; ageBands: string[]; safetyStatus: string; provenance: { source: string } | undefined; title: string; icon: string }[]; worlds: { id: string; name: string; icon: string }[] }>("/api/admin/activities").catch(() => null),
     ]);
     setAgents(a); setTasks(t); setPools(p); setStats(analytics.stats); setHealth(h); setProviders(edu.providers);
-    setHistory(hist); setContentRows(content); setAcademic(acad);
+    setHistory(hist); setContentRows(content); setAcademic(acad); setActivities(acts);
   }
 
   useEffect(() => { refresh().catch((err) => setMessage(err.message)); }, []);
@@ -252,6 +254,17 @@ function CommandCenter({ admin, onLogout }: { admin: Admin; onLogout: () => void
               {detail.versions.length === 0 ? <p className="admin-empty">No versions recorded.</p> : (
                 <div className="task-list">{detail.versions.map((v) => <div className="task-row" key={`${v.version}-${v.createdAt}`}><div><strong>v{v.version}</strong><small>{v.changeReason}</small></div><small>{v.createdAt}</small></div>)}</div>
               )}
+            </div>
+          )}
+        </Panel>
+        <Panel title="Learning Activities & Worlds" kicker="15 WORLDS · 46 ACTIVITIES">
+          {!activities ? <p className="admin-empty">Loading activities…</p> : (
+            <div className="task-list">
+              <div className="task-row"><div><strong>{activities.worlds.length} worlds</strong><small>{activities.worlds.map((w) => `${w.icon} ${w.name}`).join(" • ").slice(0, 80)}…</small></div><span>{activities.activities.length} acts</span></div>
+              {activities.activities.slice(0, 8).map((a) => (
+                <div className="task-row" key={a.id}><div><strong>{a.icon} {a.title}</strong><small>{a.world} • {a.type} • {a.skill} • {a.ageBands.join("/") } • {a.safetyStatus} • {a.provenance?.source ?? "learnzzy"}</small></div><small>{a.id}</small></div>
+              ))}
+              <div className="task-row"><div><strong>External Stories</strong><small>{activities.activities.filter((x) => x.type === "EXTERNAL_STORY").length} curated • {activities.activities.filter((x) => x.safetyStatus === "approved").length} approved • parentApprovalRequired where needed</small></div><span>safe</span></div>
             </div>
           )}
         </Panel>

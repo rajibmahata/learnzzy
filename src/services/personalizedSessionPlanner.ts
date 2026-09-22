@@ -134,7 +134,7 @@ function buildLearningGoals(masteries: SkillMastery[]): LearningGoal[] {
 export async function buildPersonalizedSessionPlan(learnerId: string): Promise<PersonalizedSessionPlan> {
   const learner = await getLearner(learnerId);
   const ageBand = (learner?.ageBand ?? "6-7") as AgeBand;
-  const globalLevel = Math.max(1, Math.min(6, learner?.level ?? 1));
+  const globalLevel = Math.max(1, Math.min(100, learner?.level ?? 1));
   const interests = learner?.interests ?? {};
   const progress = learner?.gameProgress ?? {};
 

@@ -65,7 +65,7 @@ Remaining backlog items are production-hardening or explicitly listed in
 granular tracking; the paragraph above is a progress snapshot, not a claim
 that every sub-item acceptance criterion is closed.
 
-Current verified extension (2026-09-22): Words & Phonics (19 families, 30 activities) + Mini Mission Engine (5 templates, 20/20 Playwright) + Child Identity/Session/Stickers + Living Reward World (53 world events, 254/254) + Stitch Game Section (Number Adventure ff9f32f + Fly Away 1120c83d, explicit Next Level, 780×1768). Unit tests 254/254 green; typecheck/lint pass; Stitch HTML/screenshots under `.stitch/1495487808742926612/`. Broader browser, live-Mongo, TTS, device validation remain open.
+Current verified extension (2026-09-22): Words & Phonics (19 families, 30 activities) + Mini Missions (5 templates, 20/20) + Living Reward World (54 world events incl. robot, 280/280) + Stitch Number Adventure/Fly Away (ff9f32f/1120c83d, explicit Next Level, Continue → harder ?level=) + Dynamic Non-Monotonous Engine (15 worlds, 46 activities, 18 mechanics, 100-level skill-specific `1..100` + 8-level evolution per skill, Balloon Letter/Animal burst with typing) + Multi-Level 100 (skill-specific `1..100`, knowledge-check Numbers/Words) + Curriculum 7 frameworks 10 outcomes 100% (via AI-enriched `multiplication, geometry, plants, computing` + curated activities). Unit tests 280/280 green; typecheck/lint pass; Stitch `.stitch/` + `curriculum:validate`/`coverage` green.
 
 Priority:
 

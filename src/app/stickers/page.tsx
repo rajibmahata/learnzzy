@@ -13,6 +13,7 @@ import {
   milestoneFor,
   type StickerDef,
 } from "@/lib/stickers";
+import { LivingForest } from "@/components/forest/LivingForest";
 
 interface ServerCollection {
   totalStars: number;
@@ -54,6 +55,10 @@ export default function StickersPage() {
   const catalogSize = collection?.catalogSize ?? ACTIVE_STICKERS.length;
   const milestone = milestoneFor(count);
 
+  const forestStickers = React.useMemo(() => (collection?.stickers ?? []) as StickerDef[], [collection]);
+  const [activeLearnerId, setActiveLearnerId] = React.useState<string | null>(null);
+  React.useEffect(() => { setActiveLearnerId(getActiveLearnerId()); }, []);
+
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-game flex-col px-4 py-4">
       <header className="flex items-center justify-between">
@@ -63,13 +68,14 @@ export default function StickersPage() {
 
       <div className="mt-2 flex flex-col items-center text-center">
         <p className="rounded-full bg-surface-high px-3 py-1 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-          Sticker Garden
+          🌳 My Living Forest
         </p>
-        <h1 className="mt-2 text-headline-lg">{learnerName ? `${learnerName}'s Sticker Garden` : "My Stickers"} 🌟</h1>
-        <p className="text-on-surface-variant">
+        <h1 className="mt-2 text-headline-lg">{learnerName ? `${learnerName}'s Living Forest` : "My Living Forest"} 🌳</h1>
+        <p className="text-on-surface-variant text-sm">Every reward you earn comes alive here!</p>
+        <p className="text-on-surface-variant text-xs mt-1">
           {count === 0
-            ? "Finish a game to earn your first sticker!"
-            : `${count} / ${catalogSize} Stickers • ⭐ ${collection?.totalStars ?? 0} stars${level ? ` • Level ${level}` : ""}`}
+            ? "Finish a game to grow your forest!"
+            : `${count} / ${catalogSize} friends • ⭐ ${collection?.totalStars ?? 0} stars${level ? ` • Level ${level}` : ""}`}
         </p>
         {milestone ? (
           <p role="status" className="mt-2 rounded-full bg-secondary-fixed px-3 py-1 text-xs font-black uppercase tracking-wide">
@@ -80,46 +86,60 @@ export default function StickersPage() {
 
       {count === 0 ? (
         <div className="mt-6 rounded-xl bg-white p-8 text-center shadow-card">
-          <p aria-hidden className="text-5xl">🎒</p>
-          <p className="mt-3 font-bold">Your collection is empty</p>
-          <p className="mt-1 text-sm text-on-surface-variant">Play any game to the end to earn stars and stickers.</p>
+          <p aria-hidden className="text-5xl">🌱</p>
+          <p className="mt-3 font-bold">Your forest is a tiny seedling</p>
+          <p className="mt-1 text-sm text-on-surface-variant">Play any game to the end to earn your first creature and grow a tree!</p>
           <Link href="/play" className="mt-4 inline-block rounded-full bg-primary px-6 py-3 font-black text-white">
             ▶ Play Now
           </Link>
         </div>
       ) : (
         <div className="mt-4 flex flex-col gap-4 pb-4">
-          {STICKER_CATEGORIES.map((cat) => {
-            const inCat = ACTIVE_STICKERS.filter((s) => s.category === cat.id);
-            if (inCat.length === 0) return null;
-            return (
-              <section key={cat.id} aria-label={`${cat.name} stickers`} className="rounded-xl bg-white p-4 shadow-card">
-                <h2 className="text-sm font-black">
-                  <span aria-hidden>{cat.icon} </span>
-                  {cat.name}
-                  <span className="ml-2 rounded-full bg-surface-high px-2 py-0.5 text-xs">
-                    {inCat.filter((s) => owned.has(s.id)).length}/{inCat.length}
-                  </span>
-                </h2>
-                <div className="mt-3 grid grid-cols-4 gap-2">
-                  {inCat.map((s) =>
-                    owned.has(s.id) ? (
-                      <div key={s.id} className="flex flex-col items-center rounded-lg bg-surface-low p-2">
-                        <span aria-hidden className="text-3xl">{s.emoji}</span>
-                        <span className="mt-1 text-center text-[10px] font-bold leading-tight">{s.name}</span>
-                      </div>
-                    ) : (
-                      <div key={s.id} className="flex flex-col items-center rounded-lg bg-surface-low/50 p-2 opacity-60" aria-label="Undiscovered sticker">
-                        <span aria-hidden className="text-3xl">?</span>
-                        <span className="mt-1 text-center text-[10px] font-bold leading-tight text-on-surface-variant">???</span>
-                      </div>
-                    )
-                  )}
-                </div>
-              </section>
-            );
-          })}
-          <p className="text-center text-sm text-on-surface-variant">Keep exploring to discover more!</p>
+          {/* Living Forest — primary UI, not a sticker grid */}
+          <section aria-label="My Living Forest" className="rounded-xl bg-white p-2 shadow-card">
+            <div className="h-[420px] w-full">
+              <LivingForest stickers={forestStickers} learnerId={activeLearnerId} />
+            </div>
+            <p className="mt-2 text-center text-xs text-on-surface-variant">Tap a creature — it looks at you ✨ • Your forest grows because you learn 🌳</p>
+          </section>
+
+          {/* My Friends — secondary, still inspectable */}
+          <details className="rounded-xl bg-white p-4 shadow-card">
+            <summary className="text-sm font-black cursor-pointer">👥 My Friends — {count} / {catalogSize}</summary>
+            <div className="mt-3 flex flex-col gap-3">
+              {STICKER_CATEGORIES.map((cat) => {
+                const inCat = ACTIVE_STICKERS.filter((s) => s.category === cat.id);
+                if (inCat.length === 0) return null;
+                return (
+                  <div key={cat.id}>
+                    <h3 className="text-xs font-black">
+                      <span aria-hidden>{cat.icon} </span>
+                      {cat.name}
+                      <span className="ml-2 rounded-full bg-surface-high px-2 py-0.5 text-xs">
+                        {inCat.filter((s) => owned.has(s.id)).length}/{inCat.length}
+                      </span>
+                    </h3>
+                    <div className="mt-2 grid grid-cols-4 gap-2">
+                      {inCat.map((s) =>
+                        owned.has(s.id) ? (
+                          <div key={s.id} className="flex flex-col items-center rounded-lg bg-surface-low p-2">
+                            <span aria-hidden className="text-2xl">{s.emoji}</span>
+                            <span className="mt-1 text-center text-[10px] font-bold leading-tight">{s.name}</span>
+                          </div>
+                        ) : (
+                          <div key={s.id} className="flex flex-col items-center rounded-lg bg-surface-low/50 p-2 opacity-60" aria-label="Undiscovered sticker">
+                            <span aria-hidden className="text-2xl">?</span>
+                            <span className="mt-1 text-center text-[10px] font-bold leading-tight text-on-surface-variant">???</span>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+
           <section aria-label="Milestones" className="rounded-xl bg-white p-4 shadow-card">
             <h2 className="text-sm font-black">🏆 Collection milestones</h2>
             <ul className="mt-2 flex flex-col gap-1 text-sm">

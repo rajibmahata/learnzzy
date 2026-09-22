@@ -17,20 +17,35 @@ import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
+import { getCachedProfile } from "@/lib/learner";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function CleanupPlay() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlLevel = React.useMemo(() => {
+    const v = Number(searchParams.get("level"));
+    return Number.isFinite(v) && v >= 1 && v <= 100 ? v : null;
+  }, [searchParams]);
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
   const [collected, setCollected] = React.useState<string[]>([]);
   const [done, setDone] = React.useState(false);
+  const [globalLevel, setGlobalLevel] = React.useState<number>(() => urlLevel ?? 1);
+  React.useEffect(() => {
+    if (urlLevel !== null) { setGlobalLevel(urlLevel); return; }
+    const p = getCachedProfile();
+    if (p && typeof p.level === "number") setGlobalLevel(Math.max(1, Math.min(100, p.level)));
+  }, [urlLevel]);
+  const difficulty = Math.max(1, Math.min(3, Math.ceil(globalLevel / 2))) as 1 | 2 | 3;
 
   const { rounds, reload, locked } = useGameRounds<CleanupSceneDef>({
     gameId: "clean-up",
-    difficulty: 1,
+    difficulty,
     total: GAME_ROUNDS,
     mapItem: toCleanupContent,
-    makeLocal: (r) => createCleanupScene(`local-clean-${Date.now() % 2147483647}-${r}`, ["bedroom", "garden", "park"][r % 3], 3),
+    makeLocal: (r) => createCleanupScene(`local-clean-${Date.now() % 2147483647}-${r}`, ["bedroom", "garden", "park"][r % 3], difficulty),
   });
   const scene = rounds?.[round]?.content;
   const contentId = rounds?.[round]?.contentId;
@@ -69,11 +84,28 @@ export default function CleanupPlay() {
     }
   }
 
+  const handleContinueHarder = React.useCallback(() => {
+    const next = Math.min(100, globalLevel + 1);
+    try {
+      const raw = localStorage.getItem("learnzzy.learner.v1");
+      if (raw) { const p = JSON.parse(raw); if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next })); }
+      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
+    } catch {}
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("level", String(next));
+    router.push(`/play/clean-up?${params.toString()}`);
+    setRound(0); setCollected([]); setDone(false); setReward(null);
+  }, [globalLevel, reload, router, searchParams]);
+
   if (done) {
-    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="puppy" variantSeed={reward.sticker.id} onReplay={() => { setRound(0); setCollected([]); setDone(false); setReward(null); reload(); }} />;
+    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="puppy" variantSeed={reward.sticker.id} continueLabel="Continue → Next Level" onReplay={() => { setRound(0); setCollected([]); setDone(false); setReward(null); reload(); }} onContinue={handleContinueHarder} />;
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
         <Celebration title="Wonderful Job!" stars={reward?.stars ?? 5} sticker={reward?.sticker ?? null} character="puppy" onReplay={() => { setRound(0); setCollected([]); setDone(false); setReward(null); reload(); }} />
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4">
+          <button type="button" onClick={handleContinueHarder} className="w-full h-14 rounded-full bg-primary text-on-primary font-black text-base shadow-[0_5px_0_#004395] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"><span>Continue → Next Level</span><span className="material-symbols-outlined text-[20px]">arrow_forward</span></button>
+          <p className="text-center text-xs font-bold text-on-surface-variant mt-2">LEVEL {globalLevel} → {Math.min(100, globalLevel + 1)} • Harder!</p>
+        </div>
       </div>
     );
   }

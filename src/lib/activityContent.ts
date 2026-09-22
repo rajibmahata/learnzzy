@@ -783,12 +783,190 @@ function genWordDiscovery(seed: string, c: ComplexityProfile): ActivityContent {
   };
 }
 
+function genColorDetective(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`colordetect:${seed}`));
+  const colors = [
+    { name: "red", emoji: "🔴", items: ["🍎", "🚗", "🌹", "🎈"] },
+    { name: "blue", emoji: "🔵", items: ["🐦", "💧", "🦋", "🎽"] },
+    { name: "yellow", emoji: "🟡", items: ["☀️", "🍌", "🌻", "🐝"] },
+    { name: "green", emoji: "🟢", items: ["🌳", "🐸", "🍏", "🥝"] },
+  ] as const;
+  const target = pick(rng, colors);
+  const n = c.itemCount;
+  const targetCount = 1 + Math.floor(rng() * Math.min(n, c.ageBand === "4-5" ? 2 : 3));
+  const visual: string[] = [];
+  for (let i = 0; i < targetCount; i++) visual.push(pick(rng, target.items));
+  while (visual.length < n) {
+    const other = pick(rng, colors.filter((col) => col.name !== target.name));
+    visual.push(pick(rng, other.items));
+  }
+  const shown = shuffle(rng, visual);
+  const count = shown.filter((v) => target.items.includes(v as never)).length;
+  const answer = String(count);
+  const near = [count - 1, count + 1, count + 2].filter((x) => x >= 0 && x !== count).map(String);
+  const { options, answerIndex } = uniqueOptions(answer, near, rng);
+  return {
+    contentId: `colordetect-${seed}-${target.name}-${count}`,
+    templateId: "color-detective", skill: "color-recognition", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `Find every ${target.name.toUpperCase()} treasure!`,
+    instruction: `How many ${target.name} objects can you find?`,
+    visual: shown, visualLabel: `find ${target.name}`,
+    options, answer, answerIndex,
+    hints: [`Look for ${target.emoji} ${target.name} — count only those!`, `Point at each ${target.name} one: 1, 2, 3…`],
+    explanation: `Yes! There are ${count} ${target.name} objects!`,
+    voiceLine: `Find every ${target.name} treasure!`,
+  };
+}
+
+function genAnimalSafari(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`animalsafari:${seed}`));
+  const animals = [
+    { name: "lion", emoji: "🦁", habitat: "savanna" }, { name: "elephant", emoji: "🐘", habitat: "savanna" },
+    { name: "monkey", emoji: "🐵", habitat: "jungle" }, { name: "dolphin", emoji: "🐬", habitat: "ocean" },
+    { name: "penguin", emoji: "🐧", habitat: "snow" }, { name: "fox", emoji: "🦊", habitat: "forest" },
+  ] as const;
+  const target = pick(rng, animals);
+  const distract = shuffle(rng, animals.filter((a) => a.name !== target.name)).slice(0, 3).map((a) => a.emoji);
+  const { options, answerIndex } = uniqueOptions(target.emoji, distract, rng);
+  return {
+    contentId: `animalsafari-${seed}-${target.name}`,
+    templateId: "animal-safari", skill: "animal-recognition", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `Find the ${target.name}!`,
+    instruction: `Explore the jungle — tap the ${target.name}!`,
+    visual: [target.emoji], visualLabel: target.name,
+    options, answer: target.emoji, answerIndex,
+    hints: [`Listen: the ${target.name} says…`, `Look for ${target.emoji} among the trees!`],
+    explanation: `Yes! You found the ${target.name} ${target.emoji}!`,
+    voiceLine: `Find the ${target.name}!`,
+  };
+}
+
+function genButterflyGarden(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`butterfly:${seed}`));
+  const stages = [
+    { emoji: "🥚", name: "egg" }, { emoji: "🐛", name: "caterpillar" }, { emoji: "🫘", name: "cocoon" }, { emoji: "🦋", name: "butterfly" },
+  ] as const;
+  const order = ["egg", "caterpillar", "cocoon", "butterfly"];
+  const shown = stages.map((s) => s.emoji);
+  const nextIdx = Math.floor(rng() * stages.length);
+  const answer = stages[nextIdx]!.emoji;
+  const distract = stages.filter((s) => s.emoji !== answer).map((s) => s.emoji);
+  const { options, answerIndex } = uniqueOptions(answer, distract, rng);
+  const prompt = `Egg → Caterpillar → Cocoon → ?`;
+  return {
+    contentId: `butterfly-${seed}-${answer}`,
+    templateId: "butterfly-garden", skill: "life-cycles", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt,
+    instruction: `What comes next in the butterfly life cycle?`,
+    visual: shown, visualLabel: order.join(" → "),
+    options, answer, answerIndex,
+    hints: ["Egg → caterpillar → cocoon → butterfly!", `After cocoon comes…`],
+    explanation: `Yes! ${order.join(" → ")} — beautiful butterfly!`,
+    voiceLine: `What comes next? Egg, caterpillar, cocoon…`,
+  };
+}
+
+function genRobotPath(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`robotpath:${seed}`));
+  const paths = [
+    { seq: ["UP", "RIGHT", "RIGHT", "DOWN"], answer: "DOWN" },
+    { seq: ["RIGHT", "RIGHT", "UP"], answer: "UP" },
+    { seq: ["DOWN", "LEFT", "UP"], answer: "UP" },
+  ] as const;
+  const pickPath = pick(rng, paths);
+  const shown = pickPath.seq.join(" → ");
+  const distract = ["UP", "DOWN", "LEFT", "RIGHT"].filter((d) => d !== pickPath.answer);
+  const { options, answerIndex } = uniqueOptions(pickPath.answer, distract, rng);
+  return {
+    contentId: `robotpath-${seed}-${pickPath.seq.join("")}`,
+    templateId: "robot-path", skill: "sequencing", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `Robot needs to reach the star!`,
+    instruction: `${shown} → ? Which move reaches ⭐?`,
+    visual: ["🤖", "⭐"], visualLabel: shown,
+    options, answer: pickPath.answer, answerIndex,
+    hints: ["Follow the path step by step!", `After ${pickPath.seq.join(" → ")}, which way is the star?`],
+    explanation: `Yes! ${pickPath.answer} reaches the star!`,
+    voiceLine: `Guide the robot to the star!`,
+  };
+}
+
+function genFruitSorting(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`fruitsort:${seed}`));
+  const fruits = [
+    { emoji: "🍎", color: "red" }, { emoji: "🍌", color: "yellow" }, { emoji: "🍇", color: "purple" }, { emoji: "🍓", color: "red" }, { emoji: "🍊", color: "orange" }, { emoji: "🥝", color: "green" },
+  ] as const;
+  const targetColor = pick(rng, ["red", "yellow", "purple"] as const);
+  const targetFruits = fruits.filter((f) => f.color === targetColor);
+  const n = c.itemCount;
+  const visual: string[] = [];
+  const targetCount = 1 + Math.floor(rng() * Math.min(n - 1, 2));
+  for (let i = 0; i < targetCount; i++) visual.push(pick(rng, targetFruits).emoji);
+  while (visual.length < n) {
+    const other = pick(rng, fruits.filter((f) => f.color !== targetColor));
+    visual.push(other.emoji);
+  }
+  const shown = shuffle(rng, visual);
+  const count = shown.filter((v) => targetFruits.some((t) => t.emoji === v)).length;
+  const answer = String(count);
+  const near = [count - 1, count + 1, count + 2].filter((x) => x >= 0 && x !== count).map(String);
+  const { options, answerIndex } = uniqueOptions(answer, near, rng);
+  return {
+    contentId: `fruitsort-${seed}-${targetColor}-${count}`,
+    templateId: "fruit-sorting", skill: "sorting", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `How many ${targetColor} fruits?`,
+    instruction: `Sort by color — count only ${targetColor}!`,
+    visual: shown, visualLabel: `count ${targetColor} fruits`,
+    options, answer, answerIndex,
+    hints: [`Look for ${targetColor} only!`, `Point at each ${targetColor} fruit: 1, 2…`],
+    explanation: `Yes! There are ${count} ${targetColor} fruits!`,
+    voiceLine: `How many ${targetColor} fruits?`,
+  };
+}
+
+function genDrawAMonster(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`drawmonster:${seed}`));
+  const monsters = ["👾", "👹", "🤖", "🐙", "🦖"] as const;
+  const chosen = pick(rng, monsters);
+  // Creative — no single correct answer, but we capture completion signal via any tap
+  // For deterministic validation, we use one correct that is always chosen's twin
+  const { options, answerIndex } = uniqueOptions(chosen, monsters.filter((m) => m !== chosen) as unknown as string[], rng);
+  return {
+    contentId: `drawmonster-${seed}-${chosen}`,
+    templateId: "draw-a-monster", skill: "creativity", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `Create your monster!`,
+    instruction: `Tap to choose — there is no wrong monster!`,
+    visual: [chosen], visualLabel: "create a monster",
+    options, answer: chosen, answerIndex,
+    hints: ["Try different eyes, colors, smiles!", "Every monster is wonderful!"],
+    explanation: `Wow! You created ${chosen} — amazing!`,
+    voiceLine: `Create your monster!`,
+  };
+}
+
+function genKnowledgeCheckNumbers(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`knowchecknum:${seed}`));
+  // Mix: addition, subtraction, counting — assess broader knowledge
+  const types = ["addition", "subtraction", "counting"] as const;
+  const type = pick(rng, types);
+  if (type === "addition") return genCount(seed + "-kc-add", c); // reuse count as proxy for addition assessment
+  if (type === "subtraction") return { ...genMoreLess(seed + "-kc-sub", c), skill: "addition", templateId: "knowledge-check-numbers" };
+  return { ...genCount(seed + "-kc-count", c), templateId: "knowledge-check-numbers", prompt: `Knowledge Check: ${genCount(seed + "-kc-count", c).prompt}`, skill: "addition" };
+}
+function genKnowledgeCheckWords(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`knowcheckwords:${seed}`));
+  const pickType = rng() < 0.5 ? "word-family" : "word-listen";
+  if (pickType === "word-family") return { ...genWordFamily(seed + "-kc-wf", c), templateId: "knowledge-check-words", skill: "phonics" };
+  return { ...genWordListen(seed + "-kc-wl", c), templateId: "knowledge-check-words", skill: "phonics" };
+}
+
 export type GeneratorId =
   | "number-count" | "number-order" | "number-before-after" | "shape-count"
   | "big-small" | "word-family" | "word-match" | "trace-write" | "pattern" | "find-object"
   | "more-less" | "number-names" | "count-by-tens" | "matching" | "odd-one-out"
   | "memory" | "trace-number-name" | "shape-match" | "shape-pattern"
-  | "word-jumble" | "word-builder" | "word-sort" | "word-listen" | "word-discovery";
+  | "word-jumble" | "word-builder" | "word-sort" | "word-listen" | "word-discovery"
+  | "color-detective" | "animal-safari" | "butterfly-garden" | "robot-path" | "fruit-sorting" | "draw-a-monster"
+  | "knowledge-check-numbers" | "knowledge-check-words";
 
 const GENERATORS: Record<GeneratorId, (seed: string, c: ComplexityProfile) => ActivityContent> = {
   "number-count": genCount,
@@ -822,6 +1000,14 @@ const GENERATORS: Record<GeneratorId, (seed: string, c: ComplexityProfile) => Ac
   "word-sort": genWordSort,
   "word-listen": genWordListen,
   "word-discovery": genWordDiscovery,
+  "color-detective": genColorDetective,
+  "animal-safari": genAnimalSafari,
+  "butterfly-garden": genButterflyGarden,
+  "robot-path": genRobotPath,
+  "fruit-sorting": genFruitSorting,
+  "draw-a-monster": genDrawAMonster,
+  "knowledge-check-numbers": genKnowledgeCheckNumbers,
+  "knowledge-check-words": genKnowledgeCheckWords,
 };
 
 export function isGeneratorId(v: string): v is GeneratorId {

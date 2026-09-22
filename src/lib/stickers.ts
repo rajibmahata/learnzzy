@@ -108,6 +108,7 @@ export const STICKER_CATALOG: StickerDef[] = [
   def("magic-star", "Magic Star", "🌟", "fantasy", "special", "Glows when you try.", 73),
   def("castle", "Story Castle", "🏰", "fantasy", "rare", "Every story lives here.", 74),
   // Discovery
+  def("robot", "Robo Buddy", "🤖", "discovery", "special", "Beep boop, let’s play!", 79),
   def("telescope", "Telescope Eye", "🔭", "discovery", "special", "See faraway things.", 80),
   def("magnifier", "Magnifying Glass", "🔍", "discovery", "common", "Look closer, wonder more.", 81),
   def("treasure", "Treasure Chest", "🧰", "discovery", "rare", "Learning is treasure.", 82),

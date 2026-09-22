@@ -20,12 +20,19 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 import { getCachedProfile } from "@/lib/learner";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SubtractionPlay() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlLevel = React.useMemo(() => {
+    const v = Number(searchParams.get("level"));
+    return Number.isFinite(v) && v >= 1 && v <= 100 ? v : null;
+  }, [searchParams]);
   const [round, setRound] = React.useState(0);
   const { totalStars, award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
-  const [globalLevel, setGlobalLevel] = React.useState(1);
+  const [globalLevel, setGlobalLevel] = React.useState<number>(() => urlLevel ?? 1);
   const [countdown, setCountdown] = React.useState<number | null>(null);
   const countdownRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
   const autoNextRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,9 +50,13 @@ export default function SubtractionPlay() {
   }
   React.useEffect(() => () => { if (countdownRef.current) clearInterval(countdownRef.current); if (autoNextRef.current) clearTimeout(autoNextRef.current); }, []);
   React.useEffect(() => {
+    if (urlLevel !== null) {
+      setGlobalLevel(urlLevel);
+      return;
+    }
     const p = getCachedProfile();
-    if (p && typeof p.level === "number") setGlobalLevel(Math.max(1, Math.min(6, p.level)));
-  }, []);
+    if (p && typeof p.level === "number") setGlobalLevel(Math.max(1, Math.min(100, p.level)));
+  }, [urlLevel]);
   const difficulty = Math.max(1, Math.min(3, Math.ceil(globalLevel / 2))) as 1 | 2 | 3;
   // Pool-first per-window shuffled — open windows never see identical subtraction sets.
   const { rounds, reload, locked } = useGameRounds<SubtractionLike>({
@@ -123,18 +134,18 @@ export default function SubtractionPlay() {
   }
 
   const handleContinueHarder = React.useCallback(() => {
-    setGlobalLevel((prev) => {
-      const next = Math.min(6, prev + 1);
-      try {
-        const raw = localStorage.getItem("learnzzy.learner.v1");
-        if (raw) {
-          const p = JSON.parse(raw);
-          if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next }));
-        }
-        localStorage.setItem("learnzzy.globalLevel.v1", String(next));
-      } catch {}
-      return next;
-    });
+    const next = Math.min(100, globalLevel + 1);
+    try {
+      const raw = localStorage.getItem("learnzzy.learner.v1");
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next }));
+      }
+      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
+    } catch {}
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("level", String(next));
+    router.push(`/play/subtraction?${params.toString()}`);
     mistakeRounds.current.clear();
     hintOpens.current = 0;
     gameStart.current = Date.now();
@@ -143,8 +154,7 @@ export default function SubtractionPlay() {
     setFeedback("idle");
     setDone(false);
     setReward(null);
-    reload();
-  }, [reload]);
+  }, [globalLevel, reload, router, searchParams]);
 
   if (done) {
     const isTryAgain = mistakeRounds.current.size > 0;
@@ -179,7 +189,7 @@ export default function SubtractionPlay() {
             <span>{continueLabel}</span>
             <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
           </button>
-          <p className="text-center text-xs font-bold text-on-surface-variant mt-2">LEVEL {globalLevel} → {Math.min(6, globalLevel + 1)} • Harder!</p>
+          <p className="text-center text-xs font-bold text-on-surface-variant mt-2">LEVEL {globalLevel} → {Math.min(100, globalLevel + 1)} • Harder!</p>
         </div>
       </div>
     );
@@ -214,32 +224,19 @@ export default function SubtractionPlay() {
 
   return (
     <GameShell title="Fly Away" stars={totalStars}>
-      {/* Stitch Fly Away — Sunny Meadow sub-header + stepper */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <button aria-label="Back to Home" className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface shadow-[0_4px_0_#c2c6d6] active:translate-y-1 active:shadow-none transition-all" onClick={() => window.history.back()}>
-            <span className="material-symbols-outlined text-[26px]">home</span>
-          </button>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-[0_2px_0_#d5e3fc]">
-            <span className="material-symbols-outlined text-secondary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>flight</span>
-            <span className="font-bold text-sm tracking-tight">Fly Away</span>
-          </div>
+      {/* Single authoritative progression: LEVEL + stepper — GameHeader already provides 🏠 Fly Away ⭐ 🔊 */}
+      <div className="flex flex-col items-center gap-1 py-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-black text-white shadow-[0_3px_0_#004395]">
+          <span aria-hidden>⭐</span> LEVEL {globalLevel}
+        </span>
+        <div className="flex items-center justify-center gap-3" aria-label={`Round ${round + 1} of ${GAME_ROUNDS}`}>
+          {Array.from({ length: GAME_ROUNDS }).map((_, i) => {
+            if (i < round) return <div key={i} className="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shadow-[0_3px_0_#005236]" aria-hidden><span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>check</span></div>;
+            if (i === round) return <div key={i} className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary shadow-[0_4px_0_#004395] scale-105 font-black text-sm" aria-current="step">{i + 1}</div>;
+            if (i === round + 1) return <div key={i} className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-70 font-bold text-sm">{i + 1}</div>;
+            return <div key={i} className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-70" aria-hidden><span className="material-symbols-outlined text-[16px]">lock</span></div>;
+          })}
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-secondary-fixed px-3 py-1.5 rounded-full shadow-[0_3px_0_#ffb95f]">
-            <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>star</span>
-            <span className="font-black text-sm text-on-secondary-fixed">{totalStars}</span>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-black text-white shadow-[0_3px_0_#004395]">LEVEL {globalLevel}</span>
-        </div>
-      </div>
-      <div className="flex items-center justify-center gap-3 py-2">
-        {Array.from({ length: GAME_ROUNDS }).map((_, i) => {
-          if (i < round) return <div key={i} className="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shadow-[0_3px_0_#005236]"><span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>check</span></div>;
-          if (i === round) return <div key={i} className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary shadow-[0_4px_0_#004395] scale-105 font-black text-sm">{i + 1}</div>;
-          if (i === round + 1) return <div key={i} className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-70 font-bold text-sm">{i + 1}</div>;
-          return <div key={i} className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-70"><span className="material-symbols-outlined text-[16px]">lock</span></div>;
-        })}
       </div>
 
       <div className="mt-1 flex flex-col items-center text-center">

@@ -16,6 +16,9 @@ import type { ActivityContent } from "@/lib/activityContent";
 import { getCachedProfile, getLearnerId } from "@/lib/learner";
 import { queueEvent, syncEvents } from "@/lib/events";
 import { speakWithCharacter, voiceFor } from "@/lib/audio";
+import { WorldReward } from "@/components/child/WorldReward";
+import { useRewards, type Sticker } from "@/lib/rewards";
+import { reportGameCompletion } from "@/lib/learnerSync";
 
 /**
  * Generic worksheet-inspired activity player (spec §6–§16).
@@ -35,10 +38,12 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
   const [done, setDone] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const startedAt = React.useRef(Date.now());
+  const { award } = useRewards();
+  const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
 
   const profile = getCachedProfile();
   const ageBand = normalizeAgeBand(profile?.ageBand);
-  const globalLevel = Math.max(1, Math.min(6, profile?.level ?? 1));
+  const globalLevel = Math.max(1, Math.min(100, profile?.level ?? 1));
   // Purposeful guide per category (spec §4/§34): Teddy → numbers,
   // Parrot → words/discover, Bunny → write/create, Owl → think/shapes,
   // Monkey → puzzles. characterForGame maps those engines to friends.
@@ -164,6 +169,12 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
           body: JSON.stringify({ gameId: activityId, accuracy, attempts, hintsUsed, durationMs: Date.now() - startedAt.current }),
         }).catch(() => {});
       }
+      // Living Reward World — reuse existing sticker system (no duplicate)
+      const r = award(activityId, 3);
+      setReward(r);
+      // Server authoritative claim will reconcile via learnerSync if needed
+      const acc = accuracy;
+      reportGameCompletion({ gameId: activityId, accuracy: acc, stars: r.stars, stickerId: r.sticker.id, stickerEmoji: r.sticker.emoji, hintsUsed, durationMs: Date.now() - startedAt.current }).catch(() => {});
       setDone(true);
     } else {
       setIndex((i) => i + 1);
@@ -208,15 +219,19 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
             <button type="button" onClick={() => window.location.reload()} className="tactile-button mt-4 bg-primary px-6 py-3 text-white">Try again</button>
           </div>
         ) : done ? (
-          <div className="safe-panel p-8 text-center">
-            <p aria-hidden className="text-5xl">🌟</p>
-            <h2 className="mt-2 text-headline-lg">Great job!</h2>
-            <p className="text-on-surface-variant">{correct} of {items.length} — {hintsUsed === 0 ? "no hints needed!" : `${hintsUsed} hint${hintsUsed > 1 ? "s" : ""} used, good thinking!`}</p>
-            <div className="mt-4 flex gap-2">
-              <Link href="/play" className="tactile-button flex-1 bg-surface-high px-4 py-3 text-center">🏠 Home</Link>
-              <button type="button" onClick={() => window.location.reload()} className="tactile-button flex-1 bg-primary px-4 py-3 text-white">Play again</button>
+          reward?.sticker ? (
+            <WorldReward sticker={reward.sticker} character={character as import("@/lib/characters").CharacterId} variantSeed={reward.sticker.id} onReplay={() => window.location.reload()} />
+          ) : (
+            <div className="safe-panel p-8 text-center">
+              <p aria-hidden className="text-5xl">🌟</p>
+              <h2 className="mt-2 text-headline-lg">Great job!</h2>
+              <p className="text-on-surface-variant">{correct} of {items.length} — {hintsUsed === 0 ? "no hints needed!" : `${hintsUsed} hint${hintsUsed > 1 ? "s" : ""} used, good thinking!`}</p>
+              <div className="mt-4 flex gap-2">
+                <Link href="/play" className="tactile-button flex-1 bg-surface-high px-4 py-3 text-center">🏠 Home</Link>
+                <button type="button" onClick={() => window.location.reload()} className="tactile-button flex-1 bg-primary px-4 py-3 text-white">Play again</button>
+              </div>
             </div>
-          </div>
+          )
         ) : (
           <div className="safe-panel p-5">
             <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">{def.title} • {index + 1} of {items.length}</p>

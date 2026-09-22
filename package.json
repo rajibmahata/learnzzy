@@ -15,6 +15,9 @@
     "backup": "node scripts/backup.mjs",
     "docker:health": "node scripts/docker-health.mjs",
     "mcp:test": "node --test tests/mcp*.test.js tests/mcp*.test.ts 2>&1 | head -n 100",
+    "curriculum:validate": "node scripts/curriculum-validate.mjs",
+    "curriculum:coverage": "node scripts/curriculum-coverage.mjs",
+    "games:validate": "node scripts/games-validate.mjs",
     "worker": "node --loader ts-node/esm src/workers/worker.ts 2>&1 || node -r ts-node/register src/workers/worker.ts 2>&1 || echo 'worker requires ts-node or compiled output; in Docker use next build + node .next worker bootstrap'"
   },
   "dependencies": {

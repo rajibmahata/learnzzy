@@ -25,11 +25,11 @@ describe("skill performance evaluation (real code)", () => {
     const d = decideSkillLevel(2, { completions: 5, recentAccuracy: [0.5, 0.55, 0.6, 0.52, 1] });
     assert.notEqual(d.action, "promote");
   });
-  test("promotion is exactly +1 and caps at 5", () => {
+  test("promotion is exactly +1 and caps at 100", () => {
     const d = decideSkillLevel(4, { completions: 4, recentAccuracy: [0.95, 0.92, 0.96, 0.94] });
     assert.deepEqual([d.action, d.newLevel], ["promote", 5]);
-    const maxed = decideSkillLevel(5, { completions: 9, recentAccuracy: [1, 1, 1, 1, 1] });
-    assert.equal(maxed.newLevel, 5);
+    const maxed = decideSkillLevel(100, { completions: 9, recentAccuracy: [1, 1, 1, 1, 1] });
+    assert.equal(maxed.newLevel, 100);
     assert.notEqual(maxed.action, "promote");
   });
   test("weak performance stabilizes first (no instant punishment)", () => {

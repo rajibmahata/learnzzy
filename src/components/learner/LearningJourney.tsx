@@ -64,17 +64,17 @@ export function LearningJourney() {
         </div>
         <div className="mt-3 hidden md:flex items-center gap-2 text-xs font-bold text-on-surface-variant">
           <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">3D Islands</span>
-          <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">All 6 Worlds Included</span>
-          <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">Tap to play</span>
+          <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">All {journey.tracks.length} Worlds • {journey.tracks.reduce((s, t) => s + t.gameIds.length, 0)} Games</span>
+          <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">Shuffled for you ✨</span>
         </div>
       </Link>
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {journey.tracks.map((track) => (
           <TrackPath key={track.id} track={track} currentLevel={journey.currentLevel} />
         ))}
       </div>
-      <p className="mt-3 text-center text-xs text-on-surface-variant">All 6 worlds share your Global Level {journey.currentLevel} — complexity adapts per skill, not per game 🎨</p>
+      <p className="mt-3 text-center text-xs text-on-surface-variant">Your {journey.tracks.length} worlds • {journey.tracks.reduce((s, t) => s + t.gameIds.length, 0)} games • shuffled just for you ✨ — Global Level {journey.currentLevel}</p>
     </section>
   );
 }

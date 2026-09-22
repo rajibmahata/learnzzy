@@ -261,3 +261,4 @@
 - None.
 
 
+- Balloon Letter/Animal + 100-Level (2026-09-22): balloonLetter A-Z/word-initial/7 balloons + BalloonLetterStage h-[360px] balloonWordsPlay (	ap 🎈 or type B, keydown A-Z → pop, WorldReward), alloonAnimal 🐱 CAT C-A-T + BalloonAnimalsPlay (ind 🐱), registry alloon-words/animals (words 8, discover 3, 32→34 activities, 46 total), skillLevels MAX 100, learningJourney 5 tracks 11 games shuffled + 5-window centered 96→100, play/* ?level=1..100 Continue → Next Level Harder (addition PlusOperator single +, Sketch Wonderful job!), knowledge-check Numbers/Words mixed-quiz + 4 AI-enriched multiplication, geometry, plants, computing → curriculum 10/10 100%, 280/280 tests (72 suites).

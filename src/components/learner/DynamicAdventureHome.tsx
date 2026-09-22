@@ -18,7 +18,6 @@ export function DynamicAdventureHome() {
     const profile = getCachedProfile();
     const learnerId = profile?.learnerId;
     if (!learnerId) return;
-    // Fetch next adventures via new engine; fallback to existing plan if unavailable
     fetch(`/api/learners/${encodeURIComponent(learnerId)}/next-adventure`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((b) => {
@@ -34,10 +33,10 @@ export function DynamicAdventureHome() {
     <section aria-labelledby="today-adventure" className="w-full max-w-5xl mt-6">
       {today && (
         <div className="rounded-3xl bg-gradient-to-br from-secondary-fixed via-secondary-container to-amber-100 p-5 shadow-[0_8px_0_#ffb95f] border-2 border-white">
-          <h2 id="today-adventure" className="text-xl font-black">🌟 Today's Adventure</h2>
+          <h2 id="today-adventure" className="text-xl font-black">Today&apos;s Adventure</h2>
           <p className="text-sm font-bold text-on-secondary-fixed mt-1">Rex needs your help!</p>
           <Link href={today.href} className="mt-3 inline-flex min-h-touch items-center gap-2 rounded-full bg-primary px-6 py-3 font-black text-white shadow-[0_4px_0_#004395] active:translate-y-1 active:shadow-none">
-            ▶ START ADVENTURE — {today.activity.title} {today.activity.icon}
+            START ADVENTURE — {today.activity.title} {today.activity.icon}
           </Link>
           <p className="text-xs font-bold text-on-secondary-fixed/70 mt-2">{today.reason}</p>
         </div>

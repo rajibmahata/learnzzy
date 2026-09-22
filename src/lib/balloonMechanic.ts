@@ -4,11 +4,11 @@
 
 import { mulberry32 } from "../games/framework.ts";
 
-export type BalloonPayloadKind = "number" | "color" | "letter" | "reward";
+export type BalloonPayloadKind = "number" | "color" | "letter" | "reward" | "animal";
 export type BalloonColor = "red" | "blue" | "yellow" | "green" | "purple" | "orange";
 export interface Balloon {
   id: string;
-  payload: string; // "5" | "red" | "B" | "star"
+  payload: string; // "5" | "red" | "B" | "star" | "🐱"
   payloadKind: BalloonPayloadKind;
   color: BalloonColor;
   size: number; // 1..3 (tactile target)
@@ -28,6 +28,7 @@ export interface BalloonChallenge {
   targetCount?: number;
   targetColor?: BalloonColor;
   targetLetter?: string;
+  targetAnimal?: string;
   targetReward?: string;
   balloons: Balloon[];
 }
@@ -38,6 +39,7 @@ export function generateBalloons(opts: {
   targetCount?: number;
   targetColor?: BalloonColor;
   targetLetter?: string;
+  targetAnimal?: string;
   difficulty: 1 | 2 | 3;
   seed: string;
 }): BalloonChallenge {
@@ -52,9 +54,11 @@ export function generateBalloons(opts: {
     const delayMs = Math.floor(rand() * 800);
     let payload: string;
     let kind: BalloonPayloadKind = opts.payloadKind;
+    const ANIMALS = ["🐱", "🐶", "🐰", "🦁", "🐼", "🐸", "🐵", "🐯"] as const;
     if (kind === "number") payload = String(Math.floor(rand() * 9) + 1);
     else if (kind === "color") payload = color;
     else if (kind === "letter") payload = String.fromCharCode(65 + Math.floor(rand() * 26));
+    else if (kind === "animal") payload = ANIMALS[Math.floor(rand() * ANIMALS.length)]!;
     else payload = "⭐";
     balloons.push({ id: `balloon-${i}-${opts.seed}`, payload, payloadKind: kind, color, size, speed, x, delayMs });
   }
@@ -67,13 +71,18 @@ export function generateBalloons(opts: {
     const has = balloons.some((b) => b.payload === opts.targetLetter);
     if (!has && balloons[0]) balloons[0]!.payload = opts.targetLetter;
   }
+  if (opts.targetAnimal) {
+    const has = balloons.some((b) => b.payload === opts.targetAnimal);
+    if (!has && balloons[0]) balloons[0]!.payload = opts.targetAnimal;
+  }
   const prompt =
     opts.payloadKind === "number" && opts.targetCount ? `Pop ${opts.targetCount} balloons!` :
     opts.payloadKind === "color" && opts.targetColor ? `Pop only ${opts.targetColor.toUpperCase()} balloons!` :
     opts.payloadKind === "letter" && opts.targetLetter ? `Pop the letter ${opts.targetLetter}!` :
+    opts.payloadKind === "animal" && opts.targetAnimal ? `Find the ${opts.targetAnimal} — pop its balloon!` :
     `Pop ${opts.count} balloons!`;
 
-  return { prompt, targetCount: opts.targetCount, targetColor: opts.targetColor, targetLetter: opts.targetLetter, balloons: shuffleWithRand(balloons, rand) };
+  return { prompt, targetCount: opts.targetCount, targetColor: opts.targetColor, targetLetter: opts.targetLetter, targetAnimal: opts.targetAnimal, balloons: shuffleWithRand(balloons, rand) };
 }
 
 function hashSeed(s: string): number {
@@ -102,12 +111,17 @@ export function validateBalloonPop(challenge: BalloonChallenge, popped: Balloon[
     const ok = popped.some((b) => b.payload === challenge.targetLetter);
     return { correct: ok, expected: 1, got: ok ? 1 : 0 };
   }
+  if (challenge.targetAnimal) {
+    const ok = popped.some((b) => b.payload === challenge.targetAnimal);
+    return { correct: ok, expected: 1, got: ok ? 1 : 0 };
+  }
   return { correct: popped.length > 0, expected: 1, got: popped.length };
 }
 
 export function balloonForTheme(theme: string, seed: string): BalloonChallenge {
-  // Theme-aware helper: numbers for math worlds, colors for color world, letters for words
+  // Theme-aware helper: numbers for math, colors for color world, letters for words, animals for animal world
   if (theme === "colors") return generateBalloons({ payloadKind: "color", count: 4, targetColor: "red", difficulty: 1, seed });
   if (theme === "words") return generateBalloons({ payloadKind: "letter", count: 4, targetLetter: "B", difficulty: 1, seed });
+  if (theme === "animals") return generateBalloons({ payloadKind: "animal", count: 5, targetAnimal: "🐱", difficulty: 1, seed });
   return generateBalloons({ payloadKind: "number", count: 5, targetCount: 5, difficulty: 1, seed });
 }

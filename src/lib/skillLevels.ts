@@ -23,7 +23,7 @@ export const SKILL_DISPLAY: Record<string, string> = {
 };
 
 export const MIN_LEVEL = 1;
-export const MAX_LEVEL = 5;
+export const MAX_LEVEL = 100;
 const PROMOTE_COMPLETIONS = 3;
 const PROMOTE_ACCURACY = 0.8;
 const REDUCE_SAMPLES = 5;

@@ -109,7 +109,7 @@ export async function GET(req: Request, { params }: { params: { gameId: string }
   const requestedLevel = rawLevel === null
     ? rawDiff === "medium" ? 2 : rawDiff === "hard" ? 3 : Number(rawDiff)
     : Number(rawLevel);
-  const selectedLevel = Number.isInteger(requestedLevel) ? Math.max(1, Math.min(5, requestedLevel)) : 1;
+  const selectedLevel = Number.isInteger(requestedLevel) ? Math.max(1, Math.min(100, requestedLevel)) : 1;
   const lvl: 1 | 2 | 3 = selectedLevel === 2 ? 2 : selectedLevel >= 3 ? 3 : 1;
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? "5") || 5, 1), 10);
   const difficultyName = levelToDifficulty(lvl);
