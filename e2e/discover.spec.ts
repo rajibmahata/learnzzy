@@ -4,9 +4,10 @@ import { test, expect } from "@playwright/test";
 // concept mastery recorded → parent sees discovery progress.
 test("discover journey: learn, recognize, find, complete", async ({ page }) => {
   await page.goto("/welcome");
-  await page.getByLabel("Nickname").fill("Discovery Kid");
+  await expect(page.locator("#name-title")).toBeVisible({ timeout: 15000 });
+  await page.getByLabel("Child name").fill("Discovery Kid");
   await page.getByRole("button", { name: /6–7/ }).click();
-  await page.getByRole("button", { name: /let's play/i }).click();
+  await page.getByRole("button", { name: /start my adventure/i }).click();
   await expect(page).toHaveURL(/\/play$/, { timeout: 15000 });
 
   await page.goto("/play/discover");
@@ -40,7 +41,7 @@ test("discover journey: learn, recognize, find, complete", async ({ page }) => {
     await page.waitForTimeout(1100);
   }
   // Completion celebrates and rewards.
-  await expect(page.getByRole("heading", { name: /amazing/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("heading", { name: /great job/i })).toBeVisible({ timeout: 15000 });
 });
 
 test("parent sees discovery progress after linking", async ({ page }) => {

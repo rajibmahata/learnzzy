@@ -4,6 +4,7 @@ import * as React from "react";
 import { GameShell } from "@/components/child/GameShell";
 import { CleanupStage } from "@/components/child/CleanupStage";
 import { Celebration } from "@/components/child/Celebration";
+import { WorldReward } from "@/components/child/WorldReward";
 import { GuideCard, ClueButton } from "@/components/child/WonderBits";
 import { stateForMoment } from "@/lib/characters";
 import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
@@ -69,6 +70,7 @@ export default function CleanupPlay() {
   }
 
   if (done) {
+    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="puppy" variantSeed={reward.sticker.id} onReplay={() => { setRound(0); setCollected([]); setDone(false); setReward(null); reload(); }} />;
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
         <Celebration title="Wonderful Job!" stars={reward?.stars ?? 5} sticker={reward?.sticker ?? null} character="puppy" onReplay={() => { setRound(0); setCollected([]); setDone(false); setReward(null); reload(); }} />

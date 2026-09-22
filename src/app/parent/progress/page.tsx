@@ -34,6 +34,8 @@ interface ProgressData {
     streakDays: number;
     nextActivity: { game: string; concept: string; objective: string; reason: string } | null;
   };
+  missions: { missionId: string; completedSteps: number; totalSteps: number; attempts: number; correctSteps: number; completedAt: string | null; updatedAt: string }[];
+  missionSkills: { skill: string; attempts: number; completed: number; correct: number; accuracyPct: number; hintsUsed: number; averageResponseTimeMs: number; lastPracticedAt: string | null }[];
 }
 
 const TREND_LABEL: Record<string, string> = {
@@ -110,6 +112,17 @@ export default function ParentProgressPage() {
                 {progress.academic.nextActivity && (
                   <p className="mt-1 text-sm"><strong>Next:</strong> {progress.academic.nextActivity.reason}</p>
                 )}
+              </div>
+            )}
+            {progress.missions?.length > 0 && (
+              <div className="mb-3 rounded-lg bg-secondary-fixed/40 p-3" aria-label="Mini mission progress">
+                <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Recent mini missions</p>
+                <ul className="mt-2 flex flex-col gap-1 text-sm">
+                  {progress.missions.slice(0, 4).map((mission) => (
+                    <li key={mission.missionId} className="flex items-center justify-between gap-2"><span className="truncate font-bold">{mission.missionId.split(":")[1]?.replaceAll("-", " ") ?? "Mini mission"}</span><span className="text-xs">{mission.completedAt ? "Completed" : `${mission.completedSteps}/${mission.totalSteps} steps`}</span></li>
+                  ))}
+                </ul>
+                {progress.missionSkills?.length > 0 && <p className="mt-2 text-xs text-on-surface-variant">Skills practiced: {progress.missionSkills.map((skill) => `${skill.skill} (${skill.accuracyPct}%)`).join(" · ")}</p>}
               </div>
             )}
             <div className="mb-3 rounded-lg bg-surface-low p-3">

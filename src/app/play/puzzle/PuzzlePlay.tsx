@@ -4,6 +4,7 @@ import * as React from "react";
 import { GameShell } from "@/components/child/GameShell";
 import { PuzzleStage } from "@/components/child/PuzzleStage";
 import { Celebration } from "@/components/child/Celebration";
+import { WorldReward } from "@/components/child/WorldReward";
 import { GuideCard } from "@/components/child/WonderBits";
 import { stateForMoment } from "@/lib/characters";
 import { speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
@@ -71,6 +72,7 @@ export default function PuzzlePlay() {
   }
 
   if (done) {
+    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="dino" variantSeed={reward.sticker.id} onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />;
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
         <Celebration title="Dino is Awake!" stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="dino" onReplay={() => { setRound(0); setDone(false); setReward(null); reload(); }} />

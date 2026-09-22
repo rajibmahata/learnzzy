@@ -6,6 +6,7 @@
 // Arithmetic is plain JS math — no LLM, no AI scoring, ever.
 
 import type { AgeBand, ComplexityProfile } from "./complexity";
+import { WORD_FAMILY_DATA, WORD_RIMES, familyOfWord, wordComplexity } from "./words.ts";
 
 export interface ActivityContent {
   contentId: string;
@@ -13,7 +14,13 @@ export interface ActivityContent {
   skill: string;
   ageBand: AgeBand;
   difficulty: number;
-  kind: "single-choice" | "trace-write";
+  kind: "single-choice" | "trace-write" | "build-order" | "sort-choice" | "listen-choice";
+  /** For build-order (jumble/builder): shuffled letters to tap in order. */
+  letters?: string[];
+  /** For sort-choice: family basket labels, e.g. ["-AT", "-AP"]. */
+  families?: string[];
+  /** For listen-choice: whether to auto-speak the voice line on show. */
+  autoSpeak?: boolean;
   prompt: string;
   instruction: string;
   /** Visual items rendered big (emoji / numbers / words). */
@@ -89,42 +96,7 @@ const SHAPES = [
   { emoji: "⭐", name: "stars" },
 ] as const;
 
-export const WORD_FAMILIES: Record<string, Array<{ word: string; emoji: string; name: string }>> = {
-  AN: [
-    { word: "van", emoji: "🚐", name: "van" },
-    { word: "fan", emoji: "🌀", name: "fan" },
-    { word: "pan", emoji: "🍳", name: "pan" },
-    { word: "can", emoji: "🥫", name: "can" },
-    { word: "man", emoji: "🧑", name: "man" },
-  ],
-  EN: [
-    { word: "hen", emoji: "🐔", name: "hen" },
-    { word: "pen", emoji: "🖊️", name: "pen" },
-    { word: "men", emoji: "👨‍👨‍👦", name: "men" },
-    { word: "ten", emoji: "🔟", name: "ten" },
-  ],
-  AT: [
-    { word: "cat", emoji: "🐱", name: "cat" },
-    { word: "hat", emoji: "🎩", name: "hat" },
-    { word: "bat", emoji: "🦇", name: "bat" },
-    { word: "mat", emoji: "🧺", name: "mat" },
-  ],
-  AP: [
-    { word: "cap", emoji: "🧢", name: "cap" },
-    { word: "map", emoji: "🗺️", name: "map" },
-    { word: "tap", emoji: "🚰", name: "tap" },
-  ],
-  OG: [
-    { word: "dog", emoji: "🐶", name: "dog" },
-    { word: "frog", emoji: "🐸", name: "frog" },
-    { word: "log", emoji: "🪵", name: "log" },
-  ],
-  IT: [
-    { word: "sit", emoji: "🪑", name: "sit" },
-    { word: "hit", emoji: "🥎", name: "hit" },
-    { word: "kit", emoji: "🧰", name: "kit" },
-  ],
-};
+export const WORD_FAMILIES: Record<string, Array<{ word: string; emoji: string; name: string }>> = WORD_FAMILY_DATA;
 
 function genCount(seed: string, c: ComplexityProfile): ActivityContent {
   const rng = mulberry32(hashSeed(`count:${seed}`));
@@ -678,11 +650,145 @@ function genShapePattern(seed: string, c: ComplexityProfile): ActivityContent {
   };
 }
 
+function genWordJumble(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`wjumble:${seed}`));
+  const cfg = wordComplexity(c.ageBand);
+  const rimes = cfg.mixedFamilies ? WORD_RIMES : ["AT", "AN", "AP"];
+  const words = rimes.flatMap((r) => WORD_FAMILY_DATA[r] ?? []).filter((w) => w.word.length <= cfg.maxWordLength);
+  const target = pick(rng, words.length > 0 ? words : WORD_FAMILY_DATA.AT);
+  const letters = target.word.split("");
+  // Deterministic derangement: reshuffle until order differs (max 10 tries).
+  // Easy bands keep the first letter fixed to reduce permutation difficulty.
+  let shuffled = shuffle(rng, letters);
+  let guard = 0;
+  while (guard++ < 10) {
+    const fixedFirst = c.ageBand === "4-5";
+    if (fixedFirst) shuffled = [letters[0]!, ...shuffle(rng, letters.slice(1))];
+    const same = shuffled.every((ch, i) => ch === letters[i]);
+    if (!same) break;
+    shuffled = shuffle(rng, letters);
+  }
+  if (shuffled.every((ch, i) => ch === letters[i])) {
+    shuffled = [letters[1]!, letters[0]!, ...letters.slice(2)];
+  }
+  return {
+    contentId: `wordjumble-${seed}-${target.word}`,
+    templateId: "word-jumble", skill: "phonics", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "build-order", prompt: `${target.emoji}  Unscramble the letters!`,
+    instruction: `Tap the letters in order to build “${"_ ".repeat(target.word.length).trim()}”.`,
+    visual: [target.emoji], visualLabel: target.name,
+    letters: shuffled,
+    options: [target.word], answer: target.word, answerIndex: 0,
+    hints: [`The word starts with “${target.word[0]}”.`, `It rhymes with the ${familyOfWord(target.word) ?? ""} family — say it slowly.`],
+    explanation: `Yes! ${shuffled.join(" ")} → ${target.word}!`,
+    voiceLine: `Unscramble the letters to build the word!`,
+  };
+}
+
+function genWordBuilder(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`wbuild:${seed}`));
+  const cfg = wordComplexity(c.ageBand);
+  const rimes = cfg.mixedFamilies ? WORD_RIMES : ["AT", "AN", "AP"];
+  const words = rimes.flatMap((r) => WORD_FAMILY_DATA[r] ?? []).filter((w) => w.word.length <= cfg.maxWordLength);
+  const target = pick(rng, words.length > 0 ? words : WORD_FAMILY_DATA.AT);
+  const letters = shuffle(rng, target.word.split(""));
+  return {
+    contentId: `wordbuild-${seed}-${target.word}`,
+    templateId: "word-builder", skill: "phonics", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "build-order", prompt: `${target.emoji}  Build the word!`,
+    instruction: `Drag or tap the letters into the ${target.word.length} empty slots.`,
+    visual: [target.emoji], visualLabel: target.name,
+    letters,
+    options: [target.word], answer: target.word, answerIndex: 0,
+    hints: [`First sound: “${target.word[0]}”…`, `The word means “${target.name}” — sound it out.`],
+    explanation: `Yes! ${target.word.split("").join("-").toUpperCase()}. ${target.word}!`,
+    voiceLine: `Build the word, letter by letter!`,
+  };
+}
+
+function genWordSort(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`wsort:${seed}`));
+  const cfg = wordComplexity(c.ageBand);
+  const rimeCount = Math.min(cfg.sortingFamilyCount, WORD_RIMES.length);
+  const rimes = shuffle(rng, [...WORD_RIMES]).slice(0, Math.max(2, rimeCount));
+  const targetRime = rimes[0]!;
+  const target = pick(rng, WORD_FAMILY_DATA[targetRime]!);
+  const families = rimes.map((r) => `-${r}`);
+  const answer = `-${targetRime}`;
+  const { options, answerIndex } = uniqueOptions(answer, families.filter((f) => f !== answer), rng);
+  return {
+    contentId: `wordsort-${seed}-${target.word}`,
+    templateId: "word-sort", skill: "phonics", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "sort-choice", prompt: `Where does “${target.word}” belong?`,
+    instruction: `Tap the basket with the same ending sound!`,
+    visual: [target.emoji], visualLabel: target.name,
+    families,
+    options, answer, answerIndex,
+    hints: [`Say “${target.word}” slowly — hear the ending.`, `It rhymes with the ${targetRime} family.`],
+    explanation: `Yes! “${target.word}” goes in the -${targetRime} basket!`,
+    voiceLine: `Which basket does the word belong in?`,
+  };
+}
+
+function genWordListen(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`wlisten:${seed}`));
+  const cfg = wordComplexity(c.ageBand);
+  const rimes = cfg.mixedFamilies ? WORD_RIMES : ["AT", "AN", "EN"];
+  const words = rimes.flatMap((r) => WORD_FAMILY_DATA[r] ?? []);
+  const target = pick(rng, words);
+  // Phonetic distractors: same rime (BAT vs CAT) preferred, else same onset.
+  const sameRime = (WORD_FAMILY_DATA[familyOfWord(target.word) ?? ""] ?? []).filter((w) => w.word !== target.word);
+  const sameOnset = words.filter((w) => w.word !== target.word && w.word[0] === target.word[0] && !sameRime.some((s) => s.word === w.word));
+  const distractPool = [...sameRime.map((w) => w.word), ...sameOnset.map((w) => w.word)];
+  while (distractPool.length < 5) distractPool.push(pick(rng, words).word);
+  const { options, answerIndex } = uniqueOptions(target.word, distractPool, rng);
+  const shown = options.slice(0, cfg.listenChoices);
+  const finalOptions = shown.includes(target.word) ? shown : [target.word, ...shown.slice(0, cfg.listenChoices - 1)];
+  const shuffled = shuffle(rng, finalOptions);
+  return {
+    contentId: `wordlisten-${seed}-${target.word}`,
+    templateId: "word-listen", skill: "phonics", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "listen-choice", prompt: `🔊 Listen carefully…`,
+    instruction: `Tap 🔊 to hear the word, then tap what you heard!`,
+    visual: ["🔊"], visualLabel: `listen and choose ${target.word}`,
+    autoSpeak: false,
+    options: shuffled, answer: target.word, answerIndex: shuffled.indexOf(target.word),
+    hints: [`Listen again — first sound “${target.word[0]}”…`, `It rhymes with the ${familyOfWord(target.word) ?? ""} family.`],
+    explanation: `Yes! You heard “${target.word}”!`,
+    voiceLine: `Listen carefully... ${target.word.split("").join("... ")}. Which word did I say?`,
+  };
+}
+
+function genWordDiscovery(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`wdiscover:${seed}`));
+  const rimes = WORD_RIMES;
+  const targetRime = pick(rng, rimes);
+  const famWords = shuffle(rng, [...(WORD_FAMILY_DATA[targetRime] ?? [])]).slice(0, 3);
+  const shown = famWords.map((w) => w.word);
+  // Answer: another member of the SAME family; distractors from other families
+  const remaining = (WORD_FAMILY_DATA[targetRime] ?? []).filter((w) => !shown.includes(w.word));
+  const answer = (remaining.length > 0 ? pick(rng, remaining) : famWords[0]!).word;
+  const otherWords = shuffle(rng, rimes.filter((r) => r !== targetRime).flatMap((r) => WORD_FAMILY_DATA[r] ?? []).map((w) => w.word)).slice(0, 5);
+  const { options, answerIndex } = uniqueOptions(answer, otherWords, rng);
+  return {
+    contentId: `worddiscover-${seed}-${targetRime}`,
+    templateId: "word-discovery", skill: "phonics", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `${shown.join(", ")} — what do you notice?`,
+    instruction: `These words share an ending sound. Which word belongs with them?`,
+    visual: famWords.map((w) => w.emoji), visualLabel: shown.join(", "),
+    options, answer, answerIndex,
+    hints: [`Look at the endings: ${shown.join(", ")}.`, `They all end with ${targetRime} — find another!`],
+    explanation: `Yes! ${shown.join(", ")}, ${answer} — all end with ${targetRime}!`,
+    voiceLine: `What do you notice? Which word belongs with them?`,
+  };
+}
+
 export type GeneratorId =
   | "number-count" | "number-order" | "number-before-after" | "shape-count"
   | "big-small" | "word-family" | "word-match" | "trace-write" | "pattern" | "find-object"
   | "more-less" | "number-names" | "count-by-tens" | "matching" | "odd-one-out"
-  | "memory" | "trace-number-name" | "shape-match" | "shape-pattern";
+  | "memory" | "trace-number-name" | "shape-match" | "shape-pattern"
+  | "word-jumble" | "word-builder" | "word-sort" | "word-listen" | "word-discovery";
 
 const GENERATORS: Record<GeneratorId, (seed: string, c: ComplexityProfile) => ActivityContent> = {
   "number-count": genCount,
@@ -711,6 +817,11 @@ const GENERATORS: Record<GeneratorId, (seed: string, c: ComplexityProfile) => Ac
   },
   "shape-match": genShapeMatch,
   "shape-pattern": genShapePattern,
+  "word-jumble": genWordJumble,
+  "word-builder": genWordBuilder,
+  "word-sort": genWordSort,
+  "word-listen": genWordListen,
+  "word-discovery": genWordDiscovery,
 };
 
 export function isGeneratorId(v: string): v is GeneratorId {

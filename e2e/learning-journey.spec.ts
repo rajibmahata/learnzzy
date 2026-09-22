@@ -2,9 +2,10 @@ import { test, expect } from "@playwright/test";
 
 test("learner sees current, completed, and locked journey levels", async ({ page }) => {
   await page.goto("/welcome");
-  await page.getByLabel("Nickname").fill("Journey Kid");
+  await expect(page.locator("#name-title")).toBeVisible({ timeout: 15000 });
+  await page.getByLabel("Child name").fill("Journey Kid");
   await page.getByRole("button", { name: /6–7/ }).click();
-  await page.getByRole("button", { name: /let's play/i }).click();
+  await page.getByRole("button", { name: /start my adventure/i }).click();
   await expect(page).toHaveURL(/\/play$/, { timeout: 15000 });
 
   await expect(page.getByRole("heading", { name: /level 1 is your next adventure/i })).toBeVisible({ timeout: 15000 });

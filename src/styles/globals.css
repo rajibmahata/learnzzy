@@ -206,6 +206,19 @@ body {
 .animate-float-slow { animation: floatSlow 4s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulseGlow 2.5s infinite; }
 
+/* Celebration balloon burst: light emoji balloons float up and fade (~1.2s,
+   one-shot, GPU-friendly transforms; neutralized by the reduced-motion rule). */
+@keyframes balloon-rise {
+  0% { transform: translateY(10px) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-190px) scale(1.05); opacity: 0; }
+}
+.balloon-rise {
+  animation-name: balloon-rise;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;

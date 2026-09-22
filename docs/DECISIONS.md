@@ -3,7 +3,7 @@
 **Document:** Decision Log / Architecture Decision Record (ADR) Summary  
 **Version:** 1.0  
 **Status:** Active  
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-09-19
 
 ---
 
@@ -1652,6 +1652,131 @@ Puzzles 2) in `All Wonder Adventures` with Stitch Category Hub 6-hub cards
 **Complexity:** GLOBAL + AGE BAND + PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity with age-band boundaries (4-5 simple, 6-7 intermediate, 8-9 advanced) and MCP advisory (Tutor via Gateway, 800ms timeout, 7 validations: schema, age-band, global-level, skill, bounds, game capability, safety, fallback). MCP failure never blocks child.
 
 **Status:** Active (2026-09-19)
+
+---
+
+## DEC-194 -- Words & Phonics Uses the Shared Deterministic Activity Engine
+
+**Decision:**
+Words & Phonics is a first-class category in the existing Learning Playground,
+not a separate game subsystem. `src/lib/words.ts` is the single source of truth
+for seeded word families, family validation, age-band complexity, and exercise
+mixing. Word-family, picture-match, jumble, builder, sorting, listening, and
+rhyme-discovery activities use the existing activity registry, content API,
+adaptive complexity, `ActivityPlayer`, game events, and academic result flow.
+New interaction shapes are represented as generic content kinds
+(`build-order`, `sort-choice`, and `listen-choice`) and are still validated by
+deterministic code. MCP may advise complexity but cannot score, generate
+per-click content, or block gameplay.
+
+**Reason:**
+- The requested phonics variety is delivered without duplicating routing,
+  progression, rewards, analytics, voice, or adaptive-learning contracts.
+- A single word-family source prevents drift between missing-letter, matching,
+  sorting, listening, and discovery exercises.
+- Age-band constraints remain explicit: 4-5 avoids jumble and uses picture
+  support; older bands add mixed families and more demanding interactions.
+
+**Status:** Active (2026-09-19)
+
+---
+
+## DEC-195 -- Mini Mission Engine Is Additive (Session 18)
+
+**Decision:** 3-10 minute deterministic missions reuse the activity registry,
+game events, progression, rewards, parent APIs, and MCP safety boundaries.
+Five approved templates, server-owned validation, server-derived stars;
+no second level system.
+
+**Status:** Active (2026-09-19)
+
+---
+
+## DEC-196 -- Server-Authoritative Unique Stickers, learnerId Identity (Session 19)
+
+**Decision:** The server chooses every sticker (`POST .../rewards/claim`,
+unique `rewardClaims.claimId`, `$addToSet`, never a duplicate; full catalog
+returns `collectionComplete`, never a copy). Progress owns stars/promotion via
+`recordGameResult` with `completionId` idempotency — the legacy rewards mirror
+no longer grants stars (fixing a double-count). Identity is `learnerId`;
+nickname is display-only. Device pointers (`learnzzy.activeLearnerId`,
+per-learner stores/sessions) are convenience only; the server stays
+authoritative. One shared celebration pattern ("Great job!" + balloon burst)
+across games, activities, and missions.
+
+**Status:** Active (2026-09-20)
+
+---
+
+## DEC-197 -- Picture Puzzle Clarity + Journey Levels (Session 19)
+
+**Decision:** Puzzle selection shows a golden ring with pulsing empty homes and
+a green placed-glow (reduced-motion safe); difficulty follows the global level
+(4/6/9 pieces, same rule as addition) with a LEVEL badge; per-placement
+praise and per-picture "Great job!" lead to the shared Celebration. Placement
+logic and validation are untouched.
+
+**Status:** Active (2026-09-20)
+
+---
+
+## DEC-198 -- Stepped Onboarding on the Existing Learner Model (Session 20)
+
+**Decision:** Name → nickname → companion → companion name → age → optional
+parent link → finale runs in the existing `/welcome` setup flow. Identity is
+`displayName` + `nickname` (fallback greeting) + `companion
+{characterId, displayName}`; roster grows 8→12 for the picker; `PATCH
+/api/learners/[id]` writes child-safe fields only (ageBand never patchable).
+Deviations: bands stay 4-5/6-7/8-9, no alias learner APIs, no QR pairing.
+
+**Status:** Active (2026-09-20)
+
+---
+
+## DEC-199 -- Deterministic Companion Reactions + Puzzle Guidance (Session 21)
+
+**Decision:** `src/lib/companion.ts` rotates praise lines, expressions,
+delivery drift (calm bounds), and effects by `(hash + count) % pool` — no LLM
+in the gameplay path; consecutive successes never repeat within a cycle. The
+onboarding companion leads missions; per-game guides stay. Puzzle guidance is
+a WHAT/WHERE/HOW coach strip plus zone captions (validation untouched).
+
+**Status:** Active (2026-09-20)
+
+---
+
+## DEC-200 -- Home → Welcome → Play with Preserved Game Selection (Session 22)
+
+**Decision:** Home game entry points route via `/welcome?next=/play/<game>`
+(and `/learn` equivalents) with `next` sanitized to internal routes only;
+`/welcome` reads `next` via `useSearchParams` + `Suspense` and passes it to
+`ChildSelector` (`Continue` now `router.push(next)` not `"/"`) and
+`LearnerSetup` (post-creation also `router.push(next)` with shared guarded
+create). No new learner/session architecture; authoritative `learnerId` and
+per-learner `sessionId` remain the source of truth, and no default
+age/player is ever used to start a game.
+
+**Status:** Active (2026-09-20)
+
+---
+
+## DEC-201 -- Unified Game Progression, Feedback & Celebration (Session 23)
+
+**Decision:** One `GameResult` (`CORRECT/INCORRECT/COMPLETED`, `isGameComplete`)
+and one `RoundTransition` guard (`idle→feedback→advancing→done`) for every
+game; `useRoundStatus` owns the single auto-advance timer + `countdown` +
+`advanceNow` race; per-game skill levels via `useSkillLevel`
+(`skillLevelFor` from cached `gameLevels`, live refresh on `learnzzy:rewards`)
+are the visible `LEVEL X` (not forced global) with difficulty
+`ceil(level/2)` so age + performance still shape the challenge; one
+`RoundFeedback` banner replaces 4 UIs and one `Celebration` level-progress
+`Level X ✓ Completed ↓ Level Y ★ Next` replaces per-game variants;
+`learnerSync` now returns `{claim, promotion, skill}` and caches
+`gameLevels` locally, while `recordGameResult` + `maybeAdjustSkill`
+(3 @80%+ promote, 5 @<50% ease) stay server-authoritative and idempotent
+via `completionId`/`claimId`.
+
+**Status:** Active (2026-09-20)
 
 # 27. Decision Ownership
 

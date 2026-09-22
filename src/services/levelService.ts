@@ -75,6 +75,8 @@ export async function maybeAdjustSkill(learnerId: string, gameId: string): Promi
     completions: prog?.completions ?? 0,
     recentAccuracy: prog?.recentAccuracy ?? [],
     hintsUsed: prog?.hintsUsed ?? 0,
+    recentResponseTime: (prog as unknown as { recentResponseTime?: number[] })?.recentResponseTime ?? [],
+    recentAttempts: (prog as unknown as { recentAttempts?: number[] })?.recentAttempts ?? [],
   };
   const evaluation = evaluateSkill(history);
   const decision = decideSkillLevel(current, history);

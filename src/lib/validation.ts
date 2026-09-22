@@ -4,6 +4,7 @@ import { z } from "zod";
 // client score is never trusted (BR-022 / DEC-052).
 export const GameEventSchema = z.object({
   clientEventId: z.string().min(1).max(100).optional(),
+  learnerId: z.string().min(1).max(120).optional(),
   event: z.enum([
     "session_started",
     "learner_started",
@@ -41,5 +42,6 @@ export const GameEventSchema = z.object({
 
 export const BatchEventsSchema = z.object({
   sessionId: z.string().min(1).max(120),
+  learnerId: z.string().min(1).max(120).optional(),
   events: z.array(GameEventSchema).min(1).max(100),
 });

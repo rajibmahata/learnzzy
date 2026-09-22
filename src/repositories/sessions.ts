@@ -1,8 +1,11 @@
 import { getDb, newId } from "@/db/mongodb";
 
 // sessions — anonymous, no PII (BR-001). One doc per gameplay session.
+// learnerId is additive: sessions bind to their learner on first sight;
+// pre-existing anonymous sessions keep working untouched.
 export interface SessionDoc {
   sessionId: string;
+  learnerId?: string;
   platform: string;
   deviceType?: string;
   locale?: string;

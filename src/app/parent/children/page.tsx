@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { ParentShell, ParentCard } from "@/components/parent/ParentShell";
 import { parentGet, childLabel, type ChildSummary } from "@/lib/parentApi";
+import { getCharacterDef } from "@/lib/characters";
 
 export default function ParentChildrenPage() {
   const [children, setChildren] = React.useState<ChildSummary[] | null>(null);
@@ -24,9 +25,9 @@ export default function ParentChildrenPage() {
             {children.map((c) => (
               <li key={c.learnerId} className="rounded-lg bg-surface-low px-3 py-2">
                 <div className="flex items-center gap-3">
-                  <span aria-hidden className="text-2xl">🧒</span>
+                  <span aria-hidden className="text-2xl">{c.companion ? getCharacterDef(c.companion.characterId).emoji : "🧒"}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-black">{childLabel(c)}</p>
+                    <p className="text-sm font-black">{childLabel(c)}{c.companion?.displayName ? ` · ${c.companion.displayName}` : ""}</p>
                     <p className="text-xs text-on-surface-variant">Age {c.ageBand} · Level {c.level} · ⭐ {c.totalStars} · 🎖 {c.stickerCount}</p>
                   </div>
                   <Link href={`/parent/children/${c.learnerId}`} className="rounded-full bg-primary px-3 py-1.5 text-xs font-black text-white">Open</Link>

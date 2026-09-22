@@ -8,6 +8,7 @@ interface ProgressData {
   level: number;
   totalStars: number;
   stickerCount: number;
+  recentSticker: { id: string; name: string; emoji: string; category: string } | null;
 }
 
 export default function ParentRewardsPage() {
@@ -38,11 +39,14 @@ export default function ParentRewardsPage() {
       ) : (
         rows.map(({ child, progress }) => (
           <ParentCard key={child.learnerId} title={childLabel(child)}>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <span className="rounded-full bg-secondary-fixed px-3 py-1.5 text-sm font-black">⭐ {progress.totalStars} stars</span>
               <span className="rounded-full bg-tertiary-fixed px-3 py-1.5 text-sm font-black text-on-tertiary-fixed">🎖 {progress.stickerCount} stickers</span>
               <span className="rounded-full bg-primary-fixed px-3 py-1.5 text-sm font-black text-on-primary-fixed">Level {progress.level}</span>
             </div>
+            {progress.recentSticker ? (
+              <p className="mt-2 text-sm"><strong>Recent achievement:</strong> {progress.recentSticker.emoji} {progress.recentSticker.name}</p>
+            ) : null}
           </ParentCard>
         ))
       )}

@@ -35,6 +35,9 @@ export interface SkillHistory {
   /** Rolling accuracies, oldest → newest, capped at 10 by the repository. */
   recentAccuracy: number[];
   hintsUsed?: number;
+  /** Adaptive: rolling response times / attempts (additive, optional). */
+  recentResponseTime?: number[];
+  recentAttempts?: number[];
 }
 
 export interface SkillEvaluation {
@@ -106,7 +109,19 @@ export function decideSkillLevel(currentLevel: number, history: SkillHistory): S
   const cur = clampLevel(currentLevel);
   const evaluation = evaluateSkill(history);
   const { sampleSize, avgAccuracy } = evaluation;
+  // Adaptive: hints and responseTime make promotion a bit more conservative when present
+  const hintRate = history.hintsUsed ? history.hintsUsed / Math.max(1, history.completions) : 0;
+  const avgResponseTime = history.recentResponseTime?.length ? history.recentResponseTime.reduce((a, b) => a + b, 0) / history.recentResponseTime.length : 0;
+  const needsMorePractice = hintRate > 0.8 || avgResponseTime > 8000;
   if (sampleSize >= PROMOTE_COMPLETIONS && avgAccuracy >= PROMOTE_ACCURACY && cur < MAX_LEVEL) {
+    if (needsMorePractice && sampleSize < PROMOTE_COMPLETIONS + 1) {
+      return {
+        action: "stabilize",
+        newLevel: cur,
+        reason: `avg ${Math.round(avgAccuracy * 100)}% but high hints/slow response — one more practice`,
+        message: "Let's practice a little more!",
+      };
+    }
     return {
       action: "promote",
       newLevel: cur + 1,

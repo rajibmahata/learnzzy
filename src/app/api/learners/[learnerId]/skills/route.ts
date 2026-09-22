@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getLearner } from "@/repositories/learners";
+import { getMissionSkillProgress } from "@/repositories/missions";
 import { evaluateSkill, skillLevelFor, skillSummaryLine, SKILL_GAMES } from "@/lib/skillLevels";
 import { gameDisplayName } from "@/services/parentInsights";
 
@@ -34,6 +35,6 @@ export async function GET(_req: Request, { params }: { params: { learnerId: stri
   });
   return NextResponse.json({
     success: true,
-    data: { learnerId: learner.learnerId, level: learner.level, skills, lastResult: learner.lastResult ?? null },
+    data: { learnerId: learner.learnerId, level: learner.level, skills, missionSkills: await getMissionSkillProgress(learner.learnerId), lastResult: learner.lastResult ?? null },
   });
 }

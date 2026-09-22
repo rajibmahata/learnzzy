@@ -14,7 +14,11 @@ export type CharacterId =
   | "parrot"
   | "puppy"
   | "dino"
-  | "elephant";
+  | "elephant"
+  | "fox"
+  | "panda"
+  | "butterfly"
+  | "lion";
 
 export type CharacterState =
   | "idle"
@@ -43,9 +47,23 @@ export const CHARACTERS: CharacterDef[] = [
   { id: "puppy", emoji: "🐶", name: "Puppy", role: "Sorting and clean-up", games: ["clean-up"] },
   { id: "dino", emoji: "🦕", name: "Dino", role: "Puzzle and discovery", games: ["puzzle", "discover"] },
   { id: "elephant", emoji: "🐘", name: "Elephant", role: "Magic and creative discovery", games: ["sketch", "discover"] },
+  { id: "fox", emoji: "🦊", name: "Fox", role: "Word detective", games: ["discover"] },
+  { id: "panda", emoji: "🐼", name: "Panda", role: "Calm sorting friend", games: ["clean-up"] },
+  { id: "butterfly", emoji: "🦋", name: "Butterfly", role: "Gentle discovery guide", games: ["discover"] },
+  { id: "lion", emoji: "🦁", name: "Lion", role: "Brave counting buddy", games: ["addition"] },
 ];
 
 const byId = new Map< string, CharacterDef>(CHARACTERS.map((c) => [c.id, c]));
+
+/** Companion picker order for onboarding (spec §7 all ten). */
+export const COMPANION_CHOICES: CharacterId[] = [
+  "bunny", "teddy", "fox", "owl", "monkey",
+  "panda", "elephant", "lion", "butterfly", "parrot",
+];
+
+export function companionDefs(): CharacterDef[] {
+  return COMPANION_CHOICES.map((id) => byId.get(id)!).filter(Boolean);
+}
 
 export function getCharacterDef(id: string): CharacterDef {
   return byId.get(id) ?? byId.get("teddy")!;

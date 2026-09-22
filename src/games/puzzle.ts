@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { mulberry32, type GameDefinition } from "./framework";
-import { hashSeed } from "./cleanup";
+import { mulberry32, type GameDefinition } from "./framework.ts";
+import { hashSeed } from "./cleanup.ts";
 
 // BR-060..064 — puzzles: source image (emoji mosaic), grid, unique piece IDs,
 // exactly one correct position per piece, age-appropriate piece counts.

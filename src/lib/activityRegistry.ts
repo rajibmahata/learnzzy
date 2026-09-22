@@ -11,7 +11,7 @@
 import type { CategoryId } from "./categories";
 
 export type Renderer = "generic-player" | "game-route";
-export type Validator = "single-choice" | "trace-write";
+export type Validator = "single-choice" | "trace-write" | "build-order" | "sort-choice";
 
 export interface ActivityDef {
   id: string;
@@ -51,6 +51,11 @@ export const ACTIVITY_REGISTRY: ActivityDef[] = [
   // ---- Words & Phonics ----
   { id: "word-family", category: "words", title: "Word Families", icon: "📖", skills: ["phonics"], ageBands: ALL, activityType: "COMPLETE_WORD", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-family", renderer: "generic-player", validator: "single-choice", blurb: "AN, EN, AT… hear the rhyme, build the word." },
   { id: "word-match", category: "words", title: "Read & Match", icon: "👀", skills: ["word-recognition"], ageBands: ALL, activityType: "PICTURE_TO_WORD", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-match", renderer: "generic-player", validator: "single-choice", blurb: "Look carefully — which word matches the picture?" },
+  { id: "word-jumble", category: "words", title: "Jumble Time", icon: "🔀", skills: ["phonics"], ageBands: ALL, activityType: "JUMBLE_WORD", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-jumble", renderer: "generic-player", validator: "build-order", blurb: "Unscramble the letters — tap them in order!" },
+  { id: "word-builder", category: "words", title: "Build the Word", icon: "🧱", skills: ["phonics", "word-building"], ageBands: ALL, activityType: "BUILD_WORD", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-builder", renderer: "generic-player", validator: "build-order", blurb: "Tap letters into empty slots to build the word." },
+  { id: "word-sort", category: "words", title: "Family Baskets", icon: "🧺", skills: ["phonics", "word-sorting"], ageBands: ALL, activityType: "SORT_FAMILY", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-sort", renderer: "generic-player", validator: "sort-choice", blurb: "Which basket rhymes? Sort by word family!" },
+  { id: "word-listen", category: "words", title: "Listen & Choose", icon: "🔊", skills: ["phonics", "listening"], ageBands: ALL, activityType: "LISTEN_CHOOSE", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-listen", renderer: "generic-player", validator: "single-choice", blurb: "Listen carefully — which word did you hear?" },
+  { id: "word-discovery", category: "words", title: "Rhyme Detectives", icon: "🔍", skills: ["phonics", "word-discovery"], ageBands: ALL, activityType: "DISCOVER_PATTERN", complexityDimensions: ["optionCount", "readingRequirement", "visualSupport"], generator: "word-discovery", renderer: "generic-player", validator: "single-choice", blurb: "What do these words share? Find the pattern!" },
   // ---- Write & Create ----
   { id: "trace-write", category: "write", title: "Trace & Write", icon: "✏️", skills: ["tracing", "writing"], ageBands: ALL, activityType: "TRACE_WORD", complexityDimensions: ["readingRequirement", "writingRequirement", "visualSupport"], generator: "trace-write", renderer: "generic-player", validator: "trace-write", blurb: "Read, trace, then write the word." },
   { id: "trace-number-name", category: "write", title: "Number Name Trace", icon: "🔢", skills: ["number-names", "tracing"], ageBands: ALL, activityType: "TRACE_NUMBER_NAME", complexityDimensions: ["numberRange", "writingRequirement", "visualSupport"], generator: "trace-number-name", renderer: "generic-player", validator: "trace-write", blurb: "Trace number names: o-n-e, t-w-o…" },

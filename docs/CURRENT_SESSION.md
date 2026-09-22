@@ -276,3 +276,29 @@ Complete the MVP background workforce and the first usable admin command center 
 ## Natural Female Voice -- Root Cause (2026-09-18, session 15)
 - Inspection: speechSynthesis parametric eSpeak, only rate/pitch, no SSML/breath, pauseAfterMs unused, voiceAssets pending KI-020, fallback to male voices[0] -> robotic. No Audio preload, stutter on cancel(), Hindi still en-US accent.
 - Decision: server ttsProvider (OpenAI tts-1-hd warm nova) -> voiceAssets.audioUrl -> HTMLAudio preload, speechSynthesis only offline fallback; cache deterministic, gameplay never waits.
+
+## Words & Phonics first-class track (2026-09-19)
+- Inspected the existing categories, registry, complexity matrix, generic ActivityPlayer,
+  event reporting, voice fallback, and adaptive content API before changing code.
+- Added `src/lib/words.ts`: 15 reusable word families covering AT/AP/AN/AD/ED/EN/
+  EG/ET/IN/IG/IT/UG/UN/OP/OT, seeded word/emoji data, family validation, age-band
+  complexity, deterministic exercise mixing, and no-jumble gating for ages 4-5.
+- Added five deterministic generators to the existing `activityContent` engine:
+  jumble, builder, family sorting, listen-and-choose, and rhyme discovery. Existing
+  word-family and picture-match generators now use the same family data source.
+- Added registry entries and generic player renderers for build-order, sort-choice,
+  and listen-choice. Answers remain deterministic and server-generated; MCP remains
+  advisory and never enters scoring.
+- `/play` now exposes all 30 registered activities, including seven Words & Phonics
+  tiles. No separate game engine or duplicated route was introduced.
+- Added `tests/words-phonics.test.ts` for family validation, age complexity, deterministic
+  mixes, permutations, unique answers, registry coverage, and generator behavior.
+- Fixed the generic player hook-order issue by moving its unknown-activity guard below
+  all hooks.
+- Verified: `npm test` 204/204, `npm run typecheck`, `npm run lint`, and `npm run build`
+  all pass. Lint/build retain only existing font/image/Sentry warnings.
+- Verified: focused Playwright mobile-320 Words pass 4/4 (category listing, word family,
+  builder letter tiles, sorting baskets, and listening controls). The full `learn.spec.ts`
+  file still has unrelated `/play` load-time failures in this environment.
+- NOT verified: live Mongo E2E (KI-019), neural TTS assets (KI-020), physical devices,
+  and Stitch validation.

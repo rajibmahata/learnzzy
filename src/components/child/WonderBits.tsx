@@ -1,4 +1,6 @@
+import * as React from "react";
 import { getCharacterDef, type CharacterId, type CharacterState } from "@/lib/characters";
+import { BalloonBurst } from "./BalloonBurst";
 
 // Shared Living Wonder presentation bits, grounded in the fetched Stitch
 // screens (number-orchard, breeze-valley, clean-up, living-wonder-worlds).
@@ -102,10 +104,45 @@ export function StepperTrail({ round, total }: { round: number; total: number })
   );
 }
 
-/** Ambient feedback bar: icon + status line + gentle guidance. */
-export function QuestFeedbackBar({ title, hint }: { title: string; hint: string }) {
+/** Shared round-success banner (one UI for every game): green/red panel with
+ *  title, hint, and an optional balloon burst on correct answers. Games keep
+ *  their own wording and countdown blocks; the shape never differs. */
+export function RoundFeedback({
+  correct,
+  title,
+  hint,
+  celebrate,
+  children,
+}: {
+  correct: boolean;
+  title: string;
+  hint?: string;
+  celebrate?: boolean;
+  children?: React.ReactNode;
+}) {
   return (
-    <div className="flex w-full items-center justify-between gap-2 rounded-2xl border border-amber-200 bg-white/90 px-3.5 py-2.5 shadow-[0_4px_0_#fed7aa]">
+    <div
+      role="status"
+      className={`relative mt-3 overflow-hidden rounded-2xl border-2 p-3 text-center font-bold ${
+        correct
+          ? "border-tertiary bg-tertiary-fixed/30 text-on-tertiary-fixed"
+          : "border-error bg-error-container/40 text-on-error-container"
+      }`}
+    >
+      {celebrate === true && correct && <BalloonBurst count={5} />}
+      <p className="text-base">{title}</p>
+      {hint ? <p className="mt-1 text-xs font-normal">{hint}</p> : null}
+      {children}
+    </div>
+  );
+}
+
+/** Ambient feedback bar: icon + status line + gentle guidance. Set `celebrate`
+ *  on correct answers for a short balloon burst (reduced-motion safe). */
+export function QuestFeedbackBar({ title, hint, celebrate }: { title: string; hint: string; celebrate?: boolean }) {
+  return (
+    <div className="relative flex w-full items-center justify-between gap-2 overflow-hidden rounded-2xl border border-amber-200 bg-white/90 px-3.5 py-2.5 shadow-[0_4px_0_#fed7aa]">
+      {celebrate === true && <BalloonBurst count={5} />}
       <div className="flex min-w-0 items-center gap-2.5">
         <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-amber-100 text-lg text-amber-800 shadow-[0_2px_0_#f6ad55]">
           💡

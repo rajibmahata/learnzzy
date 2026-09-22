@@ -35,15 +35,26 @@ export function LearningJourney() {
   if (loading) return <div className="rounded-2xl bg-white/80 backdrop-blur-md p-6 text-center text-sm shadow-[0_8px_24px_rgba(180,160,130,0.12)] border-2 border-white" role="status">Loading your magical journey… ✨</div>;
   if (!journey) return null;
 
+  // Main journey header should be tappable like every other game box — same Welcome→Play flow
+  const headerHref = (() => {
+    const firstPlayable = journey.tracks.flatMap((t) => t.levels).find((l) => l.playable);
+    if (firstPlayable) {
+      const track = journey.tracks.find((t) => t.levels.includes(firstPlayable));
+      const gid = track?.gameIds[0] ?? "addition";
+      return `/play/${gid}?level=${firstPlayable.level}`;
+    }
+    return "/play";
+  })();
+
   return (
     <section aria-labelledby="learning-journey-title" className="rounded-2xl bg-white/80 backdrop-blur-md p-4 md:p-5 shadow-[0_8px_24px_rgba(180,160,130,0.14)] border-2 border-white overflow-hidden">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-sky-100 via-amber-50 to-emerald-50 p-4 border-2 border-white">
+      <Link href={headerHref} className="relative overflow-hidden rounded-xl bg-gradient-to-br from-sky-100 via-amber-50 to-emerald-50 p-4 border-2 border-white block hover:shadow-md hover:-translate-y-0.5 transition-all group" aria-label={`My learning journey Global Level ${journey.currentLevel} — Level ${journey.currentLevel} is your next 3D adventure, tap to play`}>
         <div className="absolute -top-6 -right-6 w-32 h-32 bg-amber-200/40 rounded-full blur-2xl" aria-hidden />
         <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-sky-200/40 rounded-full blur-xl" aria-hidden />
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.16em] text-primary flex items-center gap-1">🌟 My learning journey • Global Level {journey.currentLevel}</p>
-            <h2 id="learning-journey-title" className="mt-1 text-xl md:text-2xl font-black leading-tight">Level {journey.currentLevel} is your next 3D adventure!</h2>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-primary flex items-center gap-1">🌟 My learning journey • Global Level {journey.currentLevel} <span aria-hidden className="hidden group-hover:inline text-primary">→</span></p>
+            <h2 id="learning-journey-title" className="mt-1 text-xl md:text-2xl font-black leading-tight group-hover:text-primary">Level {journey.currentLevel} is your next 3D adventure!</h2>
             <p className="text-xs text-on-surface-variant mt-1">Every world grows with you — 3D magic adapts ✨</p>
           </div>
           <div className="hidden sm:flex flex-col items-center gap-1 shrink-0">
@@ -56,7 +67,7 @@ export function LearningJourney() {
           <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">All 6 Worlds Included</span>
           <span className="inline-flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-full">Tap to play</span>
         </div>
-      </div>
+      </Link>
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
         {journey.tracks.map((track) => (
@@ -74,10 +85,23 @@ function TrackPath({ track, currentLevel }: { track: LearningTrackJourney; curre
   const art = world ? artForGame(world.gameId) : null;
   const guide = getCharacterDef(characterForGame(primaryGame));
   const bg = world?.gradient ?? "from-sky-100 to-emerald-50";
+  const trackHref = `/play/${primaryGame}?level=${currentLevel}`;
   return (
-    <div className={`rounded-2xl overflow-hidden border-2 border-white shadow-[0_6px_0_rgba(180,160,130,0.15)] bg-gradient-to-br ${bg}`}>
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Play ${track.title} Global Level ${currentLevel} — tap image or title to play`}
+      onClick={() => (window.location.href = trackHref)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          window.location.href = trackHref;
+        }
+      }}
+      className={`rounded-2xl overflow-hidden border-2 border-white shadow-[0_6px_0_rgba(180,160,130,0.15)] bg-gradient-to-br ${bg} group cursor-pointer hover:shadow-[0_8px_0_rgba(180,160,130,0.2)] hover:-translate-y-0.5 transition-all`}
+    >
       <div className="relative h-24 overflow-hidden">
-        {art ? <img src={art} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center text-5xl">{track.icon}</div>}
+        {art ? <img src={art} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" /> : <div className="absolute inset-0 flex items-center justify-center text-5xl">{track.icon}</div>}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" aria-hidden />
         <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-1 text-[11px] font-black shadow-sm">{world?.islandTag ?? track.title}</span>
         <span aria-hidden className="absolute bottom-2 right-2 text-2xl drop-shadow">{guide.emoji}</span>
@@ -87,7 +111,7 @@ function TrackPath({ track, currentLevel }: { track: LearningTrackJourney; curre
         <div className="flex items-center gap-2">
           <span aria-hidden className="text-xl">{track.icon}</span>
           <div>
-            <h3 className="text-sm font-black leading-tight">{track.title}</h3>
+            <h3 className="text-sm font-black leading-tight group-hover:text-primary group-hover:underline">{track.title}</h3>
             <p className="text-xs text-on-surface-variant line-clamp-1">{track.description}</p>
           </div>
         </div>
@@ -120,7 +144,12 @@ function JourneyNode({ level, gameId, trackTitle }: { level: JourneyLevel; gameI
   );
 
   return level.playable ? (
-    <Link href={`/play/${gameId}?level=${level.level}`} className="flex flex-col items-center text-center group" aria-label={`${trackTitle} Level ${level.level} ${level.label}`}>
+    <Link
+      href={`/play/${gameId}?level=${level.level}`}
+      onClick={(e) => e.stopPropagation()}
+      className="flex flex-col items-center text-center group"
+      aria-label={`${trackTitle} Level ${level.level} ${level.label}`}
+    >
       {node}
       <span className="mt-1 text-[11px] font-black group-hover:text-primary">L{level.level}</span>
       <span className={`text-[10px] font-bold px-1 py-0.5 rounded-full ${level.status === "current" ? "bg-primary-fixed text-primary" : "text-on-surface-variant"}`}>

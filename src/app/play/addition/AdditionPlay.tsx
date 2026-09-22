@@ -5,6 +5,7 @@ import { GameShell } from "@/components/child/GameShell";
 import { AdditionStage } from "@/components/child/AdditionStage";
 import { AnswerButton } from "@/components/child/AnswerButton";
 import { Celebration } from "@/components/child/Celebration";
+import { WorldReward } from "@/components/child/WorldReward";
 import { additionGame, addHint, addInstruction } from "@/games/addition";
 import { GAME_ROUNDS } from "@/games/framework";
 import { toAdditionContent, type AdditionLike } from "@/lib/pool-client";
@@ -131,15 +132,71 @@ export default function AdditionPlay() {
     }
   }
 
+  const handleContinueHarder = React.useCallback(() => {
+    // Continue → next level, harder: bump GLOBAL level (1..6) and reload same game.
+    // This is the explicit "Continue" on Try Again that user requested — always harder,
+    // even when the last run was a retry/low accuracy, so the child feels progression.
+    setGlobalLevel((prev) => {
+      const next = Math.min(6, prev + 1);
+      try {
+        const raw = localStorage.getItem("learnzzy.learner.v1");
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (p && typeof p.level === "number") {
+            localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next }));
+          }
+        }
+        localStorage.setItem("learnzzy.globalLevel.v1", String(next));
+      } catch {}
+      return next;
+    });
+    mistakeRounds.current.clear();
+    hintOpens.current = 0;
+    gameStart.current = Date.now();
+    setRound(0);
+    setPicked(null);
+    setFeedback("idle");
+    setDone(false);
+    setReward(null);
+    reload();
+  }, [reload]);
+
   if (done) {
+    const isTryAgain = mistakeRounds.current.size > 0;
+    const continueLabel = isTryAgain ? "Continue — Try Harder 💪" : "Continue → Next Level";
+    if (reward?.sticker) {
+      return (
+        <WorldReward
+          sticker={reward.sticker}
+          character="teddy"
+          variantSeed={reward.sticker.id}
+          continueLabel={isTryAgain ? "Continue — Try Harder 💪" : "Continue → Next Level"}
+          onReplay={() => {
+            mistakeRounds.current.clear();
+            hintOpens.current = 0;
+            gameStart.current = Date.now();
+            setRound(0);
+            setPicked(null);
+            setFeedback("idle");
+            setDone(false);
+            setReward(null);
+            reload();
+          }}
+          onContinue={handleContinueHarder}
+        />
+      );
+    }
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
         <Celebration
-          title="AWESOME!"
+          title={isTryAgain ? "Good try! Keep going!" : "AWESOME!"}
           stars={reward?.stars ?? 3}
           sticker={reward?.sticker ?? null}
           character="teddy"
           onReplay={() => {
+            mistakeRounds.current.clear();
+            hintOpens.current = 0;
+            gameStart.current = Date.now();
             setRound(0);
             setPicked(null);
             setFeedback("idle");
@@ -148,6 +205,14 @@ export default function AdditionPlay() {
             reload();
           }}
         />
+        {/* Explicit Continue on Try Again — harder next level */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4">
+          <button type="button" onClick={handleContinueHarder} className="w-full h-14 rounded-full bg-primary text-on-primary font-black text-base shadow-[0_5px_0_#004395] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2">
+            <span>{continueLabel}</span>
+            <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+          </button>
+          <p className="text-center text-xs font-bold text-on-surface-variant mt-2">LEVEL {globalLevel} → {Math.min(6, globalLevel + 1)} • Harder!</p>
+        </div>
       </div>
     );
   }
@@ -182,121 +247,137 @@ export default function AdditionPlay() {
 
   return (
     <GameShell title="Number Adventure" stars={totalStars}>
-      <div className="flex items-center justify-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-black text-white shadow-[0_3px_0_#004395]">
-          <span aria-hidden>🌟</span> LEVEL {globalLevel}
-        </span>
-        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-surface-container px-3 py-1 text-xs font-bold text-on-surface-variant">
-          Number Adventure • {globalLevel <= 2 ? "Building basics" : globalLevel <= 4 ? "Growing strong" : "Master explorer"}
-        </span>
-      </div>
-      <StepperTrail round={round} total={GAME_ROUNDS} />
-
-      <div className="mt-2 flex flex-col items-center text-center">
-        <GuideCard
-          character="teddy"
-          state={stateForMoment({ feedback })}
-          name="TEDDY'S HINT 🧸"
-          line={guideLine}
-          listenLabel="Listen"
-          listenAria="Teddy reads the story aloud"
-          onListen={() => teddyVoice(story.voiceLine)}
-        />
-      </div>
-
-      {/* Orchard stage (Stitch number-orchard): gradient grove card, branch
-          count badges, glowing plus ring, and the countable groups. */}
-      <div className="relative mt-3 w-full overflow-hidden rounded-3xl border-2 border-emerald-200/90 bg-gradient-to-b from-sky-100/90 via-amber-50/80 to-emerald-100/90 p-3 shadow-[0_8px_20px_rgba(16,185,129,0.18)]">
-        <div className="flex justify-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-1.5 text-[14px] font-black uppercase tracking-wider text-white shadow-[0_3px_0_#065f46]">
-            🌳 {theme.emoji} {theme.label}
-          </span>
-        </div>
-        <div role="group" aria-label={`${content.a} plus ${content.b}`} className="relative z-10 mt-2">
-          <AdditionStage a={content.a} b={content.b} successTick={successTick} emoji={theme.emoji} />
-          <div className="mt-2 flex items-center justify-center gap-3">
-            <p
-              className="rounded-full bg-red-500 px-4 py-1 text-headline-md font-black text-white shadow-[0_3px_0_#9f1239]"
-              aria-label={`${content.a} ${themeNoun(theme.id, content.a)}`}
-            >
-              🌳 {content.a}
-            </p>
-            <span
-              aria-hidden
-              className="anim-glow flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-200 text-3xl font-black text-amber-950 shadow-[0_4px_0_#d97706]"
-            >
-              +
-            </span>
-            <p
-              className="rounded-full bg-amber-500 px-4 py-1 text-headline-md font-black text-white shadow-[0_3px_0_#92400e]"
-              aria-label={`${content.b} ${themeNoun(theme.id, content.b)}`}
-            >
-              ✨ {content.b}
-            </p>
+      {/* Stitch Number Adventure — Quest Session sub-header + stepper */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <button aria-label="Back to Home" className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface shadow-[0_4px_0_#c2c6d6] active:translate-y-1 active:shadow-none transition-all" onClick={() => window.history.back()}>
+            <span className="material-symbols-outlined text-[26px]">home</span>
+          </button>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high shadow-[0_2px_0_#d5e3fc]">
+            <span className="material-symbols-outlined text-secondary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>nutrition</span>
+            <span className="font-bold text-sm tracking-tight">Number Adventure</span>
           </div>
         </div>
-        <div className="mt-3 flex flex-col items-center justify-center text-center">
-          <p className="rounded-full border border-emerald-200 bg-white/90 px-3.5 py-1 text-[15px] font-extrabold text-emerald-900 shadow-sm">
-            ⬇ {story.question}
-          </p>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-secondary-fixed px-3 py-1.5 rounded-full shadow-[0_3px_0_#ffb95f]">
+            <span className="material-symbols-outlined text-secondary text-[22px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>star</span>
+            <span className="font-black text-sm text-on-secondary-fixed">{totalStars}</span>
+          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-black text-white shadow-[0_3px_0_#004395]">LEVEL {globalLevel}</span>
+        </div>
+      </div>
+      {/* Stitch stepper trail — check / current / pending / lock */}
+      <div className="flex items-center justify-center gap-3 py-2">
+        {Array.from({ length: GAME_ROUNDS }).map((_, i) => {
+          if (i < round) return <div key={i} className="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shadow-[0_3px_0_#005236]"><span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>check</span></div>;
+          if (i === round) return <div key={i} className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary shadow-[0_4px_0_#004395] scale-105 font-black text-sm">{i + 1}</div>;
+          if (i === round + 1) return <div key={i} className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-70 font-bold text-sm">{i + 1}</div>;
+          return <div key={i} className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant opacity-70"><span className="material-symbols-outlined text-[16px]">lock</span></div>;
+        })}
+      </div>
+
+      <div className="mt-1 flex flex-col items-center text-center">
+        <GuideCard character="teddy" state={stateForMoment({ feedback })} name="TEDDY'S HINT 🧸" line={guideLine} listenLabel="Listen" listenAria="Teddy reads the story aloud" onListen={() => teddyVoice(story.voiceLine)} />
+      </div>
+
+      {/* Stitch Single-Task Prompt Box + Read aloud */}
+      <div className="flex flex-col items-center justify-center mt-2 mb-3 text-center">
+        <div className="inline-flex items-center gap-2 bg-primary-fixed px-5 py-2 rounded-full shadow-[0_3px_0_#adc6ff]">
+          <span className="material-symbols-outlined text-primary text-[24px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>campaign</span>
+          <h2 className="font-black tracking-wide uppercase text-on-primary-fixed text-lg">COUNT THEM!</h2>
+        </div>
+        <button className="mt-2 flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-container-lowest text-primary shadow-[0_3px_0_#d5e3fc] active:translate-y-0.5 active:shadow-none transition-all text-sm font-bold" onClick={() => teddyVoice(story.voiceLine)}>
+          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>volume_up</span> Read aloud
+        </button>
+      </div>
+
+      {/* Stitch Visual Addition Stage Canvas — two groups + plus + counts */}
+      <div className="flex flex-row items-center justify-center gap-2 w-full px-1">
+        <div className="flex-1 flex flex-col items-center bg-surface-container-lowest p-3 rounded-lg shadow-[0_6px_0_#d5e3fc]">
+          <div className="flex flex-wrap items-center justify-center gap-2 min-h-[96px] w-full">
+            <AdditionStage a={content.a} b={0} successTick={0} emoji={theme.emoji} />
+          </div>
+          <div className="mt-2 px-4 py-1 rounded-full bg-surface-container text-primary font-black shadow-[0_2px_0_#adc6ff]">{content.a}</div>
+        </div>
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container shadow-[0_4px_0_#ffb95f] scale-110 shrink-0 animate-pulse">
+          <span className="material-symbols-outlined text-[32px] font-black">add</span>
+        </div>
+        <div className="flex-1 flex flex-col items-center bg-surface-container-lowest p-3 rounded-lg shadow-[0_6px_0_#d5e3fc]">
+          <div className="flex flex-wrap items-center justify-center gap-2 min-h-[96px] w-full">
+            <AdditionStage a={content.b} b={0} successTick={successTick} emoji={theme.emoji} />
+          </div>
+          <div className="mt-2 px-4 py-1 rounded-full bg-surface-container text-primary font-black shadow-[0_2px_0_#adc6ff]">{content.b}</div>
         </div>
       </div>
 
-      <p className="mt-3 text-center text-instruction">{content ? addInstruction(content.a, content.b) : COPY.question}</p>
+      <div className="flex flex-col items-center justify-center my-3 text-center">
+        <div className="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-primary mb-1 shadow-[0_3px_0_#adc6ff] animate-bounce">
+          <span className="material-symbols-outlined text-[24px]">arrow_downward</span>
+        </div>
+        <p className="font-bold text-xl tracking-tight">{COPY.question}</p>
+      </div>
 
-      <div className="mt-2 flex justify-center">
-        <ClueButton
-          label="Need a Clue? 🧸"
-          onClick={() => {
-            setHintOpen(true);
-            hintOpens.current += 1;
-            queueEvent({ event: "hint_used", gameId: "addition", contentId });
-          }}
-        />
+      <div className="mt-1 flex justify-center">
+        <ClueButton label="Need a Clue? 🧸" onClick={() => { setHintOpen(true); hintOpens.current += 1; queueEvent({ event: "hint_used", gameId: "addition", contentId }); }} />
       </div>
       {hintOpen && content && (
         <div role="dialog" aria-label="Hint" className="safe-panel mx-auto mt-2 w-full max-w-md p-4">
           <p className="text-sm font-black text-on-surface">💡 Hint</p>
           <p className="mt-1 text-sm text-on-surface-variant">{addHint(content.a, content.b)}</p>
-          <button
-            type="button"
-            onClick={() => setHintOpen(false)}
-            aria-label="Close hint"
-            className="tactile mt-3 min-h-12 w-full rounded-full bg-primary-container text-sm font-black text-white shadow-[0_4px_0_#004395]"
-          >
-            Got it!
-          </button>
+          <button type="button" onClick={() => setHintOpen(false)} aria-label="Close hint" className="tactile mt-3 min-h-12 w-full rounded-full bg-primary-container text-sm font-black text-white shadow-[0_4px_0_#004395]">Got it!</button>
         </div>
       )}
 
-       <div className="mt-3 grid grid-cols-4 gap-2" role="group" aria-label="Answer choices">
-        {content.answers.map((a) => (
-          <AnswerButton
-            key={a}
-            value={a}
-            onPick={pick}
-            state={picked === a ? (additionGame.validate(content, a) ? "correct" : "incorrect") : "idle"}
-          />
-        ))}
+      {/* Stitch tactile answer grid — 4 pads >=72px, tertiary highlight for chosen */}
+      <div className="mt-3 grid grid-cols-4 gap-2 w-full" role="group" aria-label="Answer choices">
+        {content.answers.map((a) => {
+          const isPicked = picked === a;
+          const isCorrect = additionGame.validate(content, a);
+          const showCorrect = isPicked && isCorrect && feedback === "correct";
+          const showWrong = isPicked && !isCorrect && feedback === "retry";
+          return (
+            <button
+              key={a}
+              onClick={() => pick(a)}
+              aria-label={`Answer ${a}`}
+              className={`h-20 min-h-[72px] rounded-lg font-black text-[22px] flex items-center justify-center shadow-[0_6px_0_#d5e3fc] active:translate-y-1.5 active:shadow-none transition-all ${showCorrect ? "bg-tertiary-fixed text-on-tertiary-fixed shadow-[0_6px_0_#00855b] scale-[1.02]" : showWrong ? "bg-error-container text-on-error-container" : "bg-surface-container-lowest text-on-surface"}`}
+            >
+              {a}
+            </button>
+          );
+        })}
       </div>
 
-        <div className="mt-4" aria-live="polite">
-          <QuestFeedbackBar
-            title={feedback === "correct" ? `✨ ${COPY.correct}` : feedback === "retry" ? `😢 ${COPY.retry} — Let's look again!` : "Tap the number that matches!"}
-            hint={feedback === "retry" ? "Take your time. Look carefully — you can do it!" : `Put them together: count ${content.a}… then ${content.b} more!`}
-          />
-          {feedback !== "idle" && countdown !== null && (
-            <div className="mt-2 flex flex-col items-center gap-1">
-              <div className="h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/60">
-                <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(countdown / 10) * 100}%` }} />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-on-surface-variant">Next in {countdown}s</span>
-                <button type="button" onClick={goNext} className="rounded-full bg-primary px-4 py-1 text-xs font-black text-white shadow-[0_2px_0_#004395]">Next →</button>
-              </div>
-            </div>
-          )}
+      {/* Stitch feedback bar + explicit Next to continue */}
+      <div className="flex items-center justify-between w-full bg-surface-container px-4 py-3 rounded-lg shadow-[0_4px_0_#d5e3fc] mt-3" id="feedbackBar">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shadow-[0_2px_0_#ffb95f]">
+            <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>lightbulb</span>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="font-bold text-sm" id="feedbackText">{feedback === "correct" ? `✨ ${COPY.correct}` : feedback === "retry" ? `😢 ${COPY.retry}` : "Tap the number that matches!"}</span>
+            <span className="text-xs text-on-surface-variant font-medium">{feedback === "retry" ? "Take your time. Look carefully!" : `Count: ${content.a}… then ${content.b} more!`}</span>
+          </div>
         </div>
+        <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-[0_3px_0_#ffb95f]">
+          <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" } as React.CSSProperties}>star</span>
+        </div>
+      </div>
+
+      {/* Prominent Next to continue next level — Stitch tactile primary */}
+      {feedback !== "idle" && (
+        <div className="mt-3 flex flex-col gap-2">
+          <div className="h-2 w-full max-w-xs mx-auto overflow-hidden rounded-full bg-white/60">
+            <div className="h-full bg-primary transition-all duration-1000" style={{ width: countdown !== null ? `${(countdown / 10) * 100}%` : "100%" }} />
+          </div>
+          <button type="button" onClick={goNext} className="w-full h-14 rounded-full bg-primary text-on-primary font-black text-base shadow-[0_5px_0_#004395] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2">
+            <span>{round + 1 >= GAME_ROUNDS ? "Complete Level 🎉" : "Next Level "}</span>
+            <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+            {countdown !== null && <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">{countdown}s</span>}
+          </button>
+          <p className="text-center text-xs font-bold text-on-surface-variant">LEVEL {globalLevel} • Round {round + 1} of {GAME_ROUNDS}</p>
+        </div>
+      )}
     </GameShell>
   );
 }

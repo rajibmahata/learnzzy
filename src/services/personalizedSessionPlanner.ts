@@ -3,6 +3,7 @@ import { ACTIVITY_REGISTRY, type ActivityDef } from "@/lib/activityRegistry";
 import { resolveComplexity, type AgeBand, type ComplexityProfile } from "@/lib/complexity";
 import { evaluateSkill, type SkillHistory } from "@/lib/skillLevels";
 import { mulberry32 } from "@/games/framework";
+import { WORLD_EVENT_CONFIGS } from "@/lib/worldRewards";
 import type { AgeBand as LearnerAgeBand } from "@/repositories/learners";
 
 // Deterministic hash for seeding (FNV-1a)
@@ -32,6 +33,8 @@ export interface PersonalizedActivity {
   href?: string;
   title: string;
   icon: string;
+  /** Admin explainability: why was this selected? (skill+difficulty+theme+reason) */
+  explainability?: { skill: string; difficulty: number; theme?: string; reason: string };
 }
 
 export interface PersonalizedSessionPlan {
@@ -145,7 +148,15 @@ export async function buildPersonalizedSessionPlan(learnerId: string): Promise<P
   // 2. Filter eligible activities by ageBand
   const eligible: ActivityDef[] = ACTIVITY_REGISTRY.filter((a) => (a.ageBands as string[]).includes(ageBand));
 
-  // 3. Score each activity: interest + need + mastery gap + variety + recency
+  // Collect owned world reward tags for soft personalization (§23): a dino sticker
+  // gently nudges jungle/counting activities, never forces them.
+  const ownedStickerIds = (learner?.stickerIds ?? []) as string[];
+  const ownedWorldEvents = ownedStickerIds.map((id) => WORLD_EVENT_CONFIGS[id]).filter(Boolean);
+  const ownedThemes = new Set(ownedWorldEvents.flatMap((e) => e.learningThemes));
+  const ownedGameAffinity = new Set(ownedWorldEvents.flatMap((e) => e.gameAffinity));
+
+  // 3. Score each activity: interest + need + mastery gap + variety + recency + engagement/novelty (adaptive) + world rewards
+  const adaptiveOn = process.env.ADAPTIVE_ENGINE_ENABLED === "true";
   const scored = eligible.map((a) => {
     const skill = a.skills[0] ?? a.id;
     const mastery = masteries.get(skill)?.mastery ?? 0.5;
@@ -182,10 +193,43 @@ export async function buildPersonalizedSessionPlan(learnerId: string): Promise<P
     // Mastery gap boost: prioritize developing skills at global level
     const masteryGap = (0.8 - mastery) * 1.0; // positive if below 0.8
 
+    // Adaptive: engagement (theme/character) + learningBehavior (responseTime/hints) — additive, tiny, deterministic
+    let engagementBoost = 0;
+    let noveltyBoost = 0;
+    if (adaptiveOn) {
+      // Engagement: if learner has high interest in this activity's category/theme, boost slightly
+      // For now, theme is inferred from activityId; use interest as proxy for theme preference
+      engagementBoost = totalInterest > 3 ? 0.4 : totalInterest > 1 ? 0.15 : 0;
+      // Novelty: unplayed or not recently seen gets a small bump
+      if (completions === 0) noveltyBoost = 0.3;
+      else if (completions === 1) noveltyBoost = 0.12;
+      // Learning behavior: slow response or high hints → slightly reduce priority for this exact activity, encourage variety
+      const progExt = prog as unknown as { recentResponseTime?: number[]; hintsUsed?: number } | undefined;
+      if (progExt?.recentResponseTime?.length) {
+        const avgRt = progExt.recentResponseTime.reduce((s, v) => s + v, 0) / progExt.recentResponseTime.length;
+        if (avgRt > 7000) engagementBoost -= 0.2;
+      }
+      if (progExt?.hintsUsed && completions) {
+        const hintRate = progExt.hintsUsed / completions;
+        if (hintRate > 2) engagementBoost -= 0.15;
+      }
+    }
+
+    // World reward affinity: if the child recently earned e.g. rex (jungle/counting) or boat (ocean),
+    // gently boost activities in that theme / game so rewards become learning context (§24).
+    // Keep it small (0.2–0.35) and deterministic — interest/need still dominate.
+    let worldBoost = 0;
+    const gameIdForBoost = a.href ? (a.href.split("/").pop() ?? a.id) : a.id;
+    if (ownedGameAffinity.has(gameIdForBoost)) worldBoost += 0.3;
+    else if (ownedGameAffinity.has(skill)) worldBoost += 0.2;
+    if (ownedThemes.has(a.category)) worldBoost += 0.12;
+    // Cap world boost so it never overrides need/interest strongly
+    worldBoost = Math.min(0.35, worldBoost);
+
     // Deterministic tiny jitter for content variety (after personalization)
     const jitter = (mulberry32(hashSeed(`${learnerId}:${a.id}:${globalLevel}`))() - 0.5) * 0.05;
 
-    const priority = interestBoost + need * 1.3 + masteryGap * 1.2 - varietyPenalty - recencyPenalty + jitter;
+    const priority = interestBoost + need * 1.3 + masteryGap * 1.2 - varietyPenalty - recencyPenalty + engagementBoost + noveltyBoost + worldBoost + jitter;
 
     let reason = "variety";
     if (need >= 2.5) reason = "discovery";
@@ -193,7 +237,7 @@ export async function buildPersonalizedSessionPlan(learnerId: string): Promise<P
     else if (totalInterest > 2) reason = "interest";
     else if (mastery < 0.6) reason = "developing";
 
-    return { activity: a, mastery, priority, reason, completions };
+    return { activity: a, mastery, priority, reason, completions, engagementBoost, noveltyBoost };
   });
 
   // 4. Sort by priority descending
@@ -266,6 +310,12 @@ export async function buildPersonalizedSessionPlan(learnerId: string): Promise<P
       href: a.href,
       title: a.title,
       icon: a.icon,
+      explainability: {
+        skill,
+        difficulty: effectiveLevel,
+        theme: a.category,
+        reason: s.reason,
+      },
     };
   });
 

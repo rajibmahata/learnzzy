@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>Learnzzy</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { width: 100vw; margin: 0; padding: 0; } body { overscroll-behavior: none; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "primary-fixed": "#d8e2ff", "on-primary-container": "#fefcff", "on-tertiary-container": "#f5fff6", "on-surface": "#0d1c2e", "surface": "#f8f9ff", "on-error": "#ffffff", "on-surface-variant": "#424754", "on-background": "#0d1c2e", "inverse-primary": "#adc6ff", "surface-dim": "#ccdbf3", "inverse-on-surface": "#eaf1ff", "on-secondary-container": "#684000", "background": "#f8f9ff", "on-tertiary": "#ffffff", "secondary-container": "#fea619", "on-error-container": "#93000a", "surface-tint": "#005ac2", "secondary-fixed-dim": "#ffb95f", "surface-container": "#e6eeff", "error": "#ba1a1a", "outline-variant": "#c2c6d6", "outline": "#727785", "surface-container-highest": "#d5e3fc", "primary-fixed-dim": "#adc6ff", "primary": "#0058be", "surface-variant": "#d5e3fc", "primary-container": "#2170e4", "on-primary": "#ffffff", "surface-container-low": "#eff4ff", "on-secondary": "#ffffff", "tertiary": "#006947", "secondary": "#855300", "on-tertiary-fixed-variant": "#005236", "inverse-surface": "#233144", "on-primary-fixed": "#001a42", "tertiary-container": "#00855b", "on-primary-fixed-variant": "#004395", "tertiary-fixed": "#6ffbbe", "on-secondary-fixed-variant": "#653e00", "on-tertiary-fixed": "#002113", "surface-container-high": "#dce9ff", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#2a1700", "error-container": "#ffdad6", "secondary-fixed": "#ffddb8", "tertiary-fixed-dim": "#4edea3", "surface-bright": "#f8f9ff" }, "borderRadius": { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, "spacing": { "gutter": "1.5rem", "margin": "2rem", "space-lg": "2rem", "margin-mobile": "1.25rem", "space-md": "1.25rem", "gutter-mobile": "1rem", "space-sm": "0.75rem", "space-xs": "0.5rem", "space-xl": "3rem" }, "fontFamily": { "label-sm": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "instruction-bold": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "display-hero": ["Plus Jakarta Sans"], "headline-md-mobile": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "answer-btn": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-hero-mobile": ["Plus Jakarta Sans"] }, "fontSize": { "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "700" }], "instruction-bold": ["24px", { "lineHeight": "32px", "fontWeight": "700" }], "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-md-mobile": ["22px", { "lineHeight": "30px", "fontWeight": "700" }], "headline-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "800" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "500" }], "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }], "answer-btn": ["22px", { "lineHeight": "28px", "fontWeight": "800" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "500" }], "display-hero-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "800" }] } } } }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased select-none"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 px-margin-mobile flex items-center justify-between gap-space-xs"><div class="flex items-center gap-space-xs"><img alt="Learnzzy Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VgZIOnueTsYUthqrzGiJtpyitW9RvQhPxkQvCehqpCnRfHYMYsk9yguAJb7_K-LQXI7OsV51rteaytfIiiHSeCQaTwb8BhNtQEI1EiimS8fPt_2Kc-8AwTQwiTcLyZpDyATYr53EFxoZwqBItQf5vyZDIncbRC10smFn9fkmS2oDreL5yfpGwEoITn-4u720mNhr6nk2pSZPqXlWNe1sszx3bnbRBXr23iUmPlH92CG6ced9rY1QxTQ2I"/><span class="font-headline-md-mobile text-headline-md-mobile text-primary tracking-tight font-extrabold hidden sm:inline">Learnzzy</span><span class="font-label-md text-label-md text-on-surface-variant font-bold ml-1">Play Garden</span></div><div class="flex items-center gap-space-xs"><div class="flex items-center gap-1 bg-surface-container-high px-3 py-1.5 rounded-full shadow-[0_2px_0_#d5e3fc]"><span class="material-symbols-outlined text-secondary-container text-[20px]">star</span><span class="font-label-md text-label-md text-on-secondary-container font-extrabold">24</span></div><button aria-label="Sound Toggle" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-surface-container flex items-center justify-center text-primary active:scale-95 transition-transform shadow-[0_2px_0_#d5e3fc]"><span class="material-symbols-outlined text-[22px]">volume_up</span></button><button aria-label="Parent Gate" class="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant active:scale-95 transition-transform shadow-[0_2px_0_#e6eeff]"><span class="material-symbols-outlined text-[20px]">lock</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-20 pb-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Live Interactive 3D Canvas Layer -->
+<!-- STITCH_THREEJS_START:ANIMATION_48 class="fixed inset-0 w-full h-full pointer-events-auto z-0" -->
+<div class="fixed inset-0 w-full h-full pointer-events-auto z-0" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_48" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_48');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  // Rich Full-Screen 3D Living Wonder Worlds Interactive Selector Scene
+const container = document.getElementById('threejs-container-ANIMATION_WORLDS') || 
+                  document.getElementById('threejs-container') || 
+                  document.body;
+
+const width = container.clientWidth || window.innerWidth;
+const height = container.clientHeight || window.innerHeight;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0xf0f7ff, 0.018);
+
+const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+camera.position.set(0, 5, 22);
+
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.innerHTML = '';
+container.appendChild(renderer.domElement);
+
+// Lighting setup - sunny cheerful storybook atmosphere
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.25);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xfff5ea, 1.6);
+sunLight.position.set(15, 26, 18);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.width = 1024;
+sunLight.shadow.mapSize.height = 1024;
+scene.add(sunLight);
+
+const skyLight = new THREE.DirectionalLight(0xbae6fd, 0.85);
+skyLight.position.set(-15, 14, -12);
+scene.add(skyLight);
+
+const softWarmPoint = new THREE.PointLight(0xfed7aa, 1.1, 35);
+softWarmPoint.position.set(0, 3, 10);
+scene.add(softWarmPoint);
+
+// Master World Floating Archipelago
+const mainIsland = new THREE.Group();
+scene.add(mainIsland);
+
+// Big Lush Floating Wonder Center Mound
+const grassMat = new THREE.MeshToonMaterial({ color: 0x86efac });
+const centerMound = new THREE.Mesh(new THREE.CylinderGeometry(10.5, 8.2, 2.5, 36), grassMat);
+centerMound.position.y = -1.2;
+centerMound.receiveShadow = true;
+mainIsland.add(centerMound);
+
+const biscuitMat = new THREE.MeshToonMaterial({ color: 0xfef08a });
+const biscuit = new THREE.Mesh(new THREE.CylinderGeometry(8.2, 6.0, 1.6, 36), biscuitMat);
+biscuit.position.y = -2.8;
+mainIsland.add(biscuit);
+
+const floatRockMat = new THREE.MeshToonMaterial({ color: 0x93c5fd });
+const floatRock = new THREE.Mesh(new THREE.ConeGeometry(5.8, 3.8, 32), floatRockMat);
+floatRock.position.y = -5.0;
+floatRock.rotation.x = Math.PI;
+mainIsland.add(floatRock);
+
+// 3 Orbiting Mini Wonder Biome Floating Islands
+// 1: Orchard Biome (Left)
+const islandOrchard = new THREE.Group();
+const m1 = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 2.2, 1.4, 24), new THREE.MeshToonMaterial({ color: 0xfca5a5 }));
+m1.position.y = -0.7;
+islandOrchard.add(m1);
+const treeTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 1.2, 12), new THREE.MeshToonMaterial({ color: 0x78350f }));
+treeTrunk.position.y = 0.6;
+islandOrchard.add(treeTrunk);
+const treeFoliage = new THREE.Mesh(new THREE.SphereGeometry(1.1, 14, 14), new THREE.MeshToonMaterial({ color: 0x22c55e }));
+treeFoliage.position.y = 1.6;
+islandOrchard.add(treeFoliage);
+islandOrchard.position.set(-9.5, 1.5, -2);
+scene.add(islandOrchard);
+
+// 2: Starlight Space Cloud Island (Right)
+const islandStar = new THREE.Group();
+const m2 = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 2.4, 1.4, 24), new THREE.MeshToonMaterial({ color: 0xc4b5fd }));
+m2.position.y = -0.7;
+islandStar.add(m2);
+const crystalMat = new THREE.MeshToonMaterial({ color: 0x67e8f9, emissive: 0x0891b2, emissiveIntensity: 0.5 });
+const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.85, 0), crystalMat);
+crystal.position.y = 1.0;
+islandStar.add(crystal);
+islandStar.position.set(9.5, 1.8, -1.5);
+scene.add(islandStar);
+
+// 3: Dino Jungle Puzzle Island (Back Center)
+const islandDino = new THREE.Group();
+const m3 = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 2.5, 1.4, 24), new THREE.MeshToonMaterial({ color: 0x86efac }));
+m3.position.y = -0.7;
+islandDino.add(m3);
+islandDino.position.set(0, 3.2, -10);
+scene.add(islandDino);
+
+// Grand Rainbow Arch Bridge across the sky
+const rainbow = new THREE.Group();
+const rainbowColors = [0xf87171, 0xfbbf24, 0x34d399, 0x38bdf8, 0xa855f7];
+rainbowColors.forEach((color, i) => {
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(14.5 + i * 0.48, 0.22, 14, 50, Math.PI),
+    new THREE.MeshBasicMaterial({ color: color })
+  );
+  rainbow.add(ring);
+});
+rainbow.position.set(0, -0.6, -7.5);
+rainbow.rotation.y = 0.08;
+scene.add(rainbow);
+
+// Fluffy Drifting Clouds
+function makeCloud(x, y, z, s) {
+  const cGroup = new THREE.Group();
+  const cMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+  const p1 = new THREE.Mesh(new THREE.SphereGeometry(1.4, 16, 16), cMat);
+  const p2 = new THREE.Mesh(new THREE.SphereGeometry(1.0, 14, 14), cMat);
+  p2.position.set(1.3, -0.2, 0.1);
+  const p3 = new THREE.Mesh(new THREE.SphereGeometry(0.95, 14, 14), cMat);
+  p3.position.set(-1.2, -0.2, 0.1);
+  const p4 = new THREE.Mesh(new THREE.SphereGeometry(1.05, 14, 14), cMat);
+  p4.position.set(0.35, 0.7, 0.15);
+  cGroup.add(p1, p2, p3, p4);
+  cGroup.position.set(x, y, z);
+  cGroup.scale.set(s, s, s);
+  scene.add(cGroup);
+  return cGroup;
+}
+const clouds = [
+  makeCloud(-14, 8.5, -6, 1.4),
+  makeCloud(14, 9.2, -7, 1.5),
+  makeCloud(-2, 10.5, -12, 2.0),
+  makeCloud(9, 5.2, -4, 1.1),
+  makeCloud(-9, 4.0, -3, 0.9)
+];
+
+// Floating Interactive Golden Stars
+const starMat = new THREE.MeshToonMaterial({ color: 0xfacc15, emissive: 0xfde047, emissiveIntensity: 0.7 });
+const stars = [];
+for (let i = 0; i < 20; i++) {
+  const st = new THREE.Mesh(new THREE.OctahedronGeometry(0.38, 0), starMat);
+  const angle = (i / 20) * Math.PI * 2;
+  const rad = 5.5 + (i % 4) * 2.4;
+  st.position.set(Math.cos(angle) * rad, 1.8 + (i % 5) * 1.6, Math.sin(angle) * rad * 0.75);
+  scene.add(st);
+  stars.push({ mesh: st, initY: st.position.y, speed: 1.1 + (i % 5) * 0.35, angle: angle });
+}
+
+// ----------------------------------------------------
+// CHARACTERS:
+// 1. TEDDY BEAR 🧸 (Center - Welcoming friendly conductor of Wonder Worlds)
+// ----------------------------------------------------
+const teddy = new THREE.Group();
+const bearMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+const bearMuzzleMat = new THREE.MeshToonMaterial({ color: 0xfef3c7 });
+const darkMat = new THREE.MeshToonMaterial({ color: 0x1e293b });
+const redBowMat = new THREE.MeshToonMaterial({ color: 0xef4444 });
+
+const tBody = new THREE.Mesh(new THREE.SphereGeometry(1.4, 18, 18), bearMat);
+tBody.position.y = 1.35;
+teddy.add(tBody);
+
+const tHead = new THREE.Mesh(new THREE.SphereGeometry(1.15, 18, 18), bearMat);
+tHead.position.set(0, 2.7, 0.2);
+teddy.add(tHead);
+
+const tSnout = new THREE.Mesh(new THREE.SphereGeometry(0.45, 14, 14), bearMuzzleMat);
+tSnout.position.set(0, 2.5, 1.2);
+teddy.add(tSnout);
+
+const tNose = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), darkMat);
+tNose.position.set(0, 2.65, 1.6);
+teddy.add(tNose);
+
+const tEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), darkMat);
+tEyeL.position.set(-0.36, 2.85, 1.2);
+const tEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 10), darkMat);
+tEyeR.position.set(0.36, 2.85, 1.2);
+teddy.add(tEyeL, tEyeR);
+
+const tEarGeo = new THREE.SphereGeometry(0.42, 12, 12);
+const tEarL = new THREE.Mesh(tEarGeo, bearMat);
+tEarL.position.set(-0.95, 3.65, 0.2);
+const tEarR = new THREE.Mesh(tEarGeo, bearMat);
+tEarR.position.set(0.95, 3.65, 0.2);
+teddy.add(tEarL, tEarR);
+
+const bowMesh = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.12, 8, 16), redBowMat);
+bowMesh.position.set(0, 1.95, 1.35);
+teddy.add(bowMesh);
+
+const armGeo = new THREE.CylinderGeometry(0.25, 0.35, 1.3, 12);
+const tArmR = new THREE.Mesh(armGeo, bearMat);
+tArmR.position.set(1.5, 1.9, 0.35);
+tArmR.rotation.z = -1.4;
+teddy.add(tArmR);
+
+const tArmL = new THREE.Mesh(armGeo, bearMat);
+tArmL.position.set(-1.5, 1.9, 0.35);
+tArmL.rotation.z = 1.4;
+teddy.add(tArmL);
+
+teddy.position.set(0, 0.0, 0.4);
+mainIsland.add(teddy);
+
+// 2. PIP THE PUPPY 🐶 (Left playful companion)
+const puppy = new THREE.Group();
+const pupMat = new THREE.MeshToonMaterial({ color: 0xfbbf24 });
+const earMat = new THREE.MeshToonMaterial({ color: 0xd97706 });
+const whiteMat = new THREE.MeshToonMaterial({ color: 0xffffff });
+
+const pBody = new THREE.Mesh(new THREE.SphereGeometry(0.95, 16, 16), pupMat);
+pBody.position.y = 0.95;
+puppy.add(pBody);
+
+const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16), pupMat);
+pHead.position.set(0, 1.8, 0.4);
+puppy.add(pHead);
+
+const pSnout = new THREE.Mesh(new THREE.SphereGeometry(0.4, 12, 12), whiteMat);
+pSnout.position.set(0, 1.65, 1.05);
+puppy.add(pSnout);
+
+const pNose = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), darkMat);
+pNose.position.set(0, 1.8, 1.4);
+puppy.add(pNose);
+
+const pEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), darkMat);
+pEyeL.position.set(-0.3, 1.95, 1.15);
+const pEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), darkMat);
+pEyeR.position.set(0.3, 1.95, 1.15);
+puppy.add(pEyeL, pEyeR);
+
+const pEarGeo = new THREE.CylinderGeometry(0.16, 0.34, 1.1, 10);
+const pEarL = new THREE.Mesh(pEarGeo, earMat);
+pEarL.position.set(-0.75, 2.0, 0.35);
+pEarL.rotation.z = 0.65;
+const pEarR = new THREE.Mesh(pEarGeo, earMat);
+pEarR.position.set(0.75, 2.0, 0.35);
+pEarR.rotation.z = -0.65;
+puppy.add(pEarL, pEarR);
+
+const pTail = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.16, 0.8, 8), earMat);
+pTail.position.set(0, 1.15, -0.95);
+pTail.rotation.x = -0.95;
+puppy.add(pTail);
+
+const bandana = new THREE.Mesh(new THREE.TorusGeometry(0.68, 0.15, 8, 20), new THREE.MeshToonMaterial({ color: 0x06b6d4 }));
+bandana.position.set(0, 1.45, 0.3);
+bandana.rotation.x = Math.PI / 2.3;
+puppy.add(bandana);
+
+puppy.position.set(-4.2, 0.1, 2.6);
+mainIsland.add(puppy);
+
+// 3. BELLA BUNNY 🐰 (Right jumping companion)
+const bunny = new THREE.Group();
+const pinkMat = new THREE.MeshToonMaterial({ color: 0xf472b6 });
+const bBody = new THREE.Mesh(new THREE.SphereGeometry(0.85, 16, 16), whiteMat);
+bBody.position.y = 0.9;
+bunny.add(bBody);
+
+const bHead = new THREE.Mesh(new THREE.SphereGeometry(0.76, 16, 16), whiteMat);
+bHead.position.set(0, 1.8, 0.12);
+bunny.add(bHead);
+
+const bEarGeo = new THREE.CylinderGeometry(0.14, 0.22, 1.4, 10);
+const bEarL = new THREE.Mesh(bEarGeo, whiteMat);
+bEarL.position.set(-0.32, 2.9, 0.12);
+bEarL.rotation.z = -0.15;
+const bEarR = new THREE.Mesh(bEarGeo, whiteMat);
+bEarR.position.set(0.32, 2.9, 0.12);
+bEarR.rotation.z = 0.15;
+bunny.add(bEarL, bEarR);
+
+const bEyeL = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), darkMat);
+bEyeL.position.set(-0.24, 1.9, 0.76);
+const bEyeR = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), darkMat);
+bEyeR.position.set(0.24, 1.9, 0.76);
+const bNose = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), pinkMat);
+bNose.position.set(0, 1.75, 0.84);
+bunny.add(bEyeL, bEyeR, bNose);
+
+bunny.position.set(4.2, 0.1, 2.8);
+mainIsland.add(bunny);
+
+// 4. BIRDS FLAPPING IN ORBIT 🐦
+const birds = [];
+const birdMat = new THREE.MeshToonMaterial({ color: 0x38bdf8 });
+for (let i = 0; i < 4; i++) {
+  const bird = new THREE.Group();
+  const bBodyM = new THREE.Mesh(new THREE.SphereGeometry(0.38, 10, 10), birdMat);
+  bBodyM.scale.set(1, 0.75, 1.3);
+  bird.add(bBodyM);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.26, 8, 8), birdMat);
+  head.position.set(0, 0.22, 0.45);
+  bird.add(head);
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.28, 6), new THREE.MeshToonMaterial({ color: 0xf59e0b }));
+  beak.position.set(0, 0.2, 0.75);
+  beak.rotation.x = Math.PI / 2;
+  bird.add(beak);
+  const wingGeo = new THREE.BoxGeometry(0.8, 0.05, 0.45);
+  const wL = new THREE.Mesh(wingGeo, birdMat);
+  wL.position.set(-0.48, 0.08, 0);
+  const wR = new THREE.Mesh(wingGeo, birdMat);
+  wR.position.set(0.48, 0.08, 0);
+  bird.add(wL, wR);
+  bird.userData = { wL, wR, angle: (i / 4) * Math.PI * 2, rad: 8.5 + i * 2.2, spd: 0.9 + i * 0.15, yBase: 5.5 + i * 1.2 };
+  scene.add(bird);
+  birds.push(bird);
+}
+
+// Interactive Camera Motion & Raycast hover
+let mouseX = 0, mouseY = 0;
+let tgtX = 0, tgtY = 0;
+let jumpBoost = 0;
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+window.addEventListener('pointerdown', () => {
+  jumpBoost = 1.0;
+});
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  tgtX += (mouseX * 2.8 - tgtX) * 0.05;
+  tgtY += (mouseY * 1.5 - tgtY) * 0.05;
+
+  camera.position.x = tgtX * 1.4;
+  camera.position.y = 5.0 + tgtY * 0.9;
+  camera.lookAt(0, 1.8, 0);
+
+  jumpBoost *= 0.92;
+
+  // Archipelago subtle floating bob
+  mainIsland.position.y = Math.sin(t * 1.2) * 0.15;
+  islandOrchard.position.y = 1.5 + Math.sin(t * 1.5 + 1) * 0.25;
+  islandStar.position.y = 1.8 + Math.sin(t * 1.4 + 2) * 0.25;
+  islandDino.position.y = 3.2 + Math.sin(t * 1.1 + 3) * 0.2;
+
+  crystal.rotation.y += 0.03;
+  crystal.rotation.x += 0.015;
+
+  // Teddy Bear welcoming bounce and wave
+  teddy.position.y = 0.0 + Math.sin(t * 3.0) * 0.12 + jumpBoost * 0.6;
+  tHead.rotation.y = Math.sin(t * 1.8) * 0.25;
+  tArmR.rotation.z = -1.4 + Math.sin(t * 6.5) * 0.45;
+  tArmR.rotation.x = Math.cos(t * 6.5) * 0.25;
+  tArmL.rotation.z = 1.4 - Math.sin(t * 6.5 + 0.5) * 0.45;
+  tArmL.rotation.x = Math.cos(t * 6.5 + 0.5) * 0.25;
+
+  // Pip the Puppy hopping
+  const pupHop = Math.abs(Math.sin(t * 4.5));
+  puppy.position.y = 0.1 + pupHop * 0.85 + jumpBoost * 0.8;
+  pTail.rotation.z = Math.sin(t * 18) * 0.8;
+  pEarL.rotation.z = 0.65 + Math.sin(t * 9) * 0.22;
+  pEarR.rotation.z = -0.65 - Math.sin(t * 9) * 0.22;
+  puppy.rotation.y = Math.sin(t * 2.2) * 0.35;
+
+  // Bella Bunny cheerful hopping
+  const bunHop = Math.abs(Math.sin(t * 5.2));
+  bunny.position.y = 0.1 + bunHop * 1.0 + jumpBoost * 0.9;
+  bEarL.rotation.x = Math.sin(t * 5.5) * 0.3;
+  bEarR.rotation.x = Math.sin(t * 5.5 + 0.3) * 0.3;
+  bunny.rotation.y = -Math.sin(t * 2.2) * 0.35;
+
+  // Flying Birds
+  birds.forEach((b) => {
+    b.userData.angle += b.userData.spd * 0.02;
+    const r = b.userData.rad;
+    b.position.x = Math.cos(b.userData.angle) * r;
+    b.position.z = Math.sin(b.userData.angle) * (r * 0.7) - 2.0;
+    b.position.y = b.userData.yBase + Math.sin(t * 2.5 + b.userData.angle) * 0.7;
+    b.rotation.y = -b.userData.angle - Math.PI / 2;
+    
+    const flap = Math.sin(t * 22) * 0.7;
+    b.userData.wL.rotation.z = flap;
+    b.userData.wR.rotation.z = -flap;
+  });
+
+  // Floating Stars
+  stars.forEach((s, idx) => {
+    s.mesh.position.y = s.initY + Math.sin(t * s.speed + idx) * 0.45;
+    s.mesh.rotation.y += 0.025;
+    s.mesh.rotation.x += 0.02;
+  });
+
+  // Clouds drifting
+  clouds.forEach((c, idx) => {
+    c.position.x += Math.sin(t * 0.35 + idx) * 0.008;
+  });
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  const w = container.clientWidth || window.innerWidth;
+  const h = container.clientHeight || window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_48 -->
+<!-- Ambient Light Softeners -->
+<div class="fixed inset-0 pointer-events-none z-0 bg-gradient-to-b from-surface/75 via-transparent to-surface/90"></div>
+<!-- Main Floating Wonder Overlay -->
+<div class="relative z-10 flex flex-col items-center w-full px-gutter-mobile md:px-margin space-y-space-lg pb-space-xl">
+<!-- Top Wonder Nav Glass Pill (Ergonomic Child/Grown-up Header HUD) -->
+<header class="w-full max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-space-xs bg-surface-container-lowest/90 backdrop-blur-xl p-space-xs md:p-space-sm rounded-full shadow-[0_8px_24px_rgba(180,160,130,0.18)] border-2 border-surface-container-low">
+<!-- Left: Logo & Wonder World Badge -->
+<div class="flex items-center gap-space-xs">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-[0_3px_0_#adc6ff]">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">cloud</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-headline-md-mobile md:font-headline-md text-primary font-extrabold tracking-tight">Learnzzy</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[11px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">3D Island</span>
+</div>
+<span class="font-label-sm text-on-surface-variant">Living Wonder Worlds</span>
+</div>
+</div>
+<!-- Center Status Pouch -->
+<div class="flex items-center gap-space-xs">
+<div class="flex items-center gap-2 bg-secondary-fixed/50 px-4 py-2 rounded-full shadow-[0_2px_0_#ffb95f]">
+<span class="material-symbols-outlined text-secondary text-[24px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="font-headline-md-mobile text-on-secondary-container font-extrabold">12 Sparks</span>
+</div>
+<div class="hidden sm:flex items-center gap-1.5 bg-tertiary-fixed/60 text-on-tertiary-fixed px-3 py-2 rounded-full shadow-[0_2px_0_#4edea3]">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span class="font-label-md">Level 1 Explorer</span>
+</div>
+<button aria-label="Audio Narrative" class="w-11 h-11 rounded-full bg-surface-container-high text-primary flex items-center justify-center active:scale-90 transition-transform shadow-[0_3px_0_#d5e3fc]" id="bgSoundBtn">
+<span class="material-symbols-outlined text-[24px]">volume_up</span>
+</button>
+</div>
+<!-- Right: Parent / Safe Zone -->
+<div class="flex items-center gap-space-xs">
+<button class="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container text-on-surface font-label-md font-bold hover:bg-surface-container-high active:scale-95 transition-all shadow-[0_3px_0_#d5e3fc]" id="grownupsGateBtn">
+<span class="material-symbols-outlined text-[18px] text-tertiary">shield_lock</span>
+<span>Grown-ups</span>
+</button>
+<button class="w-11 h-11 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_3px_0_#004395] active:scale-95 transition-transform" title="Switch View">
+<span class="material-symbols-outlined text-[22px]">map</span>
+</button>
+</div>
+</header>
+<!-- Companion Conductor Banner (Teddy's Live Prompt) -->
+<section class="w-full max-w-4xl mx-auto">
+<div class="relative overflow-hidden bg-surface-container-lowest/95 backdrop-blur-xl rounded-lg p-space-md md:p-space-lg shadow-[0_6px_0_#E2DAC8,0_16px_32px_rgba(180,160,130,0.16)] border-2 border-surface-container-high flex flex-col md:flex-row items-center justify-between gap-space-md">
+<!-- Floating Speech Left -->
+<div class="flex items-center gap-space-md">
+<div class="relative shrink-0">
+<div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-secondary-fixed flex items-center justify-center shadow-[0_4px_0_#ffb95f] text-[36px]">
+              🧸
+            </div>
+<div class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center text-[14px] shadow-sm animate-pulse">
+<span class="material-symbols-outlined text-[16px]">record_voice_over</span>
+</div>
+</div>
+<div class="flex flex-col space-y-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-primary uppercase tracking-wide">Buddy Pip &amp; Teddy</span>
+<span class="w-2 h-2 rounded-full bg-tertiary animate-ping"></span>
+</div>
+<p class="font-headline-md-mobile md:font-headline-md text-on-surface font-extrabold leading-snug">
+              “Tap any floating world or friend to jump into an adventure! ✨”
+            </p>
+<p class="font-body-md text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px] text-primary">pan_tool</span>
+<span>Touch, drag &amp; pinch anywhere to explore the magical 3D floating island!</span>
+</p>
+</div>
+</div>
+<!-- Audio Replay Chunky Button -->
+<button class="shrink-0 flex items-center gap-2 px-6 py-3.5 bg-primary text-on-primary font-answer-btn rounded-full shadow-[0_5px_0_#004395,0_10px_20px_rgba(0,88,190,0.25)] active:translate-y-1 active:shadow-[0_1px_0_#004395] transition-all">
+<span class="material-symbols-outlined text-[22px]">replay</span>
+<span>Hear Again</span>
+</button>
+</div>
+</section>
+<!-- World Biome Floating Selector Cards Grid -->
+<section class="w-full max-w-6xl mx-auto flex flex-col space-y-space-md">
+<div class="flex items-center justify-between px-space-xs">
+<div class="flex items-center gap-2">
+<span class="text-[26px]">✨</span>
+<h2 class="font-headline-md md:font-headline-lg text-on-surface font-extrabold tracking-tight">Living Wonder Worlds</h2>
+<span class="bg-primary-fixed text-primary font-extrabold px-3 py-1 rounded-full text-label-md">6 Interactive Lands</span>
+</div>
+<div class="hidden sm:flex items-center gap-2 font-label-md text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[20px]">explore</span>
+<span>Zero pressure • Self-paced play</span>
+</div>
+</div>
+<!-- The 6 Tactile Island Cards Mosaic -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<!-- World 1: Number Orchard -->
+<article class="group relative bg-surface-container-lowest/95 backdrop-blur-md rounded-lg p-space-md flex flex-col justify-between shadow-[0_6px_0_#d5e3fc,0_12px_24px_rgba(180,160,130,0.12)] border-2 border-surface-container-high transition-transform hover:-translate-y-1">
+<div class="flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="bg-error-container text-on-error-container font-label-sm px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span>🍎</span> Math Island
+              </span>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm px-2.5 py-1 rounded-full font-extrabold">
+                ⭐ +2 Sparks
+              </span>
+</div>
+<div class="relative w-full h-36 rounded-DEFAULT bg-gradient-to-br from-error-container/40 via-surface-container to-surface-container-lowest flex items-center justify-center overflow-hidden">
+<div class="text-[68px] transform group-hover:scale-110 transition-transform select-none filter drop-shadow-md">
+                🍎
+              </div>
+<div class="absolute bottom-2 left-2 bg-surface/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-label-sm font-bold text-on-surface-variant flex items-center gap-1">
+<span>🧸 Teddy Host</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md-mobile text-on-surface font-extrabold">Number Orchard</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 mt-1">Pick juicy counting apples, feed hungry critters, and master early numbers 1 to 20!</p>
+</div>
+</div>
+<div class="mt-space-md flex items-center justify-between pt-space-xs">
+<span class="font-label-md text-on-surface-variant">Ages 3–6 • Counting</span>
+<button aria-label="Enter Number Orchard" class="w-14 h-14 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_4px_0_#004395] active:translate-y-1 active:shadow-none transition-all">
+<span class="material-symbols-outlined text-[28px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- World 2: Breeze Valley -->
+<article class="group relative bg-surface-container-lowest/95 backdrop-blur-md rounded-lg p-space-md flex flex-col justify-between shadow-[0_6px_0_#d5e3fc,0_12px_24px_rgba(180,160,130,0.12)] border-2 border-surface-container-high transition-transform hover:-translate-y-1">
+<div class="flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="bg-primary-fixed text-primary font-label-sm px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span>🐦</span> Subtraction Joy
+              </span>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm px-2.5 py-1 rounded-full font-extrabold">
+                ⭐ -1 Fly Away!
+              </span>
+</div>
+<div class="relative w-full h-36 rounded-DEFAULT bg-gradient-to-br from-primary-fixed/40 via-surface-container to-surface-container-lowest flex items-center justify-center overflow-hidden">
+<div class="text-[64px] transform group-hover:-translate-y-2 group-hover:rotate-6 transition-transform select-none filter drop-shadow-md">
+                🕊️
+              </div>
+<div class="absolute bottom-2 left-2 bg-surface/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-label-sm font-bold text-on-surface-variant flex items-center gap-1">
+<span>🐰 Bella Bunny Host</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md-mobile text-on-surface font-extrabold">Breeze Valley</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 mt-1">Watch feathered bluebirds leap into soft clouds and grasp physical subtraction with pure smile power.</p>
+</div>
+</div>
+<div class="mt-space-md flex items-center justify-between pt-space-xs">
+<span class="font-label-md text-on-surface-variant">Ages 4–7 • Calming Math</span>
+<button aria-label="Enter Breeze Valley" class="w-14 h-14 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_4px_0_#004395] active:translate-y-1 active:shadow-none transition-all">
+<span class="material-symbols-outlined text-[28px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- World 3: Pip the Puppy's Playroom (Photo Card with DATA:IMAGE:IMAGE_21) -->
+<article class="group relative bg-surface-container-lowest/95 backdrop-blur-md rounded-lg p-space-md flex flex-col justify-between shadow-[0_6px_0_#ffddb8,0_12px_24px_rgba(180,160,130,0.14)] border-2 border-secondary-fixed transition-transform hover:-translate-y-1">
+<div class="flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span>🐶</span> Tidy Playroom
+              </span>
+<span class="bg-secondary-container text-on-secondary-container font-label-sm px-2.5 py-1 rounded-full font-extrabold">
+                ⭐ +1 Star
+              </span>
+</div>
+<div class="relative w-full h-36 rounded-DEFAULT overflow-hidden shadow-inner">
+<img alt="Pip the playful puppy tidying toys in cozy sunny nursery playroom" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1Wrbfy3ipr-Fw3wgC2WYpmKjhJVEFL8tH3gnY7nEC49njVk1LmbjpvA7ob_tl1HJ--ZjrVWDeha2jKF-VgUnkzuxm9cYmLYhxHAFLkQNAziTujcsHmVxE6SXQ8KfFgjsr1ParVVPvyhhjpFw5s27E-fKSyrweK4vHiIiw0_1KuoZAxuL8JxE7nnD7S9IpS4P-LW32Eq_hN1rQkOiyERmHdnFQFkATn3ce1C_4MBTQexVS2FTXFSJToeUvY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 bg-surface/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-label-sm font-bold text-on-surface flex items-center gap-1">
+<span>🐾 Pip the Puppy Host</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md-mobile text-on-surface font-extrabold">Playroom Adventure</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 mt-1">Sort wooden blocks, crayons, and cars into tactile woven baskets with cheerful pup Pip!</p>
+</div>
+</div>
+<div class="mt-space-md flex items-center justify-between pt-space-xs">
+<span class="font-label-md text-on-surface-variant">Ages 3–6 • Sorting Habits</span>
+<button aria-label="Enter Playroom" class="w-14 h-14 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-[0_4px_0_#684000] active:translate-y-1 active:shadow-none transition-all">
+<span class="material-symbols-outlined text-[28px]">play_arrow</span>
+</button>
+</div>
+</article>
+<!-- World 4: Dino Discovery (Wooden Jigsaw Puzzle with DATA:IMAGE:IMAGE_23) -->
+<article class="group relative bg-surface-container-lowest/95 backdrop-blur-md rounded-lg p-space-md flex flex-col justify-between shadow-[0_6px_0_#6ffbbe,0_12px_24px_rgba(180,160,130,0.12)] border-2 border-tertiary-fixed transition-transform hover:-translate-y-1">
+<div class="flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span>🦖</span> Logic &amp; Shapes
+              </span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm px-2.5 py-1 rounded-full font-extrabold">
+                ⭐ Snap &amp; Match
+              </span>
+</div>
+<div class="relative w-full h-36 rounded-DEFAULT overflow-hidden shadow-inner">
+<img alt="Handcrafted wooden dinosaur jigsaw puzzle resting among green forest leaves" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1UcwoEEN4w33fAKVv7c3rT3-rmQl8corNykLpoaKjsyL-DLLs8Tl8UUBzZLIFmTrAd1_2jDlbvpL1spOii_ETxv5jXriugFZH4PlIaPVMSVGjh9yUihYmKusE9_NCULpBobzthkN6BoHcRfXzKHz0VIGtRuSrkKLn2o05b6X6wDQp2HRZ87En_N4HFr2CDibveG8fgRMRsJrmSfAiiwU3OZTgJ3qKvfPOnNeclL1v6N-6RuvuAo40j6hOU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 bg-surface/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-label-sm font-bold text-on-surface flex items-center gap-1">
+<span>🦉 Prof. Hoot Host</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md-mobile text-on-surface font-extrabold">Dino Discovery</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 mt-1">Snap chunky wooden pieces into place to hatch friendly baby brachiosaurs and stegos!</p>
+</div>
+</div>
+<div class="mt-space-md flex items-center justify-between pt-space-xs">
+<span class="font-label-md text-on-surface-variant">Ages 4–8 • Spatial Logic</span>
+<button aria-label="Enter Dino Discovery" class="w-14 h-14 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center shadow-[0_4px_0_#005236] active:translate-y-1 active:shadow-none transition-all">
+<span class="material-symbols-outlined text-[28px]">extension</span>
+</button>
+</div>
+</article>
+<!-- World 5: Starlight Sketch (Glow Tracing with DATA:IMAGE:IMAGE_22) -->
+<article class="group relative bg-surface-container-lowest/95 backdrop-blur-md rounded-lg p-space-md flex flex-col justify-between shadow-[0_6px_0_#d8e2ff,0_12px_24px_rgba(180,160,130,0.12)] border-2 border-primary-fixed transition-transform hover:-translate-y-1">
+<div class="flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="bg-primary-fixed text-primary font-label-sm px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span>✨</span> Motor Glow Tracing
+              </span>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm px-2.5 py-1 rounded-full font-extrabold">
+                ⭐ Rainbow Dust
+              </span>
+</div>
+<div class="relative w-full h-36 rounded-DEFAULT overflow-hidden shadow-inner">
+<img alt="Cute baby elephant tracing glowing cosmic rainbow spirals under starry nebula sky" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1VytguazwSMSJbQzfL3VisRsjRpdLXW4hxdzEs_ycnCWKTKG1Xz0g3sEx7DUFdUywDD66ioAy5g5iiXPJQbWeUh19EHm__8134MpFANQbbHMrp9y20ekKyCiv0eQ_h-UQl6fDiAXBXewZrgTf_P_a10nuOCtCj19T1CxmtYkA5PwQQzXpMe5ZAZFLTiqyQZeL7EIh_2cSDi_XfYDuH4hc8UpQizOipz-i6XLb15wla6sNiaN2yh1gJ9ESc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 bg-surface/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-label-sm font-bold text-on-surface flex items-center gap-1">
+<span>🐘 Ellie Host</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md-mobile text-on-surface font-extrabold">Starlight Sketch</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 mt-1">Trace glowing neon constellations with gentle finger sweeps to unlock calming phonics chords.</p>
+</div>
+</div>
+<div class="mt-space-md flex items-center justify-between pt-space-xs">
+<span class="font-label-md text-on-surface-variant">Ages 3–8 • Pre-Writing</span>
+<button aria-label="Enter Starlight Sketch" class="w-14 h-14 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_4px_0_#004395] active:translate-y-1 active:shadow-none transition-all">
+<span class="material-symbols-outlined text-[28px]">brush</span>
+</button>
+</div>
+</article>
+<!-- World 6: Animal Safari World -->
+<article class="group relative bg-surface-container-lowest/95 backdrop-blur-md rounded-lg p-space-md flex flex-col justify-between shadow-[0_6px_0_#d5e3fc,0_12px_24px_rgba(180,160,130,0.12)] border-2 border-surface-container-high transition-transform hover:-translate-y-1">
+<div class="flex flex-col space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="bg-tertiary-fixed/60 text-on-tertiary-fixed font-label-sm px-3 py-1 rounded-full flex items-center gap-1 font-bold">
+<span>🌈</span> Discovery Safari
+              </span>
+<span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm px-2.5 py-1 rounded-full font-extrabold">
+                ⭐ New Friends
+              </span>
+</div>
+<div class="relative w-full h-36 rounded-DEFAULT bg-gradient-to-br from-tertiary-fixed-dim/30 via-surface-container to-surface-container-lowest flex items-center justify-center overflow-hidden">
+<div class="text-[64px] transform group-hover:scale-110 transition-transform select-none filter drop-shadow-md">
+                🦜
+              </div>
+<div class="absolute bottom-2 left-2 bg-surface/90 backdrop-blur-sm px-2.5 py-1 rounded-full text-label-sm font-bold text-on-surface-variant flex items-center gap-1">
+<span>🦜 Parrot Host</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-md-mobile text-on-surface font-extrabold">Animal Safari World</h3>
+<p class="font-body-md text-on-surface-variant line-clamp-2 mt-1">Meet friendly jungle creatures, mimic acoustic animal calls, and learn rainbow habitat science!</p>
+</div>
+</div>
+<div class="mt-space-md flex items-center justify-between pt-space-xs">
+<span class="font-label-md text-on-surface-variant">Ages 3–7 • Natural Science</span>
+<button aria-label="Enter Animal Safari" class="w-14 h-14 rounded-full bg-tertiary text-on-tertiary flex items-center justify-center shadow-[0_4px_0_#005236] active:translate-y-1 active:shadow-none transition-all">
+<span class="material-symbols-outlined text-[28px]">cruelty_free</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Interactive 3D Companion Quick-Bar & Surprise Adventure Trigger -->
+<section class="w-full max-w-4xl mx-auto flex flex-col space-y-space-md pt-space-sm">
+<!-- Interactive Buddy Tap Row -->
+<div class="bg-surface-container-lowest/90 backdrop-blur-md rounded-xl p-space-md shadow-[0_6px_0_#E2DAC8,0_12px_24px_rgba(180,160,130,0.14)] border-2 border-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">waving_hand</span>
+</div>
+<div>
+<span class="font-headline-md-mobile text-on-surface font-extrabold">Tap a 3D Companion:</span>
+<p class="font-body-md text-on-surface-variant">Watch them jump &amp; talk right inside your screen!</p>
+</div>
+</div>
+<!-- 5 Tactile Avatars -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
+<button class="buddy-btn group flex flex-col items-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-90 transition-all shadow-[0_3px_0_#d5e3fc]" data-name="Teddy">
+<span class="text-[32px] group-hover:scale-110 transition-transform">🧸</span>
+<span class="font-label-sm text-on-surface-variant font-bold mt-1">Teddy</span>
+</button>
+<button class="buddy-btn group flex flex-col items-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-90 transition-all shadow-[0_3px_0_#d5e3fc]" data-name="Pip">
+<span class="text-[32px] group-hover:scale-110 transition-transform">🐶</span>
+<span class="font-label-sm text-on-surface-variant font-bold mt-1">Pip</span>
+</button>
+<button class="buddy-btn group flex flex-col items-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-90 transition-all shadow-[0_3px_0_#d5e3fc]" data-name="Bella">
+<span class="text-[32px] group-hover:scale-110 transition-transform">🐰</span>
+<span class="font-label-sm text-on-surface-variant font-bold mt-1">Bella</span>
+</button>
+<button class="buddy-btn group flex flex-col items-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-90 transition-all shadow-[0_3px_0_#d5e3fc]" data-name="Prof. Hoot">
+<span class="text-[32px] group-hover:scale-110 transition-transform">🦉</span>
+<span class="font-label-sm text-on-surface-variant font-bold mt-1">Hoot</span>
+</button>
+<button class="buddy-btn group flex flex-col items-center p-2 rounded-lg bg-surface-container-low hover:bg-surface-container active:scale-90 transition-all shadow-[0_3px_0_#d5e3fc]" data-name="Ellie">
+<span class="text-[32px] group-hover:scale-110 transition-transform">🐘</span>
+<span class="font-label-sm text-on-surface-variant font-bold mt-1">Ellie</span>
+</button>
+</div>
+</div>
+<!-- Giant Surprise Wheel Tactile CTA -->
+<div class="w-full flex justify-center">
+<button class="w-full sm:w-auto px-8 md:px-14 min-h-[68px] rounded-full bg-secondary-container text-on-secondary font-answer-btn text-answer-btn shadow-[0_6px_0_#684000,0_14px_28px_rgba(254,166,25,0.35)] hover:scale-105 active:translate-y-1 active:shadow-[0_1px_0_#684000] transition-all flex items-center justify-center gap-3" id="surpriseBtn">
+<span class="material-symbols-outlined text-[32px] animate-spin" style="animation-duration: 8s;">casino</span>
+<span>✨ Spin for a Surprise Wonder Adventure! 🎲</span>
+</button>
+</div>
+</section>
+<!-- Sensory Safe & Parent Shield Footer Status -->
+<footer class="w-full max-w-4xl mx-auto pt-space-md">
+<div class="bg-surface-container-low/95 backdrop-blur-md rounded-lg p-space-sm md:p-space-md flex flex-wrap items-center justify-between gap-space-sm border border-surface-container text-on-surface-variant font-label-md">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span>100% Offline Ready</span>
+<span class="text-outline-variant">•</span>
+<span>No Ads or Micro-transactions</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary">hourglass_bottom</span>
+<span>Wind-Down Timer: <strong>18 mins left</strong></span>
+</div>
+<button class="text-primary hover:underline font-bold flex items-center gap-1" id="parentModalTrigger">
+<span class="material-symbols-outlined text-[18px]">insights</span>
+<span>Learning Insights</span>
+</button>
+</div>
+</footer>
+</div>
+<!-- Interactive Parent Passcode Modal (Hidden by Default) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 backdrop-blur-sm p-4 hidden" id="parentGateModal">
+<div class="bg-surface-container-lowest max-w-md w-full rounded-lg p-space-lg shadow-[0_16px_32px_rgba(13,28,46,0.2)] border-2 border-surface-container flex flex-col space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-primary font-headline-md-mobile font-extrabold">
+<span class="material-symbols-outlined text-[26px]">lock</span>
+<span>Grown-Ups Gate</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high" id="closeModalBtn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-md text-on-surface-variant">
+        To ensure this area is for adults, please solve this quick math puzzle:
+      </p>
+<div class="p-space-md bg-surface-container-low rounded-DEFAULT text-center">
+<span class="font-headline-md text-on-surface font-extrabold tracking-widest">7 + 5 = ?</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<button class="gate-choice-btn py-3 rounded-DEFAULT bg-surface-container font-answer-btn text-on-surface hover:bg-primary hover:text-on-primary transition-colors">11</button>
+<button class="gate-choice-btn py-3 rounded-DEFAULT bg-surface-container font-answer-btn text-on-surface hover:bg-primary hover:text-on-primary transition-colors">12</button>
+<button class="gate-choice-btn py-3 rounded-DEFAULT bg-surface-container font-answer-btn text-on-surface hover:bg-primary hover:text-on-primary transition-colors">14</button>
+</div>
+</div>
+</div>
+<!-- Client Micro-Interactions Script -->
+<script>
+    (function initWonderUI() {
+      // Audio narration toggle state
+      const soundBtn = document.getElementById('bgSoundBtn');
+      let soundActive = true;
+      if (soundBtn) {
+        soundBtn.addEventListener('click', () => {
+          soundActive = !soundActive;
+          soundBtn.querySelector('.material-symbols-outlined').textContent = soundActive ? 'volume_up' : 'volume_off';
+          soundBtn.classList.toggle('opacity-50', !soundActive);
+        });
+      }
+
+      // Companion Quick-Tap trigger
+      const buddyBtns = document.querySelectorAll('.buddy-btn');
+      buddyBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const name = btn.getAttribute('data-name');
+          // Dispatch custom event to 3D Three.js canvas layer
+          window.dispatchEvent(new CustomEvent('wonder:companion:trigger', { detail: { companion: name } }));
+          
+          // Micro joyful visual pop
+          btn.classList.add('scale-125', 'bg-secondary-fixed');
+          setTimeout(() => {
+            btn.classList.remove('scale-125', 'bg-secondary-fixed');
+          }, 350);
+        });
+      });
+
+      // Surprise Adventure randomizer
+      const surpriseBtn = document.getElementById('surpriseBtn');
+      if (surpriseBtn) {
+        const adventures = ['Number Orchard', 'Breeze Valley', 'Playroom Adventure', 'Dino Discovery', 'Starlight Sketch', 'Animal Safari World'];
+        surpriseBtn.addEventListener('click', () => {
+          surpriseBtn.classList.add('rotate-2');
+          const chosen = adventures[Math.floor(Math.random() * adventures.length)];
+          setTimeout(() => {
+            surpriseBtn.classList.remove('rotate-2');
+            alert('🎉 Hurray! You unlocked a secret portal to: ' + chosen + '!');
+          }, 300);
+        });
+      }
+
+      // Grown-ups Modal logic
+      const modal = document.getElementById('parentGateModal');
+      const openBtn = document.getElementById('grownupsGateBtn');
+      const insightsTrigger = document.getElementById('parentModalTrigger');
+      const closeBtn = document.getElementById('closeModalBtn');
+      const gateChoices = document.querySelectorAll('.gate-choice-btn');
+
+      function openModal() { modal?.classList.remove('hidden'); }
+      function closeModal() { modal?.classList.add('hidden'); }
+
+      openBtn?.addEventListener('click', openModal);
+      insightsTrigger?.addEventListener('click', openModal);
+      closeBtn?.addEventListener('click', closeModal);
+
+      gateChoices.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.textContent.trim() === '12') {
+            closeModal();
+            alert('🛡️ Parent Dashboard & Screen Control Hub accessed.');
+          } else {
+            btn.classList.add('bg-error', 'text-on-error');
+            setTimeout(() => {
+              btn.classList.remove('bg-error', 'text-on-error');
+            }, 500);
+          }
+        });
+      });
+    })();
+  </script>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.04)]" data-active-classes="bg-primary text-on-primary shadow-[0_4px_0_#004395]"><div class="h-20 px-gutter-mobile flex items-center justify-around gap-space-xs"><a aria-current="page" class="flex items-center justify-center gap-2 px-space-md py-space-xs rounded-full min-h-[48px] font-answer-btn active:scale-95 transition-all bg-primary text-on-primary shadow-[0_4px_0_#004395]" data-path="play-garden" href="#"><span class="material-symbols-outlined text-[28px]">smart_toy</span><span>Play</span></a><a class="flex items-center justify-center gap-2 px-space-md py-space-xs rounded-full min-h-[48px] text-on-surface-variant font-answer-btn text-answer-btn active:scale-95 transition-all" data-path="star-trail" href="#"><span class="material-symbols-outlined text-[28px]">hotel_class</span><span>Stars</span></a><a class="flex items-center justify-center gap-2 px-space-md py-space-xs rounded-full min-h-[48px] text-on-surface-variant font-answer-btn text-answer-btn active:scale-95 transition-all" data-path="audio-tunes" href="#"><span class="material-symbols-outlined text-[28px]">music_note</span><span>Tunes</span></a></div></nav></body></html>

@@ -5,6 +5,7 @@ export interface QueuedEvent {
   event: string;
   gameId?: string;
   contentId?: string;
+  learnerId?: string;
   metadata?: Record<string, unknown>;
   clientTimestamp: string;
 }
@@ -12,20 +13,40 @@ export interface QueuedEvent {
 const SESSION_KEY = "learnzzy.sessionId";
 const QUEUE_KEY = "learnzzy.eventQueue";
 
-export function getSessionId(): string {
+function sessionKeyFor(learnerId?: string | null): string {
+  return learnerId ? `learnzzy.sessionId.${learnerId}` : SESSION_KEY;
+}
+
+function activeLearnerId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem("learnzzy.activeLearnerId") ?? localStorage.getItem("learnzzy.learnerId.v1");
+  } catch {
+    return null;
+  }
+}
+
+/** A session belongs to a learner (CHILD_SESSION.md). Each learner gets their
+ *  own session id so events never leak across children on one device. */
+export function getSessionId(learnerId?: string | null): string {
   if (typeof window === "undefined") return "sess_server";
-  let id = localStorage.getItem(SESSION_KEY);
+  const owner = learnerId ?? activeLearnerId();
+  const key = sessionKeyFor(owner);
+  let id = localStorage.getItem(key);
   if (!id) {
     id = `sess_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
-    localStorage.setItem(SESSION_KEY, id);
+    try {
+      localStorage.setItem(key, id);
+    } catch {}
   }
   return id;
 }
 
-export function queueEvent(e: Omit<QueuedEvent, "clientEventId" | "clientTimestamp">) {
+export function queueEvent(e: Omit<QueuedEvent, "clientEventId" | "clientTimestamp" | "learnerId"> & { learnerId?: string }) {
   if (typeof window === "undefined") return;
   const full: QueuedEvent = {
     ...e,
+    learnerId: e.learnerId ?? activeLearnerId() ?? undefined,
     clientEventId: `evt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
     clientTimestamp: new Date().toISOString(),
   };
@@ -47,11 +68,12 @@ export async function syncEvents(): Promise<void> {
   if (!raw) return;
   const arr: QueuedEvent[] = JSON.parse(raw);
   if (arr.length === 0) return;
-  const sessionId = getSessionId();
+  const learnerId = activeLearnerId();
+  const sessionId = getSessionId(learnerId);
   const res = await fetch("/api/game-events/batch", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ sessionId, events: arr }),
+    body: JSON.stringify({ sessionId, learnerId: learnerId ?? undefined, events: arr }),
   }).catch(() => null);
   if (res && res.ok) localStorage.setItem(QUEUE_KEY, JSON.stringify([]));
 }

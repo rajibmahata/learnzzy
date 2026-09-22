@@ -11,6 +11,11 @@ const ProgressSchema = z.object({
   stickerId: z.string().max(50).optional(),
   hintsUsed: z.number().int().min(0).max(100).optional(),
   durationMs: z.number().int().min(0).max(3600000).optional(),
+  responseTimeMs: z.number().int().min(0).max(3600000).optional(),
+  attempts: z.number().int().min(1).max(50).optional(),
+  theme: z.string().max(30).optional(),
+  character: z.string().max(30).optional(),
+  completionId: z.string().min(1).max(120).optional(),
 });
 
 export async function POST(req: Request, { params }: { params: { learnerId: string } }) {
@@ -24,10 +29,14 @@ export async function POST(req: Request, { params }: { params: { learnerId: stri
   if (!learner) return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: "Learner not found." } }, { status: 404 });
   // Server is authoritative: accuracy/stars/hints are validated here and the
   // structured result is recorded once (history stays append-only in events).
-  const { gameId, accuracy, stars = 0, stickerId, hintsUsed = 0 } = parsed.data;
-  await recordGameResult(params.learnerId, { gameId, accuracy, stars, stickerId, hintsUsed });
+  const { gameId, accuracy, stars = 0, stickerId, hintsUsed = 0, completionId, responseTimeMs, attempts, theme, character } = parsed.data;
+  const { learner: recorded, duplicate } = await recordGameResult(params.learnerId, { gameId, accuracy, stars, stickerId, hintsUsed, responseTimeMs, attempts, theme, character, completionId });
+  if (duplicate) {
+    const current = await getLearner(params.learnerId);
+    return NextResponse.json({ success: true, data: { learner: current, duplicate: true, recorded } });
+  }
   const promo = await maybePromote(params.learnerId, gameId, accuracy);
   const skill = await maybeAdjustSkill(params.learnerId, gameId);
   const updated = await getLearner(params.learnerId);
-  return NextResponse.json({ success: true, data: { learner: updated, promotion: promo, skill: { gameId, ...skill } } });
+  return NextResponse.json({ success: true, data: { learner: updated, duplicate: false, promotion: promo, skill: { gameId, ...skill } } });
 }

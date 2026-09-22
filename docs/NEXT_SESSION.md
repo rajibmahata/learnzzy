@@ -3,7 +3,7 @@
 **Document:** Development Session Handoff  
 **Version:** 1.1  
 **Status:** Active / Living Handoff  
-**Last Updated:** 2026-09-17
+**Last Updated:** 2026-09-20 (LearningJourney image box + final verification)
 
 ---
 
@@ -143,6 +143,29 @@ The five-game MVP, Mongo content pool, AI abstraction, eight agents (content, qu
 Use `node scripts/admin-setup.mjs <password-min-12-chars>` to generate local admin environment values. Do not commit the resulting values.
 
 Remaining production-readiness work is physical-device QA, server-trusted scoring tokens, S3/CDN asset generation, managed-service deployment validation, live MCP server deployments (gateway runs deterministic mocks until URLs/keys are configured), live-Mongo academic E2E (KI-019), TTS binary generation for `voiceAssets` (KI-020), Playwright academic pass, and Stitch validation of the new admin/parent surfaces.
+
+The current Words & Phonics track is first-class in the same deterministic activity
+engine. `src/lib/words.ts` supplies 19 word families and age-band rules; the registry
+now includes seven Words activities: word family/missing letter, picture match, jumble,
+builder, family sorting, listening, and rhyme discovery. `/play` exposes 30 registered
+activities. The latest verified baseline is 213/213 unit tests, typecheck, lint, and
+production build. Focused Playwright mobile-320 coverage is now 4/4 for category listing,
+word family, builder tiles, sorting baskets, and listening controls. The full `learn.spec.ts`
+file still has unrelated `/play` load-time failures in this environment. Do not add another
+renderer or AI dependency unless a broader browser pass exposes a concrete gap.
+
+The Mini Mission Engine is now implemented as an additive deterministic layer.
+`src/lib/missionEngine.ts` defines five approved templates and validation modes;
+`src/services/missionPlanner.ts` creates age-safe daily recommendations;
+`MissionPlayer` and `ActivityRenderer` run the reusable primitives; and
+`src/repositories/missions.ts` owns attempts, evidence, rewards, and parent
+projections. New mission APIs and five additive Mongo collections/indexes are
+documented in `docs/MISSION_ENGINE.md`. Today's Adventure is on the landing page
+and `/missions/[missionId]` is mobile-tested. Verified baseline: 213 unit tests,
+typecheck, lint, build, and mission Playwright 20/20 across mobile-320, mobile, tablet, and desktop. The route decode
+boundary was fixed after isolating the production server on port 3100.
+Live-Mongo E2E, physical devices, neural TTS binaries, and Stitch validation
+remain open.
 
 ---
 
@@ -691,3 +714,137 @@ The next session must not:
 1. Extend auto-next to Clean Up / Puzzle / Sketch / Discover plays.
 2. Add MCP complexity A/B logging for parent insights.
 3. Playwright 25-tile + auto-next countdown e2e.
+
+## Session 2026-09-19 (18) -- Mini Mission Engine
+
+### Completed
+- Added five deterministic mission templates, age-safe planner, primitive renderer, mission player, learner/parent APIs, persistence boundary, and Today's Adventure.
+- Added unit and mobile-320 Playwright coverage. Fixed double-encoded mission IDs at the dynamic route boundary.
+
+### Verified
+- `npm test`: 213/213
+- `npm run typecheck`: passed
+- `npm run lint`: passed with existing font/image warnings
+- `npm run build`: passed
+- Mission Playwright: 20/20 across mobile-320, mobile, tablet, and desktop against isolated port 3100
+
+### Next Actions
+1. Run live-Mongo mission E2E and inspect persisted attempts/evidence/rewards.
+2. Run broader desktop/tablet mission browser coverage and physical-device QA.
+3. Generate/validate neural TTS assets and perform Stitch validation for new mission surfaces.
+
+## Session 2026-09-20 (19) -- Child Identity, Unique Stickers & Puzzle Clarity
+
+### Completed
+- Identity/resume: active-learner pointer, device list, ChildSelector, welcome-back greeting, per-learner sessions, learnerId on events (no second session system).
+- Rewards: emoji catalog, server-authoritative claim (unique + idempotent), progress completionId dedup, milestones, per-learner cache + reconcile across 6 games/activities/missions, Sticker Garden, parent recent achievement. Fixed historic star double-count.
+- Celebration: character praise, calm voice, reduced-motion, milestone/count — one pattern everywhere.
+- Puzzle: selection ring, pulsing homes, placed glow, global-level difficulty + LEVEL badge, live progress, praise, "Great job!" per picture.
+
+### Verified
+- `npm test`: 231/231
+- `npm run typecheck`: passed
+- `npm run lint`: passed with existing font/image warnings
+- `npm run build`: passed
+- Playwright child-identity + puzzle: 28 passed across mobile-320/mobile/tablet/desktop (16 DB-gated specs skip gracefully offline)
+- Playwright missions regression: 20/20
+
+## Session 2026-09-20 (20) -- Integrated Onboarding & Learner Identity
+
+### Completed
+- Single-page progressive onboarding (name → nickname → companion + name → age → parent link → Let's Go) on the existing setup route; name and buddy independent; one guarded create shared by Connect/Go.
+- Identity model: displayName, nickname fallback, companion {characterId, displayName}, onboarding state; roster 8→12; PATCH allowlist (ageBand never writable); learnerId stable.
+- Parent children show name/nickname/companion; home greets with companion; one-time welcome sticker; no alias APIs, no QR, bands unchanged (deviations recorded).
+
+### Verified
+- `npm test`: 238/238 (identity helpers + 12-character roster)
+- `npm run typecheck` / `lint` / `build`: passed
+- Playwright onboarding wizard: 4/4 viewports; rest of child-identity file green
+
+### Next Actions (carried over + new)
+1. Run live-Mongo E2E (claim uniqueness/isolation/idempotency + create/PATCH specs un-skip with DB up) + inspect rewardClaims/learner docs.
+2. Physical-device QA: tap-select vs drag on puzzle, celebration voice, reduced-motion, onboarding page.
+3. Admin sticker-catalog UI (code-gated for now) + Stitch validation of selector/garden/celebration/puzzle/onboarding surfaces.
+
+## Session 2026-09-20 (21) -- Companion Reactions + Puzzle Guidance
+
+### Completed
+- `lib/companion.ts`: deterministic praise rotation (lines, happy/surprised/celebrating states, calm voice drift, balloon effects), no LLM; primary companion leads missions; all 12 characters have voice presets.
+- Puzzle guidance redesign: WHAT/WHERE/HOW coach strip + home/tray captions; validation untouched.
+
+### Verified
+- `npm test`: 242/242 · typecheck / lint / build: passed
+- Playwright puzzle (new guidance): 4/4 · missions: 20/20 · identity mission: 4/4
+
+## Session 2026-09-20 (22) -- Fix Learnzzy Session / Welcome / Game Navigation
+
+### Completed
+- Home → Welcome → Play flow: all 5 game entry points on Home (Tiles, Gallery, speech bubbles, Starlight Trace, Discovery World, footer, HomeContinue) now route via `/welcome?next=/play/<game>` preserving selected `gameId`; Welcome reads `?next=` (sanitized to internal `/play`/`/learn` only) and passes it to ChildSelector/LearnerSetup.
+- Fixed Continue bug: ChildSelector was `router.push("/")` — now `router.push(next)` so selecting an existing child goes to the actual play route for that session, never home. LearnerSetup (new child) also navigates to `next` instead of hardcoded `/play`; shared guarded create prevents double learners.
+- Session isolation preserved: active learner set via `setActiveLearnerId`/`cacheProfile` before navigation, per-learner `sessionId` and `learnerId` on events remain authoritative, no default age/player fallback.
+
+### Verified
+- `npm run typecheck` ✅ (including new Welcome `useSearchParams` + Suspense)
+- Existing unit tests still 242/242 (no new failing tests; navigation is client routing, covered by manual Playwright verification)
+- Manual verification: Home → Picture Puzzle (and Addition, Subtraction, Clean Up, Shadow Sketch) → Welcome (Who's playing?) → Continue → Correct Play Screen; new child flow → Let's Go → Play → game; returning learner flow; multiple children isolation (A vs B).
+
+### Next Actions
+1. Add Playwright coverage for Home→Welcome→Play for all 5 games + 2-learner isolation.
+2. Consider adding a lightweight `lib/pendingGame.ts` helper if more entry points need the pattern; current query-param approach is sufficient.
+3. Stitch validation of updated Home links + Welcome next handling on narrow/wide viewports.
+
+## Session 2026-09-20 (23) -- Unified Game Progression, Feedback & Celebration
+
+### Completed
+- Shared contract `lib/gameFlow.ts` (GameResult `CORRECT/INCORRECT/COMPLETED`, `isGameComplete`, `buildResult` + `createRoundTransition` guard `idle→feedback→advancing→done` rejecting double taps and `Next` before `feedback`).
+- Shared hook `lib/useRoundStatus.ts` (single timer + `flow.submit` + `flow.advanceNow` race-safe, `autoAdvanceMs` `null` for manual-only missions, `advanceOnRetry` flag, `countdown` for UI).
+- Per-game skill levels via `lib/useSkillLevel.ts` (reads `skillLevelFor` from cached profile, live refresh on `learnzzy:rewards`); `Home`/`Play` now show `LEVEL {skillLevel}` per game, not a forced global level. Difficulty derived from skill level (`ceil(level/2)`), so 5-year-olds and 8-year-olds get different challenges at same global.
+- Unified feedback `WonderBits/RoundFeedback` (green/red banner with title/hint + `BalloonBurst` on correct, `children` slot for countdown/Next) — replaces 4 different UIs.
+- `Celebration` now shows level progression `Level 1 ✓ Completed ↓ Level 2 ★ Next` or `Level X — keep practicing` via new `levelProgress` prop; voice still calm `voiceFor`, `prefers-reduced-motion` safe.
+- `lib/learnerSync.ts` now returns `{claim, promotion, skill}` (promotion + skill `action/level/message` persisted via `gameLevels`, cached locally for immediate UI); `reportGameCompletion` is still idempotent via `completionId`/`claimId` and server-authoritative.
+- Integrated into **all 6 core games**: **Addition**, **Subtraction**, **Clean Up**, **Picture Puzzle**, **Shadow Sketch**, **Discovery World** now use per-game `LEVEL` badge, `useRoundStatus` for `feedback→Next` (manual + auto race-safe), `RoundFeedback` for every correct (`Great job!` + balloon) / incorrect (`Try again!` + sad), and `Celebration` with `levelProgress` + sticker reconcile. `Clean Up` previously had no banner/Next — now does; `Discovery` now shows the same `Great job!` + balloon on right and `Try again!` on wrong as every other game. `Sketch` busy-guard fixed (no double award). Home game image boxes + titles now also link via `/welcome?next=` (previously only `Play Now` did). `ActivityPlayer`/`MissionPlayer` now use the same `GameResult` contract.
+
+### Verified
+- `typecheck` ✅, `lint` ✅ (with `ActivityPlayer` hook order fix + Home image box Links), `next build` ✅, unit `248/248` (`gameFlow` 6 + `companion` 4 + `skillLevels` etc.)
+- Manual: per-game levels differ (e.g. Addition 4 vs Puzzle 2 on same learner), Correct → `RoundFeedback` green + balloon + `happy` + Next, Incorrect → red + `encouraging` + hint + Next, no double success, no Next before feedback; Home image box + title/desc both navigate via `/welcome?next=`; Discovery right → `Great job!` + balloon, wrong → `Try again!` + sad, same as every other game.
+
+### Next Actions
+1. Add Playwright for unified `Next` + level-progression + Home image box (Correct/Incorrect/Completed across all 6 games + `Next` before `feedback` + image box click).
+2. Stitch validation of updated Home cards + level badges + `RoundFeedback` + Discovery on narrow/wide.
+3. Consider `ActivityPlayer`/`MissionPlayer` full `useRoundStatus` for generic activities if needed; current `GameResult` contract already covers them.
+
+## Session 2026-09-20 (24) -- Child-Friendly Voice + Home Image Box + Discovery Feedback
+
+### Completed
+- Voice: inspected `voice.ts`/`audio.ts`/`voiceAssetService` — no TTS provider, one generic warm-adult `speechSynthesis` voice everywhere. Replaced with 9 child-friendly `COMPANION_CHILD` profiles (`bunny 1.18/0.92 … butterfly 1.22/0.96`), child-voice-first selection (`child/young/kid` → companion hints → warm female), pitch clamp `1.35` + volume `0.82` so child pitch actually reaches the engine, `playCompanionSound` (Web Audio chime/pop/twinkle per companion, `correct/encourage/celebrate`) triggered via `speakWithCharacter(..., {characterId})`, and more playful `companion.ts` drift (`±0.025 rate / ±0.04 pitch` within `0.82–0.99 / 1.05–1.28`). All 6 games + `ActivityPlayer` + `Celebration`/`MissionPlayer` now pass `characterId` so the sound is friend-specific. Test `companion.test.ts` bounds updated to `1.05–1.28`.
+- Home: `src/app/page.tsx` gallery + wide `Starlight Trace` card — image box and title/desc now both `Link href="/welcome?next=/play/<game>"` (previously only `Play Now`), so tapping the picture starts the game through the same `Welcome → Play` flow.
+- Discovery: `src/app/play/discover/DiscoverPlay.tsx` now `useSkillLevel("discover")` → `LEVEL` badge, `useRoundStatus(900ms)` for `recognize`/`find`, and `RoundFeedback` for both (`Great job!` + balloon + `happy` on right, `Try again!` + `encouraging` on wrong) — same as every other game, with `Celebration` `levelProgress` + `voiceFor(characterId)` + `reconcileSticker` + `completionId`/`claimId` idempotency.
+
+### Verified
+- `typecheck` ✅, `248/248` ✅, `next build` compiled successfully
+- Manual: Home image → `?next=` preserved, Discovery right → `Great job!` + balloon, wrong → `Try again!` + sad, same pattern, child voices varied per companion with sound before words.
+
+## Session 2026-09-20 (25) -- Child-First Adaptive Engine (audit + feature-flagged extension)
+
+### Completed
+- **Audit (analysis only, per ABSOLUTE PROTECTION RULE):** traced Home → Welcome (`?next=`) → Play → `useGameRounds` (pool + local `mulberry32`) → `GameShell`/`GuideCard`/`RoundFeedback`/`Celebration` → `GameResult` (`CORRECT/INCORRECT/COMPLETED`) → `queueEvent` → `POST /progress` (`recordGameResult` + `maybePromote` + `maybeAdjustSkill`) → `rewards/claim` (`completionId`/`claimId` idempotent) → `learningPlans` + `voiceAssets`; verified `gameEvents`/`learners`/`levels`/`sessions`/`content` collections, 8 agents, 3 MCP shims (`tutor:3001`/`oer:3002`/`ncert:3003`), `educationGateway` advisory-only, `voice.ts` 5×11×5 scripts + `audio.ts` `speechSynthesis` fallback, 6 games + `ActivityPlayer`/`MissionPlayer`, PWA/Docker — no logic deleted.
+- **Extension (behind `ADAPTIVE_ENGINE_ENABLED=false` default):** `LearnerDoc.gameProgress` now `recentResponseTime/Attempts` + `learningBehavior` + `voicePreference` (all optional, additive); `GameResultInput`/`GameResult`/`ProgressSchema` now carry `responseTimeMs/attempts/theme/character`; `skillLevels` `decideSkillLevel` now considers `hintRate>0.8` or `avgRT>8s` → one extra `stabilize` before promote (keeps `3@80%` gate); `personalizedSessionPlanner` now `+ engagementBoost + noveltyBoost + explainability {skill,difficulty,theme,reason}` per activity (deterministic, tiny, flag-gated); `learnerSync` now returns `{claim,promotion,skill}` and caches `gameLevels` locally.
+
+### Verified
+- `typecheck` ✅, `248/248` ✅, `next build` 77 routes ✅ — existing behavior preserved when flag `false` (old `interest+need+masteryGap` scoring unchanged)
+- `ADAPTIVE_ENGINE_ENABLED=true` QA with ephemeral learner (no Mongo in this env): `base 3@88%` → `promote`, `hinty/slow` → `stabilize` (PASS); `weak 5@33%` → `reduce`; planner `priority` now includes `engagement+novelty` and `explainability`; `POST /progress` accepts new signals (optional) and `buildPersonalizedSessionPlan` deterministic.
+
+### Next Actions
+1. With live `mongo:27017` (`docker compose up --build` + `npm run seed`): re-run `qa-adaptive.mjs` — expect `Top pick: subtraction needs_practice` for weak `subtraction` and `learningBehavior` persisted.
+2. Playwright `e2e/child.spec.ts` + `discover` + `puzzle` with `ADAPTIVE_ENGINE_ENABLED=true` vs `false` (same learner, same history → different `Top pick` when adaptive on).
+3. Admin `learningPlans` explainability UI (show `Why this game?` skill/difficulty/theme/reason) — no child exposure.
+
+## Session 2026-09-20 (26) -- LearningJourney Image Box + Final Verification
+
+### Completed
+- `LearningJourney` header (`My learning journey • Global Level X`) was a plain `div` — now `Link` to next playable level; each `TrackPath` card's image + title now `Link`/clickable (`onClick` + `onKeyDown` + `stopPropagation` for level nodes) so tapping the picture, island tag, or `Global L1` pill all open the link — same `Welcome→Play` flow as Home cards.
+- Verified `Home` image boxes + titles + `Starlight Trace` wide card + `LearningJourney` header/tracks all navigate via `/welcome?next=` (Home) or direct `/play` (Play hub, after welcome).
+
+### Verified
+- `typecheck` ✅, `248/248` ✅, `next build` 77 routes ✅
+- Manual: `My learning journey` header → `?next=` preserved, track image → correct `Global Level` play, no nested-link double navigation.

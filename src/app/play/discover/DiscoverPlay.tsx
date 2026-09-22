@@ -3,6 +3,7 @@
 import * as React from "react";
 import { GameShell } from "@/components/child/GameShell";
 import { Celebration } from "@/components/child/Celebration";
+import { WorldReward } from "@/components/child/WorldReward";
 import { Button } from "@/components/ui/Button";
 import {
   buildQuizOptions,
@@ -189,6 +190,7 @@ export default function DiscoverPlay() {
   }
 
   if (done) {
+    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character={guideCharacter as import("@/lib/characters").CharacterId} variantSeed={reward.sticker.id} onReplay={() => { mistakeSteps.current.clear(); setStepIdx(0); setFeedback("idle"); setDone(false); setReward(null); }} />;
     return (
       <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4">
         <Celebration

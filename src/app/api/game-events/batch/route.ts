@@ -25,6 +25,6 @@ export async function POST(req: Request) {
       { status: 422 }
     );
   }
-  const result = await ingestEvents(parsed.data.sessionId, parsed.data.events);
+  const result = await ingestEvents(parsed.data.sessionId, parsed.data.events, parsed.data.learnerId);
   return NextResponse.json({ success: true, data: result });
 }

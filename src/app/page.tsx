@@ -4,6 +4,8 @@ import { AnimalWonderland3D } from "@/components/child/AnimalWonderland3D";
 import { HomeVoiceBoard } from "@/components/child/HomeVoiceBoard";
 import { SoundToggle } from "@/components/child/SoundToggle";
 import { HomeContinue } from "@/components/child/HomeContinue";
+import { TodaysAdventure } from "@/components/child/TodaysAdventure";
+import { DynamicAdventureHome } from "@/components/learner/DynamicAdventureHome";
 import { CATEGORIES } from "@/lib/categories";
 
 // Home — exact fit of Stitch screen d14a9b61423a49adb2d0a5bf05f5e5ed
@@ -16,16 +18,16 @@ import { CATEGORIES } from "@/lib/categories";
 // also on the landing (§3/§26) so newcomers see the learning world immediately.
 
 const TILES = [
-  { href: "/play/addition", icon: "🔢", label: "Numbers & Counting", buddy: "🧸 Teddy Bear", box: "bg-secondary-fixed", ring: "border-secondary-fixed/60 hover:border-secondary-container", shadow: "shadow-[0_6px_0_#ffddb8]", text: "text-secondary" },
-  { href: "/play/subtraction", icon: "🎈", label: "Fly Away Subtraction", buddy: "🐰 Bella Bunny", box: "bg-primary-fixed", ring: "border-primary-fixed/60 hover:border-primary", shadow: "shadow-[0_6px_0_#adc6ff]", text: "text-primary" },
-  { href: "/play/clean-up", icon: "🧸", label: "Clean Up & Sort", buddy: "🐶 Pip the Puppy", box: "bg-tertiary-fixed", ring: "border-tertiary-fixed/60 hover:border-tertiary", shadow: "shadow-[0_6px_0_#6ffbbe]", text: "text-tertiary" },
-  { href: "/play/puzzle", icon: "🦖", label: "Dino Jigsaw Puzzle", buddy: "🦉 Prof Hoot", box: "bg-surface-high", ring: "border-surface-high hover:border-outline", shadow: "shadow-[0_6px_0_#d5e3fc]", text: "text-outline" },
-  { href: "/play/sketch", icon: "✨", label: "Starlight Tracing", buddy: "🐘 Ellie the Calf", box: "bg-error-container", ring: "border-error-container/80 hover:border-error", shadow: "shadow-[0_6px_0_#ffdad6]", text: "text-error" },
+  { href: "/welcome?next=/play/addition", icon: "🔢", label: "Numbers & Counting", buddy: "🧸 Teddy Bear", box: "bg-secondary-fixed", ring: "border-secondary-fixed/60 hover:border-secondary-container", shadow: "shadow-[0_6px_0_#ffddb8]", text: "text-secondary" },
+  { href: "/welcome?next=/play/subtraction", icon: "🎈", label: "Fly Away Subtraction", buddy: "🐰 Bella Bunny", box: "bg-primary-fixed", ring: "border-primary-fixed/60 hover:border-primary", shadow: "shadow-[0_6px_0_#adc6ff]", text: "text-primary" },
+  { href: "/welcome?next=/play/clean-up", icon: "🧸", label: "Clean Up & Sort", buddy: "🐶 Pip the Puppy", box: "bg-tertiary-fixed", ring: "border-tertiary-fixed/60 hover:border-tertiary", shadow: "shadow-[0_6px_0_#6ffbbe]", text: "text-tertiary" },
+  { href: "/welcome?next=/play/puzzle", icon: "🦖", label: "Dino Jigsaw Puzzle", buddy: "🦉 Prof Hoot", box: "bg-surface-high", ring: "border-surface-high hover:border-outline", shadow: "shadow-[0_6px_0_#d5e3fc]", text: "text-outline" },
+  { href: "/welcome?next=/play/sketch", icon: "✨", label: "Starlight Tracing", buddy: "🐘 Ellie the Calf", box: "bg-error-container", ring: "border-error-container/80 hover:border-error", shadow: "shadow-[0_6px_0_#ffdad6]", text: "text-error" },
 ];
 
 const GAMES = [
   {
-    href: "/play/addition", img: "/images/stitch/number-orchard.jpg",
+    href: "/welcome?next=/play/addition", img: "/images/stitch/number-orchard.jpg",
     alt: "Plush teddy bear in a sunlit apple orchard with wooden crates of red apples",
     buddy: "🧸 Teddy Bear", tag: "🍎 Addition Apples",
     title: "Number Orchard",
@@ -33,7 +35,7 @@ const GAMES = [
     age: "Ages 4–6", ageCls: "bg-secondary-fixed text-on-surface",
   },
   {
-    href: "/play/subtraction", img: "/images/stitch/breeze-valley.jpg",
+    href: "/welcome?next=/play/subtraction", img: "/images/stitch/breeze-valley.jpg",
     alt: "Bella Bunny with floral headband in a wildflower valley with bluebirds fluttering away",
     buddy: "🐰 Bella Bunny", tag: "🐦 Fly Away Subtraction",
     title: "Breeze Valley (Fly Away)",
@@ -41,7 +43,7 @@ const GAMES = [
     age: "Ages 4–7", ageCls: "bg-primary-fixed text-primary",
   },
   {
-    href: "/play/clean-up", img: "/images/stitch/clean-up.jpg",
+    href: "/welcome?next=/play/clean-up", img: "/images/stitch/clean-up.jpg",
     alt: "Puppy with blue bandana putting a colorful wooden block into a woven mint basket",
     buddy: "🐶 Pip the Puppy", tag: "📦 Sort & Categorize",
     title: "Clean Up Playroom",
@@ -49,7 +51,7 @@ const GAMES = [
     age: "Ages 3–6", ageCls: "bg-tertiary-fixed text-tertiary",
   },
   {
-    href: "/play/puzzle", img: "/images/stitch/dino-puzzle.jpg",
+    href: "/welcome?next=/play/puzzle", img: "/images/stitch/dino-puzzle.jpg",
     alt: "Wooden toddler jigsaw puzzle of a cute baby dinosaur on a wooden table outdoors",
     buddy: "🦉 Prof Hoot", tag: "🧩 Wooden Jigsaw",
     title: "Dino Discovery Puzzle",
@@ -126,7 +128,7 @@ export default function LandingPage() {
                     <div>
                       <p className="text-sm font-extrabold text-secondary">Teddy Bear 📣</p>
                       <p className="text-sm font-medium leading-snug">&quot;Hi friend! Come count golden apples with me!&quot;</p>
-                      <Link href="/play/addition" className="mt-1 inline-block rounded-full bg-secondary-container px-3 py-1 text-xs font-extrabold">Count apples →</Link>
+                      <Link href="/welcome?next=/play/addition" className="mt-1 inline-block rounded-full bg-secondary-container px-3 py-1 text-xs font-extrabold">Count apples →</Link>
                     </div>
                   </div>
                 </div>
@@ -137,7 +139,7 @@ export default function LandingPage() {
                     <div>
                       <p className="text-sm font-extrabold text-primary">Pip the Puppy 📣</p>
                       <p className="text-sm font-medium leading-snug">&quot;Woof woof! Let&apos;s sort shiny toys together!&quot;</p>
-                      <Link href="/play/clean-up" className="mt-1 inline-block rounded-full bg-primary-fixed px-3 py-1 text-xs font-extrabold text-primary">Sort toys →</Link>
+                      <Link href="/welcome?next=/play/clean-up" className="mt-1 inline-block rounded-full bg-primary-fixed px-3 py-1 text-xs font-extrabold text-primary">Sort toys →</Link>
                     </div>
                   </div>
                 </div>
@@ -148,7 +150,7 @@ export default function LandingPage() {
                     <div>
                       <p className="text-sm font-extrabold text-tertiary">Bella Bunny 📣</p>
                       <p className="text-sm font-medium leading-snug">&quot;Hop in! Let&apos;s watch bluebirds fly in Breeze Valley!&quot;</p>
-                      <Link href="/play/subtraction" className="mt-1 inline-block rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-extrabold text-tertiary">Fly away →</Link>
+                      <Link href="/welcome?next=/play/subtraction" className="mt-1 inline-block rounded-full bg-tertiary-fixed px-3 py-1 text-xs font-extrabold text-tertiary">Fly away →</Link>
                     </div>
                   </div>
                 </div>
@@ -177,6 +179,8 @@ export default function LandingPage() {
 
             {/* Personalized continue (spec §26) — only when learner exists */}
             <HomeContinue />
+            <TodaysAdventure />
+            <DynamicAdventureHome />
 
             {/* Learning World categories — PRIMARY navigation (§2/§3) — Stitch styled */}
             <section aria-labelledby="learning-world-title" className="mt-8 w-full max-w-5xl">
@@ -228,19 +232,19 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {GAMES.map((g) => (
                 <article key={g.href} className="group flex flex-col overflow-hidden rounded-2xl border-2 border-surface-high bg-white shadow-[0_8px_0_#d5e3fc] transition-all hover:-translate-y-1.5">
-                  <div className="relative flex h-60 items-center justify-center overflow-hidden bg-secondary-fixed/30">
+                  <Link href={g.href} aria-label={`Play ${g.title} now`} className="relative flex h-60 items-center justify-center overflow-hidden bg-secondary-fixed/30">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={g.img} alt={g.alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 shadow backdrop-blur-md">
                       <span className="text-sm font-extrabold">{g.buddy}</span>
                     </div>
                     <div className="absolute bottom-3 right-3 rounded-full bg-secondary-container px-3 py-1 text-sm font-extrabold shadow">{g.tag}</div>
-                  </div>
+                  </Link>
                   <div className="flex flex-grow flex-col justify-between p-5">
-                    <div>
-                      <h3 className="mb-1 text-2xl font-bold">{g.title}</h3>
+                    <Link href={g.href} aria-label={`Play ${g.title} now`} className="block">
+                      <h3 className="mb-1 text-2xl font-bold hover:text-primary hover:underline">{g.title}</h3>
                       <p className="mb-5 font-medium text-on-surface-variant">{g.desc}</p>
-                    </div>
+                    </Link>
                     <div className="flex items-center justify-between border-t border-surface-low pt-3">
                       <span className={`rounded-full px-2.5 py-1 text-sm font-extrabold ${g.ageCls}`}>{g.age}</span>
                       <Link href={g.href} aria-label={`Play ${g.title} now`} className="flex min-h-touch items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 font-extrabold text-white shadow-[0_4px_0_#003f8a] transition-all hover:bg-primary-container active:translate-y-1 active:shadow-none">
@@ -253,30 +257,30 @@ export default function LandingPage() {
               {/* Game 5 — wide feature card (Stitch exactly) */}
               <article className="group flex flex-col overflow-hidden rounded-2xl border-2 border-surface-high bg-white shadow-[0_8px_0_#d5e3fc] transition-all hover:-translate-y-1.5 md:col-span-2 lg:col-span-2">
                 <div className="grid h-full grid-cols-1 md:grid-cols-2">
-                  <div className="relative flex h-64 items-center justify-center overflow-hidden bg-primary-fixed md:h-full">
+                  <Link href="/welcome?next=/play/sketch" aria-label="Trace with Ellie now" className="relative flex h-64 items-center justify-center overflow-hidden bg-primary-fixed md:h-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/images/stitch/starlight-trace.jpg" alt="Ellie the baby elephant tracing sparkling starlight trails in a starry meadow" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 shadow backdrop-blur-md">
                       <span className="text-sm font-extrabold">🐘 Ellie the Star Calf</span>
                     </div>
                     <div className="absolute bottom-3 left-3 rounded-full bg-primary px-3 py-1 text-sm font-extrabold text-white shadow">✨ Rainbow Tracing & Phonics</div>
-                  </div>
+                  </Link>
                   <div className="flex flex-col justify-between p-8">
-                    <div>
+                    <Link href="/welcome?next=/play/sketch" aria-label="Trace with Ellie now" className="block">
                       <div className="mb-2 flex items-center gap-2">
                         <span className="rounded-full bg-secondary-fixed px-2.5 py-0.5 text-sm font-extrabold">Kid Favorite</span>
                         <span className="flex items-center gap-1 text-sm font-bold text-tertiary">🪄 Sparkle Paths</span>
                       </div>
-                      <h3 className="mb-2 text-[22px] font-bold leading-[30px]">Starlight Trace & Shadow Sketch</h3>
+                      <h3 className="mb-2 text-[22px] font-bold leading-[30px] hover:text-primary hover:underline">Starlight Trace & Shadow Sketch</h3>
                       <p className="mb-5 font-medium text-on-surface-variant">Touch and trace glowing letters, numbers, and constellations. Gentle phonics audio whispers as rainbow stardust sparkles under your fingertip.</p>
                       <div className="mb-5 grid grid-cols-2 gap-2">
                         <div className="flex items-center gap-2 rounded-xl bg-surface-low p-2.5"><span aria-hidden>👆</span><span className="text-sm font-extrabold">Letter Curves</span></div>
                         <div className="flex items-center gap-2 rounded-xl bg-surface-low p-2.5"><span aria-hidden>🎵</span><span className="text-sm font-extrabold">Letter Sounds</span></div>
                       </div>
-                    </div>
+                    </Link>
                     <div className="flex items-center justify-between border-t border-surface-low pt-3">
                       <span className="rounded-full bg-primary-fixed px-2.5 py-1 text-sm font-extrabold text-primary">Ages 3–8</span>
-                      <Link href="/play/sketch" aria-label="Trace with Ellie now" className="flex min-h-touch items-center gap-2 rounded-full bg-secondary-container px-6 py-3 font-extrabold shadow-[0_4px_0_#c77c00] transition-all hover:bg-secondary-fixed active:translate-y-1 active:shadow-none">
+                      <Link href="/welcome?next=/play/sketch" aria-label="Trace with Ellie now" className="flex min-h-touch items-center gap-2 rounded-full bg-secondary-container px-6 py-3 font-extrabold shadow-[0_4px_0_#c77c00] transition-all hover:bg-secondary-fixed active:translate-y-1 active:shadow-none">
                         🪄 Trace with Ellie
                       </Link>
                     </div>
@@ -284,7 +288,7 @@ export default function LandingPage() {
                 </div>
               </article>
               {/* 6th cell — Discovery World invite keeps grid balanced + real */}
-              <Link href="/play/discover" className="tactile flex min-h-touch flex-col items-center justify-center gap-2 rounded-2xl bg-tertiary-container p-8 text-center text-white shadow-[0_8px_0_#005236]">
+              <Link href="/welcome?next=/play/discover" className="tactile flex min-h-touch flex-col items-center justify-center gap-2 rounded-2xl bg-tertiary-container p-8 text-center text-white shadow-[0_8px_0_#005236]">
                 <span aria-hidden className="text-5xl">🧭</span>
                 <span className="text-2xl font-extrabold">Meet Ellie in Discovery World →</span>
                 <span className="text-sm font-bold opacity-90">Colors, animals & daily curiosity</span>
@@ -354,9 +358,9 @@ export default function LandingPage() {
             <div className="flex flex-col gap-2">
               <span className="text-sm font-extrabold uppercase tracking-wider">Quick Play</span>
               <Link href="#play-zone" className="font-medium text-on-surface-variant hover:text-primary">🎮 Play Games</Link>
-              <Link href="/play/addition" className="font-medium text-on-surface-variant hover:text-primary">Number Orchard (Add)</Link>
-              <Link href="/play/subtraction" className="font-medium text-on-surface-variant hover:text-primary">Fly Away Subtraction</Link>
-              <Link href="/play/sketch" className="font-medium text-on-surface-variant hover:text-primary">Starlight Tracing</Link>
+              <Link href="/welcome?next=/play/addition" className="font-medium text-on-surface-variant hover:text-primary">Number Orchard (Add)</Link>
+              <Link href="/welcome?next=/play/subtraction" className="font-medium text-on-surface-variant hover:text-primary">Fly Away Subtraction</Link>
+              <Link href="/welcome?next=/play/sketch" className="font-medium text-on-surface-variant hover:text-primary">Starlight Tracing</Link>
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-sm font-extrabold uppercase tracking-wider">Guardians</span>

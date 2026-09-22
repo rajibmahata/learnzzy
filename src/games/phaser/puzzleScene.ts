@@ -29,6 +29,9 @@ export function createPuzzleScene(P: typeof Phaser) {
     private misdropCb: ((pieceId: string) => void) | null = null;
     private pieces: Piece[] = [];
     private slots: { x: number; y: number; taken: boolean }[] = [];
+    private frames: Phaser.GameObjects.Graphics[] = [];
+    private ring: Phaser.GameObjects.Graphics | null = null;
+    private hintTween: Phaser.Tweens.Tween | null = null;
     private selected: Piece | null = null;
     private cell = 100;
     private reduced = false;
@@ -50,6 +53,10 @@ export function createPuzzleScene(P: typeof Phaser) {
         (_p: unknown, obj: Phaser.GameObjects.Container, x: number, y: number) => {
           obj.x = x;
           obj.y = y;
+          // Keep the selection ring glued to the dragged piece.
+          if (this.ring?.visible && this.selected && obj.getData("piece") === this.selected) {
+            this.ring.setPosition(x, y);
+          }
         }
       );
       this.input.on("dragend", (_p: unknown, obj: Phaser.GameObjects.Container) => {
@@ -73,7 +80,68 @@ export function createPuzzleScene(P: typeof Phaser) {
     private select(piece: Piece | null) {
       if (this.selected && !this.selected.placed) this.selected.obj.setScale(1);
       this.selected = piece && !piece.placed ? piece : null;
-      if (this.selected) this.selected.obj.setScale(1.12);
+      this.stopHints();
+      if (this.selected) {
+        // Strong selection: bigger pop + golden ring so the child always sees
+        // exactly which piece is picked up...
+        this.selected.obj.setScale(1.15);
+        this.showRing(this.selected);
+        // ...and every empty home pulses so the child sees where it can go.
+        this.pulseEmptySlots();
+      } else {
+        this.ring?.setVisible(false);
+      }
+    }
+
+    private showRing(piece: Piece) {
+      if (!this.ring) return;
+      this.ring.clear();
+      this.ring.lineStyle(5, 0xffb95f, 1);
+      this.ring.strokeRoundedRect(-this.cell / 2 - 4, -this.cell / 2 - 4, this.cell + 8, this.cell + 8, 20);
+      this.ring.setPosition(piece.obj.x, piece.obj.y);
+      this.ring.setVisible(true);
+    }
+
+    private pulseEmptySlots() {
+      const empty = this.frames.filter((_, i) => !this.slots[i]?.taken);
+      if (empty.length === 0) return;
+      if (this.reduced) {
+        // No motion: a steady softer frame still marks the homes.
+        empty.forEach((f) => f.setAlpha(0.6));
+        return;
+      }
+      this.hintTween = this.tweens.add({
+        targets: empty,
+        alpha: 0.45,
+        duration: 450,
+        yoyo: true,
+        repeat: -1,
+        ease: "Sine.easeInOut",
+      });
+    }
+
+    private stopHints() {
+      this.hintTween?.stop();
+      this.hintTween = null;
+      this.frames.forEach((f) => {
+        if (f.active) f.setAlpha(1);
+      });
+    }
+
+    private paintFrame(i: number, color: number, width: number) {
+      const frame = this.frames[i];
+      const s = this.slots[i];
+      if (!frame || !s || !frame.active) return;
+      frame.clear();
+      frame.lineStyle(width, color, 1);
+      frame.strokeRoundedRect(s.x - this.cell / 2 + 4, s.y - this.cell / 2 + 4, this.cell - 8, this.cell - 8, 14);
+    }
+
+    /** Brief green glow on the home that just received its piece. */
+    private flash(slot: number) {
+      if (this.reduced) return;
+      this.paintFrame(slot, 0x4caf50, 5);
+      this.time.delayedCall(650, () => this.paintFrame(slot, 0xd5e3fc, 3));
     }
 
     private slotAt(x: number, y: number): number {
@@ -91,11 +159,13 @@ export function createPuzzleScene(P: typeof Phaser) {
 
     private place(piece: Piece, slot: number) {
       const s = this.slots[slot];
+      if (!s || s.taken) return;
       s.taken = true;
       piece.placed = true;
       piece.obj.disableInteractive();
       this.placeCb?.(piece.id);
       if (this.selected === piece) this.select(null);
+      this.flash(slot);
       const land = () => {
         piece.obj.x = s.x;
         piece.obj.y = s.y;
@@ -148,10 +218,14 @@ export function createPuzzleScene(P: typeof Phaser) {
     }
 
     showPuzzle(def: PuzzleDef) {
+      this.hintTween?.stop();
+      this.hintTween = null;
       this.children.removeAll();
       this.pieces = [];
       this.slots = [];
+      this.frames = [];
       this.selected = null;
+      this.ring = this.add.graphics().setDepth(19).setVisible(false);
       const n = def.rows * def.columns;
       this.cell = Math.floor(Math.min(BOARD.w / def.columns, BOARD.h / def.rows));
 
@@ -178,6 +252,7 @@ export function createPuzzleScene(P: typeof Phaser) {
         const frame = this.add.graphics();
         frame.lineStyle(3, 0xd5e3fc, 1);
         frame.strokeRoundedRect(x - this.cell / 2 + 4, y - this.cell / 2 + 4, this.cell - 8, this.cell - 8, 14);
+        this.frames.push(frame);
       }
 
       def.pieces.forEach((pd, k) => {

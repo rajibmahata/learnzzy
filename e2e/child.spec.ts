@@ -8,12 +8,15 @@ test("landing renders hero + play CTA", async ({ page }) => {
   await expect(page.locator("footer").getByRole("link", { name: /for parents/i })).toBeVisible();
 });
 
-test("welcome collects nickname + age band", async ({ page }) => {
+test("welcome collects name, nickname, buddy, and age band", async ({ page }) => {
   await page.goto("/welcome");
-  await expect(page.getByRole("heading", { name: /what should we call you/i })).toBeVisible();
-  await page.getByLabel("Nickname").fill("Playwright Kid");
+  await expect(page.locator("#name-title")).toBeVisible({ timeout: 15000 });
+  await page.getByLabel("Child name").fill("Playwright Kid");
+  await page.getByLabel("Nickname", { exact: true }).fill("Star");
+  await page.getByRole("button", { name: /buddy bear/i }).click();
+  await expect(page.getByLabel("Nickname", { exact: true })).toHaveValue("Star");
   await page.getByRole("button", { name: /6–7/ }).click();
-  await page.getByRole("button", { name: /let's play/i }).click();
+  await page.getByRole("button", { name: /start my adventure/i }).click();
   await expect(page).toHaveURL(/\/play$/, { timeout: 15000 });
 });
 

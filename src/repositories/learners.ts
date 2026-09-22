@@ -1,11 +1,21 @@
 import { getDb, newId } from "@/db/mongodb";
+import { normalizeAvatar, normalizeDisplayName, normalizeNickname, sanitizeCompanion, type CompanionInput } from "../lib/identity.ts";
 
 export type AgeBand = "4-5" | "6-7" | "8-9";
 
 export interface LearnerDoc {
   learnerId: string;
   sessionId: string;
+  /** Child's name (personalization only, never authentication). */
+  displayName?: string;
+  /** What Learnzzy calls the child; falls back to displayName. */
   nickname?: string;
+  /** Explorer buddy emoji picked by the child (display-only, never auth). */
+  avatar?: string;
+  /** Primary companion: chosen character + the name the child gave it. */
+  companion?: { characterId: string; displayName?: string };
+  /** Stepped onboarding state (additive; old profiles simply lack it). */
+  onboarding?: { completed: boolean; completedAt?: string; version: number };
   ageBand: AgeBand;
   level: number; // 1..6+ — GLOBAL journey (single source, shared across all games)
   /** Per-skill adaptive levels (1..5) — legacy internal storage, not visible as game level.
@@ -46,9 +56,18 @@ export interface LearnerDoc {
       /** Rolling accuracies, oldest → newest, capped at 10. */
       recentAccuracy?: number[];
       hintsUsed?: number;
+      /** Adaptive: rolling response times / attempts for learning behavior (additive, optional). */
+      recentResponseTime?: number[];
+      recentAttempts?: number[];
     }
   >;
   interests: Record<string, number>; // gameId -> score
+  /** Recent completion ids for idempotent reward/progress writes (capped). */
+  recentCompletionIds?: string[];
+  /** Adaptive: per-skill learning behavior (additive, optional, derived from gameProgress + events). */
+  learningBehavior?: Record<string, { avgResponseTime?: number; avgAttempts?: number; hintRate?: number }>;
+  /** Adaptive: voice preference per learner (additive, optional). */
+  voicePreference?: { voiceId?: string; locale?: string };
   createdAt: Date;
   updatedAt: Date;
   lastActivityAt: Date;
@@ -56,20 +75,25 @@ export interface LearnerDoc {
 
 export const AGE_BANDS: AgeBand[] = ["4-5", "6-7", "8-9"];
 
-export function normalizeNickname(raw?: string): string | undefined {
-  if (!raw) return undefined;
-  const s = raw.trim().slice(0, 20);
-  if (s.length < 1) return undefined;
-  // No PII validation beyond length; allow any display name
-  return s;
-}
+export type { CompanionInput };
 
-export async function createLearner(input: { nickname?: string; ageBand: AgeBand; sessionId?: string }): Promise<LearnerDoc> {
+export async function createLearner(input: {
+  displayName?: string;
+  nickname?: string;
+  avatar?: string;
+  companion?: CompanionInput;
+  ageBand: AgeBand;
+  sessionId?: string;
+}): Promise<LearnerDoc> {
   const db = await getDb().catch(() => null);
   const doc: LearnerDoc = {
     learnerId: newId("learner"),
     sessionId: input.sessionId || newId("sess"),
+    displayName: normalizeDisplayName(input.displayName),
     nickname: normalizeNickname(input.nickname),
+    avatar: normalizeAvatar(input.avatar),
+    companion: input.companion ? (sanitizeCompanion(input.companion) ?? undefined) : undefined,
+    onboarding: { completed: false, version: 1 },
     ageBand: input.ageBand,
     level: 1,
     totalStars: 0,
@@ -100,42 +124,56 @@ export async function getLearner(learnerId: string): Promise<LearnerDoc | null> 
   return (await db.collection<LearnerDoc>("learners").findOne({ learnerId }).catch(() => null)) as LearnerDoc | null;
 }
 
+export interface ProfilePatch {
+  displayName?: string | null;
+  nickname?: string | null;
+  avatar?: string | null;
+  companion?: CompanionInput | null;
+  onboardingCompleted?: boolean;
+}
+
+/**
+ * Child-safe profile update. Strict allowlist: displayName, nickname, avatar,
+ * companion, onboarding flag. ageBand, level, progress, rewards, and history
+ * are NEVER writable here — identity (learnerId) stays stable no matter what
+ * display fields change.
+ */
+export async function updateLearnerProfile(learnerId: string, patch: ProfilePatch): Promise<LearnerDoc | null> {
+  const db = await getDb().catch(() => null);
+  if (!db) return null;
+  const existing = await getLearner(learnerId);
+  if (!existing) return null;
+  const set: Record<string, unknown> = { updatedAt: new Date() };
+  const unset: Record<string, string> = {};
+  const assign = (key: string, value: unknown) => {
+    if (value === undefined) unset[key] = "";
+    else set[key] = value;
+  };
+  if (patch.displayName !== undefined) assign("displayName", normalizeDisplayName(patch.displayName ?? undefined));
+  if (patch.nickname !== undefined) assign("nickname", normalizeNickname(patch.nickname ?? undefined));
+  if (patch.avatar !== undefined) assign("avatar", normalizeAvatar(patch.avatar ?? undefined));
+  if (patch.companion !== undefined) {
+    if (patch.companion === null) {
+      unset.companion = "";
+    } else {
+      const clean = sanitizeCompanion(patch.companion);
+      if (!clean) return null;
+      set.companion = clean;
+    }
+  }
+  if (patch.onboardingCompleted === true) {
+    set.onboarding = { completed: true, completedAt: new Date().toISOString(), version: 1 };
+  }
+  const update: Record<string, unknown> = { $set: set };
+  if (Object.keys(unset).length > 0) update.$unset = unset;
+  await db.collection("learners").updateOne({ learnerId }, update as never).catch(() => null);
+  return getLearner(learnerId);
+}
+
 export async function updateLearnerActivity(learnerId: string): Promise<void> {
   const db = await getDb().catch(() => null);
   if (!db) return;
   await db.collection("learners").updateOne({ learnerId }, { $set: { lastActivityAt: new Date(), updatedAt: new Date() } }).catch(() => null);
-}
-
-export async function addLearnerStars(learnerId: string, stars: number, stickerId?: string, gameId?: string, accuracy?: number): Promise<LearnerDoc | null> {
-  const db = await getDb().catch(() => null);
-  if (!db) return null;
-  if (gameId) {
-    const key = `gameProgress.${gameId}.completions`;
-    // Use $inc for completions and update bestAccuracy if higher
-    await db.collection("learners").updateOne({ learnerId }, { $inc: { [key]: 1 } as never }).catch(() => null);
-    if (typeof accuracy === "number") {
-      const cur = await getLearner(learnerId);
-      const prev = cur?.gameProgress?.[gameId]?.bestAccuracy ?? 0;
-      if (accuracy > prev) {
-        await db.collection("learners").updateOne({ learnerId }, { $set: { [`gameProgress.${gameId}.bestAccuracy`]: accuracy } as never }).catch(() => null);
-      }
-    }
-    // Preserve the level at which this game was completed for journey
-    // analytics without changing the existing global promotion authority.
-    const current = await getLearner(learnerId);
-    if (current) {
-      await db.collection("learners").updateOne(
-        { learnerId },
-        { $set: { [`gameProgress.${gameId}.lastLevel`]: current.level } } as never
-      ).catch(() => null);
-    }
-    // interests: simple count
-    await db.collection("learners").updateOne({ learnerId }, { $inc: { [`interests.${gameId}`]: 1 } as never }).catch(() => null);
-  }
-  const update: Record<string, unknown> = { $inc: { totalStars: stars }, $set: { updatedAt: new Date(), lastActivityAt: new Date() } };
-  if (stickerId) (update as { $push: Record<string, unknown> }).$push = { stickerIds: stickerId };
-  await db.collection("learners").updateOne({ learnerId }, update as never).catch(() => null);
-  return getLearner(learnerId);
 }
 
 export interface GameResultInput {
@@ -145,6 +183,14 @@ export interface GameResultInput {
   stickerId?: string;
   hintsUsed?: number;
   durationMs?: number;
+  /** Adaptive signals (all optional, additive) */
+  responseTimeMs?: number;
+  attempts?: number;
+  theme?: string;
+  character?: string;
+  /** Optional idempotency key: repeat submissions return { duplicate: true }
+   *  without re-recording completions, stars, or stickers. */
+  completionId?: string;
 }
 
 /**
@@ -153,15 +199,24 @@ export interface GameResultInput {
  * stars/stickers, and the latest-result projection — one update, no history
  * overwrite (raw event history stays append-only in gameEvents).
  */
-export async function recordGameResult(learnerId: string, input: GameResultInput): Promise<LearnerDoc | null> {
+export async function recordGameResult(
+  learnerId: string,
+  input: GameResultInput
+): Promise<{ learner: LearnerDoc | null; duplicate: boolean }> {
   const db = await getDb().catch(() => null);
-  if (!db) return null;
+  if (!db) return { learner: null, duplicate: false };
   const accuracy = Math.max(0, Math.min(1, input.accuracy));
   const hintsUsed = Math.max(0, Math.floor(input.hintsUsed ?? 0));
   const cur = await getLearner(learnerId);
+  if (input.completionId && (cur?.recentCompletionIds ?? []).includes(input.completionId)) {
+    return { learner: cur, duplicate: true };
+  }
   const prev = cur?.gameProgress?.[input.gameId];
   const recent = [...(prev?.recentAccuracy ?? []), accuracy].slice(-10);
   const bestAccuracy = Math.max(prev?.bestAccuracy ?? 0, accuracy);
+  // Adaptive: rolling responseTime / attempts (additive, capped 10)
+  const recentResponseTime = typeof input.responseTimeMs === "number" ? [...(prev?.recentResponseTime ?? []), Math.max(0, Math.floor(input.responseTimeMs))].slice(-10) : prev?.recentResponseTime;
+  const recentAttempts = typeof input.attempts === "number" ? [...(prev?.recentAttempts ?? []), Math.max(1, Math.floor(input.attempts))].slice(-10) : prev?.recentAttempts;
   const update: Record<string, unknown> = {
     $inc: {
       [`gameProgress.${input.gameId}.completions`]: 1,
@@ -172,6 +227,8 @@ export async function recordGameResult(learnerId: string, input: GameResultInput
     $set: {
       [`gameProgress.${input.gameId}.bestAccuracy`]: bestAccuracy,
       [`gameProgress.${input.gameId}.recentAccuracy`]: recent,
+      ...(recentResponseTime ? { [`gameProgress.${input.gameId}.recentResponseTime`]: recentResponseTime } : {}),
+      ...(recentAttempts ? { [`gameProgress.${input.gameId}.recentAttempts`]: recentAttempts } : {}),
       updatedAt: new Date(),
       lastActivityAt: new Date(),
       lastResult: {
@@ -188,11 +245,24 @@ export async function recordGameResult(learnerId: string, input: GameResultInput
   if (cur) {
     (update.$set as Record<string, unknown>)[`gameProgress.${input.gameId}.lastLevel`] = cur.level;
   }
+  // Adaptive: derive learningBehavior for this skill (additive, feature-flagged but stored always)
+  if (recentResponseTime || recentAttempts) {
+    const avgResponseTime = recentResponseTime ? Math.round(recentResponseTime.reduce((a, b) => a + b, 0) / recentResponseTime.length) : undefined;
+    const avgAttempts = recentAttempts ? Math.round((recentAttempts.reduce((a, b) => a + b, 0) / recentAttempts.length) * 10) / 10 : undefined;
+    const totalCompletions = (prev?.completions ?? 0) + 1;
+    const hintRate = totalCompletions ? Math.round((hintsUsed / totalCompletions) * 100) / 100 : 0;
+    (update.$set as Record<string, unknown>)[`learningBehavior.${input.gameId}`] = { avgResponseTime, avgAttempts, hintRate };
+  }
   if (input.stickerId) {
     (update as { $push?: Record<string, unknown> }).$push = { stickerIds: input.stickerId };
   }
+  if (input.completionId) {
+    // Remember idempotency keys inline (capped); history stays in events/claims.
+    const seen = [...(cur?.recentCompletionIds ?? []), input.completionId].slice(-50);
+    (update.$set as Record<string, unknown>).recentCompletionIds = seen;
+  }
   await db.collection("learners").updateOne({ learnerId }, update as never).catch(() => null);
-  return getLearner(learnerId);
+  return { learner: await getLearner(learnerId), duplicate: false };
 }
 
 /**

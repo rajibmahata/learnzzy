@@ -4,7 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { setLearnerId, cacheProfile } from "@/lib/learner";
+import { setLearnerId, cacheProfile, upsertDeviceLearner } from "@/lib/learner";
+import { adoptLegacyStore } from "@/lib/rewards";
 import { speakWithCharacter } from "@/lib/audio";
 import { useRouter } from "next/navigation";
 
@@ -22,9 +23,16 @@ const AVATARS = [
   { name: "Star", emoji: "🌟" },
 ];
 
-export function LearnerSetup() {
+// Quick name ideas for children who prefer tapping to typing.
+const NAME_IDEAS = ["Aarvi", "Rohan", "Leo", "Mia", "Zara", "Arjun", "Diya", "Kabir"];
+
+export function LearnerSetup({ next = "/play" }: { next?: string }) {
   const router = useRouter();
+  const [displayName, setDisplayName] = React.useState("");
   const [nickname, setNickname] = React.useState("");
+  // Explorer buddy is separate from the name: picking a character never
+  // overwrites what the child typed.
+  const [buddy, setBuddy] = React.useState("🌟");
   const [ageBand, setAgeBand] = React.useState<"" | "4-5" | "6-7" | "8-9">("");
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -46,7 +54,12 @@ export function LearnerSetup() {
         res = await fetch("/api/learners", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ nickname: nickname.trim() || undefined, ageBand: selectedAgeBand }),
+          body: JSON.stringify({
+            displayName: displayName.trim() || undefined,
+            nickname: nickname.trim() || undefined,
+            avatar: buddy,
+            ageBand: selectedAgeBand,
+          }),
           signal: controller.signal,
         });
       } finally {
@@ -54,19 +67,16 @@ export function LearnerSetup() {
       }
       const body = await res.json();
       if (!res.ok) throw new Error(body.error?.message ?? "Could not create profile.");
-      const learner = body.data as { learnerId: string; nickname?: string; ageBand: string; level: number };
-      setLearnerId(learner.learnerId);
-      cacheProfile({ learnerId: learner.learnerId, nickname: learner.nickname, ageBand: learner.ageBand as "4-5" | "6-7" | "8-9", level: learner.level });
-      // Queue learner_started event (deterministic, no PII)
-      try {
-        const sid = localStorage.getItem("learnzzy.sessionId") || learner.learnerId;
-        await fetch("/api/game-events/batch", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ sessionId: sid, events: [{ event: "learner_started", gameId: "system", metadata: { ageBand, level: learner.level } }] }),
-        }).catch(() => null);
-      } catch {}
-      router.push("/play");
+      const learner = body.data as { learnerId: string; displayName?: string; nickname?: string; avatar?: string; ageBand: string; level: number };
+      persistLocal({
+        learnerId: learner.learnerId,
+        displayName: learner.displayName ?? (displayName.trim() || undefined),
+        nickname: learner.nickname ?? (nickname.trim() || undefined),
+        avatar: learner.avatar ?? buddy,
+        ageBand: learner.ageBand as "4-5" | "6-7" | "8-9",
+        level: learner.level,
+      });
+      router.push(next);
     } catch (e) {
       const message = e instanceof Error ? e.message : "Something went wrong.";
       // Connection refused / server not running → graceful offline fallback
@@ -82,14 +92,19 @@ export function LearnerSetup() {
             typeof crypto !== "undefined" && "randomUUID" in crypto
               ? `learner_${(crypto as { randomUUID: () => string }).randomUUID()}`
               : `learner_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
-          const fallbackLevel = 1;
-          setLearnerId(fallbackId);
-          cacheProfile({ learnerId: fallbackId, nickname: nickname.trim() || undefined, ageBand: selectedAgeBand as "4-5" | "6-7" | "8-9", level: fallbackLevel });
+          persistLocal({
+            learnerId: fallbackId,
+            displayName: displayName.trim() || undefined,
+            nickname: nickname.trim() || undefined,
+            avatar: buddy,
+            ageBand: selectedAgeBand as "4-5" | "6-7" | "8-9",
+            level: 1,
+          });
           // also store session for offline event queue
           try {
             localStorage.setItem("learnzzy.sessionId", fallbackId);
           } catch {}
-          router.push("/play");
+          router.push(next);
           return;
         } catch {
           // fall through to error display if fallback also fails
@@ -107,6 +122,36 @@ export function LearnerSetup() {
     }
   }
 
+  function persistLocal(learner: { learnerId: string; displayName?: string; nickname?: string; avatar?: string; ageBand: "4-5" | "6-7" | "8-9"; level: number }) {
+    setLearnerId(learner.learnerId);
+    cacheProfile({ ...learner });
+    upsertDeviceLearner({ ...learner, addedAt: new Date().toISOString() });
+    adoptLegacyStore(learner.learnerId);
+    // Fire-and-forget: mark onboarding done, claim the one-time welcome
+    // sticker, and queue the learner_started event. Never blocks play.
+    void (async () => {
+      try {
+        const id = encodeURIComponent(learner.learnerId);
+        await fetch(`/api/learners/${id}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ onboardingCompleted: true }),
+        }).catch(() => null);
+        await fetch(`/api/learners/${id}/rewards/claim`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ gameId: "welcome", claimId: `welcome-${learner.learnerId}` }),
+        }).catch(() => null);
+        const sid = localStorage.getItem("learnzzy.sessionId") || learner.learnerId;
+        await fetch("/api/game-events/batch", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ sessionId: sid, learnerId: learner.learnerId, events: [{ event: "learner_started", gameId: "system", metadata: { ageBand: learner.ageBand, level: learner.level } }] }),
+        }).catch(() => null);
+      } catch {}
+    })();
+  }
+
   function skip() {
     // Anonymous learner — keep a safe default age band for deterministic leveling.
     submit(ageBand || "6-7");
@@ -121,24 +166,56 @@ export function LearnerSetup() {
         <p className="text-sm text-on-surface-variant">Let&apos;s get ready for your big quest.</p>
       </div>
 
-      <section className="safe-panel p-5" aria-labelledby="nickname-title">
+      <section className="safe-panel p-5" aria-labelledby="name-title">
         <div className="flex items-start gap-3">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-black text-white">1</span>
-          <div className="min-w-0 flex-1"><h2 id="nickname-title" className="text-instruction">What should we call you?</h2><p className="text-xs text-on-surface-variant">Type a name or pick an explorer buddy.</p></div>
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-black text-white">👋</span>
+          <div className="min-w-0 flex-1">
+            <h2 id="name-title" className="text-instruction">What is your name?</h2>
+            <p className="text-xs text-on-surface-variant">Just your first name — it helps us cheer for you.</p>
+          </div>
           <button
             type="button"
             aria-label="Hear the wonder guide say hello"
-            onClick={() => speakWithCharacter("Hi! I am Teddy, your wonder guide. What should we call you?", { lang: "en-US" })}
+            onClick={() => speakWithCharacter("Hi! I am Teddy, your wonder guide. What is your name?", { lang: "en-US" })}
             className="tactile flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-lg text-primary shadow-[0_3px_0_#adc6ff]"
           >
             🔊
           </button>
         </div>
+        <Input placeholder="e.g. Aarvi" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={20} className="mt-3 h-14 w-full rounded-full bg-surface-low pl-5 text-lg" aria-label="Child name" />
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Name ideas">
+          {NAME_IDEAS.map((idea) => (
+            <button
+              key={idea}
+              type="button"
+              onClick={() => setDisplayName(idea)}
+              aria-pressed={displayName === idea}
+              className={`tactile min-h-11 rounded-full px-4 py-2 text-sm font-extrabold ${displayName === idea ? "bg-primary text-white" : "bg-surface-low text-on-surface"}`}
+            >
+              {idea}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="safe-panel p-5" aria-labelledby="nickname-title">
+        <div className="flex items-start gap-3">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-container text-sm font-black text-white">1</span>
+          <div className="min-w-0 flex-1"><h2 id="nickname-title" className="text-instruction">What should we call you?</h2><p className="text-xs text-on-surface-variant">Type a nickname or pick an explorer buddy below.</p></div>
+        </div>
         <Input placeholder="e.g. Captain Leo..." value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={20} className="mt-3 h-14 w-full rounded-full bg-surface-low pl-5 text-lg" aria-label="Nickname" />
-        <div className="mt-3 grid grid-cols-5 gap-2">
+        <div className="mt-3 grid grid-cols-5 gap-2" role="group" aria-label="Explorer buddy choices">
           {AVATARS.map((avatar) => (
-            <button key={avatar.name} type="button" onClick={() => setNickname(avatar.name)} className={`tactile flex min-h-16 flex-col items-center justify-center rounded-2xl p-2 text-xs font-bold ${nickname === avatar.name ? "bg-surface-high text-primary" : "bg-surface-low text-on-surface"}`}>
+            <button
+              key={avatar.name}
+              type="button"
+              onClick={() => setBuddy(avatar.emoji)}
+              aria-pressed={buddy === avatar.emoji}
+              aria-label={`Buddy ${avatar.name}`}
+              className={`tactile relative flex min-h-16 flex-col items-center justify-center rounded-2xl p-2 text-xs font-bold ${buddy === avatar.emoji ? "bg-surface-high text-primary ring-4 ring-primary-fixed" : "bg-surface-low text-on-surface"}`}
+            >
               <span aria-hidden className="text-2xl">{avatar.emoji}</span><span>{avatar.name}</span>
+              {buddy === avatar.emoji ? <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-secondary-container text-xs text-on-secondary-fixed">✓</span> : null}
             </button>
           ))}
         </div>

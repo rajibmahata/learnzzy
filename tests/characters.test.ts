@@ -2,11 +2,13 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 import {
   CHARACTERS,
+  COMPANION_CHOICES,
   characterForGame,
   stateForMoment,
   lineForState,
   ariaLabelFor,
   asCharacterId,
+  companionDefs,
   getCharacterDef,
 } from "../src/lib/characters.ts";
 import { themeById, themeNoun, pickVisualTheme, verifyThemeMath } from "../src/lib/visualThemes.ts";
@@ -14,8 +16,8 @@ import { toAdditionContent, toSubtractionContent } from "../src/lib/pool-client.
 
 // Cartoon character system: purposeful guides with interaction states.
 describe("character roster (real code)", () => {
-  test("eight purposeful characters, unique ids and emoji", () => {
-    assert.equal(CHARACTERS.length, 8);
+  test("twelve purposeful characters, unique ids and emoji", () => {
+    assert.equal(CHARACTERS.length, 12);
     const ids = CHARACTERS.map((c) => c.id);
     assert.equal(new Set(ids).size, ids.length);
     for (const c of CHARACTERS) {
@@ -23,6 +25,12 @@ describe("character roster (real code)", () => {
       assert.ok(c.role.length >= 3, `${c.id} needs a purpose`);
       assert.ok(c.games.length >= 1, `${c.id} guides at least one game`);
     }
+  });
+  test("companion picker offers the ten onboarding friends", () => {
+    assert.deepEqual(COMPANION_CHOICES, ["bunny", "teddy", "fox", "owl", "monkey", "panda", "elephant", "lion", "butterfly", "parrot"]);
+    const defs = companionDefs();
+    assert.equal(defs.length, 10);
+    assert.ok(defs.every((d) => d.emoji.length >= 1 && d.games.length >= 1));
   });
   test("every game resolves to its purposeful guide", () => {
     assert.equal(characterForGame("addition"), "teddy");

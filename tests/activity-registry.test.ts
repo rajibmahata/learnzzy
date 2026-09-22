@@ -42,7 +42,7 @@ describe("learning categories + activity registry (real code)", () => {
       assert.ok(a.activityType.length >= 3, `${a.id} activityType`);
       assert.ok(a.complexityDimensions.length >= 2, `${a.id} complexityDimensions`);
       assert.ok(a.renderer === "generic-player" || a.renderer === "game-route", `${a.id} renderer`);
-      assert.ok(a.validator === "single-choice" || a.validator === "trace-write", `${a.id} validator`);
+      assert.ok(a.validator === "single-choice" || a.validator === "trace-write" || a.validator === "build-order" || a.validator === "sort-choice", `${a.id} validator`);
       if (a.renderer === "game-route") assert.ok((a.href ?? "").startsWith("/play/"), `${a.id} href`);
       else assert.ok((a.generator ?? "").length > 0, `${a.id} generator`);
     }

@@ -9,7 +9,9 @@ export interface ParentMe {
 
 export interface ChildSummary {
   learnerId: string;
+  displayName?: string;
   nickname?: string;
+  companion?: { characterId: string; displayName?: string };
   ageBand: string;
   level: number;
   totalStars: number;
@@ -35,6 +37,6 @@ export async function parentPost<T>(url: string, payload: unknown): Promise<T> {
   return body.data as T;
 }
 
-export function childLabel(c: { nickname?: string; learnerId: string }): string {
-  return c.nickname || `Learner ${c.learnerId.slice(-4)}`;
+export function childLabel(c: { displayName?: string; nickname?: string; learnerId: string }): string {
+  return c.nickname?.trim() || c.displayName?.trim() || `Learner ${c.learnerId.slice(-4)}`;
 }

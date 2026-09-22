@@ -39,7 +39,9 @@ export interface LastResult {
 
 export interface ChildSummary {
   learnerId: string;
+  displayName?: string;
   nickname?: string;
+  companion?: { characterId: string; displayName?: string };
   ageBand: string;
   level: number;
   totalStars: number;
@@ -74,6 +76,11 @@ const GAME_NAMES: Record<string, string> = {
   puzzle: "Picture Puzzle",
   sketch: "Shadow Sketch",
   discover: "Discovery World",
+  "mission-memory": "Mission: Remember & Find",
+  "mission-sort": "Mission: Sort & Group",
+  "mission-phonics": "Mission: Build the Word",
+  "mission-word-change": "Mission: Change One Thing",
+  "mission-observation": "Mission: Find the Difference",
 };
 
 export function gameDisplayName(gameId: string): string {
@@ -231,7 +238,9 @@ export async function buildChildSummary(learner: LearnerDoc): Promise<ChildSumma
   }
   return {
     learnerId: learner.learnerId,
+    displayName: learner.displayName,
     nickname: learner.nickname,
+    companion: learner.companion,
     ageBand: learner.ageBand,
     level: learner.level,
     totalStars: learner.totalStars,

@@ -36,7 +36,7 @@ Learnzzy is a child-focused educational games PWA for short, visual, determinist
 
 ## Status
 - Phase: build / stabilize
-- Last updated: 2026-09-19 Session 16, by OpenCode -- 190 unit, Global Level Journey + Auto-Next, 3D, Docker MCP
+- Last updated: 2026-09-19 Session 17, by OpenCode -- 204 unit, Words & Phonics, Global Level Journey + Auto-Next, 3D, Docker MCP
 
 ## 2026-09-18 Stitch Retrieval + Attractiveness Update
 
@@ -129,3 +129,16 @@ The current session evidence verifies Addition and Subtraction gameplay strongly
 ## 2026-09-19 Session 16 -- Global Level Journey + Auto-Next + Interactive Feedback
 
 ONE GLOBAL Level (1..6) visible as LEVEL N on every exercise (ActivityPlayer, AdditionPlay, SubtractionPlay); no per-game visible levels, skill mastery internal. Exercise flow: Exercise starts -> Child solves -> Server validates -> Correct? SUCCESS (green) : RETRY (red, sad) -> Feedback -> Next enabled -> 10s countdown (progress bar + Next in Xs) -> Automatic next (setTimeout 10000, cancel on manual). Implemented countdown state + useEffect + cancel. Complexity: GLOBAL + AGE BAND + PERFORMANCE + SKILL MASTERY + INTEREST + RECENT -> Activity Complexity with age-band boundaries (4-5 simple, 6-7 intermediate, 8-9 advanced) and MCP advisory (Tutor via Gateway, 800ms timeout, 7 validations: schema, age-band, global-level, skill, bounds, game capability, safety, fallback). MCP failure never blocks child. Verified: npm test 190/190, tsc 0.
+
+## 2026-09-19 Session 17 -- Words & Phonics First-Class Track
+
+Words & Phonics now runs through the existing category, registry, content API,
+adaptive complexity, event, academic-result, voice, and `ActivityPlayer` paths.
+`src/lib/words.ts` owns 15 seeded word families and age-band rules. Seven
+activities are available: word family/missing letter, picture match, jumble,
+builder, family sorting, listening, and rhyme discovery. Five new deterministic
+generators and three renderer kinds (`build-order`, `sort-choice`, and
+`listen-choice`) were added without creating a separate game engine. `/play`
+now exposes all 30 registered activities. Verified: 204/204 unit tests,
+typecheck, lint, production build, and focused mobile-320 Playwright Words
+coverage 4/4. Full `/play` E2E load timing remains an environment issue.

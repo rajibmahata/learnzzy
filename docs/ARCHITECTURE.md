@@ -724,20 +724,83 @@ theme independent of difficulty. New collections: `academicPlans`,
 result` + `GET /api/admin/academic/plans`. Living Wonder layer (2026-09-18):
 `lib/worlds.ts` + `WonderBits.tsx` presentation bits, 3 optimized Stitch
 scene postcards in `public/assets/`; deviations in DEC-187. Learning
-Playground layer (2026-09-18, DEC-188/191): category-first `/play` (7 Learning
-Worlds) â†’ `/learn/[category]` â†’ 25 activities (all organized: Featured
-Worlds 6 + All Wonder Adventures 25 grouped by World); worksheet-inspired
+Playground layer (2026-09-19, DEC-188/191/194): category-first `/play` (7 Learning
+Worlds) â†’ `/learn/[category]` â†’ 30 activities (all organized: Featured
+Worlds 6 + All Wonder Adventures 30 grouped by World); worksheet-inspired
 generic engine (`lib/categories.ts`, `lib/complexity.ts` Â§27 baseline,
-`lib/activityRegistry.ts`, `lib/activityContent.ts` deterministic) served by
+`lib/activityRegistry.ts`, `lib/activityContent.ts`, `lib/words.ts` deterministic) served by
 `GET /api/activities/[activityId]/content` + `ActivityPlayer`; shipped
-engines linked, never duplicated; completions reuse game-events +
+engines linked, never duplicated; Words & Phonics adds 19 seeded families and
+build-order, sort-choice, and listen-choice renderers; completions reuse game-events +
 `academic/result`. Session 10 (DEC-189): landing category-primary
 (`HomeContinue` + `BrandLogoâ†’/play` + `d14a`/`4b84` mushrooms/apples/stars)
 + Session 11/12 (DEC-190/191/192): calm VoiceScript (13 events, 5 locales)
-+ organized 25-tile Play + Docker-first MCP (`services/mcp` + `qdrant` on
-private `learnzzy` network, `docker:health`) + Session 13 (Big & Small
-`visualMeta` fix, 300-seed validation). Verified: 190
-unit tests (47 suites), typecheck, lint, production build, `docker compose config` OK.
-Open: Playwright `/play` 25-tile + HomeContinue + Big & Small scale pass, live-Mongo E2E (KI-019), TTS binaries (KI-020),
++ organized 30-tile Play + Docker-first MCP (`services/mcp` + `qdrant` on
+private `learnzzy` network, `docker:health`) + Words & Phonics (19 seeded
+families, seven activities). Verified: 213
+unit tests (51 suites), typecheck, lint, production build, `docker compose config` previously OK;
+focused Words Playwright mobile pass 4/4. Open: broader `/play` load timing,
+live-Mongo E2E (KI-019), TTS binaries (KI-020),
 Playwright academic pass, parent-journey screenshot re-fetch, physical devices.
+
+# 58. Mini Mission Engine - 2026-09-19
+
+The Mini Mission Engine is an additive deterministic layer over the existing
+activity, progression, reward, event, parent, and Education Gateway boundaries.
+`MissionPlanner` selects age-safe recommendations from approved templates;
+`MissionPlayer` and `ActivityRenderer` run the steps without live AI or MCP
+dependencies. The server regenerates or loads mission steps and owns validation.
+
+```text
+Learner profile + skill evidence
+    -> MissionPlanner
+    -> approved deterministic mission template
+    -> MissionPlayer / ActivityRenderer
+    -> server step validation
+    -> game events + mission evidence + parent projection
+```
+
+The five additive MongoDB collections are `missions`, `missionTemplates`,
+`missionAttempts`, `missionSteps`, and `learnerMissionProgress`. Missing MongoDB
+degrades persistence and parent aggregates only; approved deterministic
+templates still support gameplay. New routes cover mission listing, mission
+retrieval, attempt lifecycle, step results, learner adventure/progress, and
+authorized parent mission summaries. Full details are in `MISSION_ENGINE.md`.
+
+Verified: 213 unit tests, typecheck, lint, production build, and mission
+Playwright coverage 20/20 across mobile-320, mobile, tablet, and desktop. Open: live-Mongo E2E, physical
+devices, neural TTS binaries, and Stitch validation.
+
+# 59. Child Identity, Unique Sticker Rewards & Puzzle Clarity - 2026-09-20
+
+Identity is `learnerId`; nickname is display-only. Device convenience pointers
+(`learnzzy.activeLearnerId`, `learnzzy.learners.v1` list, per-learner
+`learnzzy.rewards.v1.{id}` / `learnzzy.sessionId.{id}`) never replace the
+server, which stays authoritative for profiles, progress, sessions, rewards,
+and history. `ChildSelector` (welcome) + welcome-back greeting (home) complete
+the resume loop without a second session system: `sessions.learnerId` binds on
+first event sighting and every game event carries its owning `learnerId`.
+
+```text
+Game completed
+  -> progress (stars/promotion/skills, completionId-idempotent)
+  -> rewards/claim (server picks unowned catalog sticker, claimId-idempotent)
+  -> Celebration ("Great job!" + balloon burst + sticker + milestone)
+  -> per-learner collection + parent recentSticker
+```
+
+New additive pieces: `src/lib/stickers.ts` catalog (~50 emoji, 8 categories),
+`src/repositories/rewards.ts` claim authority (`rewardClaims` unique claimId,
+`$addToSet`, collection-complete instead of duplicates), milestones derived
+from count (5/10/25/50), `BalloonBurst` (CSS, reduced-motion safe),
+`ChildSelector`, server-backed Sticker Garden. The legacy shared rewards key is
+retired (adopted once per new learner); the legacy rewards POST delegates to
+claim. Picture Puzzle gains a selection ring, pulsing homes, placed glow, and
+global-level difficulty (4/6/9 pieces) with a LEVEL badge — placement logic
+untouched.
+
+Verified: 231 unit tests, typecheck, lint, production build, identity+puzzle
+e2e 28 passed (16 DB-gated specs skip gracefully offline), missions 20/20.
+Open: live-Mongo claim/isolation/idempotency E2E, physical devices, admin
+catalog UI, Stitch validation.
 

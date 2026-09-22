@@ -1,10 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { selectUnownedSticker, stickerById, type StickerDef } from "./stickers.ts";
 
-// Simple sticker + stars reward system.
-// Persisted in localStorage (shared across windows/tabs) so collected
-// stickers survive reloads. Stars are aggregated. No PII.
+// Sticker + stars rewards (client cache). The SERVER is authoritative:
+// every completion claims an unowned catalog sticker via
+// POST /api/learners/[learnerId]/rewards/claim and the local store is
+// reconciled to it. Local awards are optimistic placeholders only.
+//
+// Stores are namespaced per learner (`learnzzy.rewards.v1.<learnerId>`) so
+// siblings on one device never mix collections. Server data wins on hydrate.
 
 export interface Sticker {
   id: string;
@@ -12,6 +17,8 @@ export interface Sticker {
   name: string;
   gameId: string;
   earnedAt: string;
+  /** Optimistic placeholder awaiting server confirmation. */
+  pending?: boolean;
 }
 
 export interface RewardsState {
@@ -19,57 +26,26 @@ export interface RewardsState {
   stickers: Sticker[];
 }
 
-const KEY = "learnzzy.rewards.v1";
+const LEGACY_KEY = "learnzzy.rewards.v1";
+const HYDRATED_PREFIX = "learnzzy.rewards.hydrated.v1.";
 
-const STICKER_POOL: Record<string, { emoji: string; name: string }[]> = {
-  addition: [
-    { emoji: "🍎", name: "Apple Star" },
-    { emoji: "🌟", name: "Number Star" },
-    { emoji: "🎈", name: "Counting Balloon" },
-    { emoji: "🍓", name: "Berry Star" },
-    { emoji: "🏆", name: "Math Champion" },
-  ],
-  subtraction: [
-    { emoji: "🐦", name: "Little Bird" },
-    { emoji: "🪶", name: "Feather" },
-    { emoji: "🌤️", name: "Sunny Sky" },
-    { emoji: "⭐", name: "Subtraction Star" },
-    { emoji: "🎈", name: "Fly Away" },
-  ],
-  "clean-up": [
-    { emoji: "🧹", name: "Super Cleaner" },
-    { emoji: "✨", name: "Sparkle" },
-    { emoji: "🧸", name: "Tidy Teddy" },
-    { emoji: "🌟", name: "Clean Star" },
-    { emoji: "🏅", name: "Tidy Champion" },
-  ],
-  puzzle: [
-    { emoji: "🧩", name: "Puzzle Master" },
-    { emoji: "🎨", name: "Art Star" },
-    { emoji: "🌈", name: "Rainbow Puzzle" },
-    { emoji: "⭐", name: "Logic Star" },
-    { emoji: "🏆", name: "Puzzle Champion" },
-  ],
-  sketch: [
-    { emoji: "✏️", name: "Magic Pencil" },
-    { emoji: "🎨", name: "Artist Star" },
-    { emoji: "🌟", name: "Sketch Star" },
-    { emoji: "🖍️", name: "Color Burst" },
-    { emoji: "🏆", name: "Sketch Champion" },
-  ],
-  discover: [
-    { emoji: "🧭", name: "Little Explorer" },
-    { emoji: "🦜", name: "Bird Buddy" },
-    { emoji: "🍎", name: "Fruit Finder" },
-    { emoji: "🎨", name: "Color Champion" },
-    { emoji: "🏆", name: "Discovery Star" },
-  ],
-};
+function keyFor(learnerId?: string | null): string {
+  return learnerId ? `learnzzy.rewards.v1.${learnerId}` : LEGACY_KEY;
+}
 
-function load(): RewardsState {
+function activeLearnerId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem("learnzzy.activeLearnerId") ?? localStorage.getItem("learnzzy.learnerId.v1");
+  } catch {
+    return null;
+  }
+}
+
+function load(learnerId?: string | null): RewardsState {
   if (typeof window === "undefined") return { totalStars: 0, stickers: [] };
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(keyFor(learnerId));
     if (!raw) return { totalStars: 0, stickers: [] };
     const p = JSON.parse(raw) as RewardsState;
     if (typeof p.totalStars !== "number" || !Array.isArray(p.stickers)) return { totalStars: 0, stickers: [] };
@@ -79,67 +55,184 @@ function load(): RewardsState {
   }
 }
 
-function save(s: RewardsState) {
+function save(s: RewardsState, learnerId?: string | null) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    localStorage.setItem(keyFor(learnerId), JSON.stringify(s));
   } catch {}
 }
 
-export function getRewards(): RewardsState {
-  return load();
+function notify() {
+  try {
+    window.dispatchEvent(new CustomEvent("learnzzy:rewards"));
+  } catch {}
 }
 
-export function addReward(gameId: string, starsAwarded = 3): { stars: number; sticker: Sticker } {
-  const pool = STICKER_POOL[gameId] ?? STICKER_POOL["addition"];
-  // Pick sticker deterministically per window but with time entropy so
-  // consecutive completions in same window don't repeat.
-  let idx = 0;
+export function getRewards(learnerId?: string | null): RewardsState {
+  return load(learnerId ?? activeLearnerId());
+}
+
+function tempId(): string {
   try {
-    const wId = sessionStorage.getItem("learnzzy.windowId.v1") || "";
-    let h = 0;
-    const s = `${wId}:${gameId}:${Date.now()}`;
-    for (let i = 0; i < s.length; i++) h = (Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0);
-    idx = h % pool.length;
-  } catch {
-    idx = Math.floor(Math.random() * pool.length);
-  }
-  const pick = pool[idx];
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return `pending_${(crypto as { randomUUID: () => string }).randomUUID().replace(/-/g, "").slice(0, 12)}`;
+    }
+  } catch {}
+  return `pending_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/** Optimistic local award shown instantly at celebration. The returned sticker
+ *  is a placeholder: callers must reconcile it with the server claim result. */
+export function addReward(gameId: string, starsAwarded = 3, learnerId?: string | null): { stars: number; sticker: Sticker } {
+  const owner = learnerId ?? activeLearnerId();
+  const cur = load(owner);
+  const owned = cur.stickers.map((s) => s.id);
+  const pick = selectUnownedSticker(owned, `temp:${owner ?? "anon"}:${Date.now()}`);
+  const fallback = { emoji: "🌟", name: "Star Buddy" };
   const sticker: Sticker = {
-    id: `st_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
-    emoji: pick.emoji,
-    name: pick.name,
+    id: tempId(),
+    emoji: pick?.emoji ?? fallback.emoji,
+    name: pick?.name ?? fallback.name,
     gameId,
     earnedAt: new Date().toISOString(),
+    pending: true,
   };
-  const cur = load();
   const next: RewardsState = {
     totalStars: cur.totalStars + starsAwarded,
     stickers: [...cur.stickers, sticker].slice(-100),
   };
-  save(next);
-  // Notify other windows/tabs
-  try {
-    window.dispatchEvent(new StorageEvent("storage", { key: KEY, newValue: JSON.stringify(next) }));
-  } catch {}
+  save(next, owner);
+  notify();
   return { stars: starsAwarded, sticker };
+}
+
+export interface ServerSticker {
+  id: string;
+  emoji: string;
+  name: string;
+}
+
+/**
+ * Swap an optimistic placeholder for the server-authoritative sticker.
+ * Dedups by canonical id (a retried claim never duplicates). Returns the
+ * canonical local sticker, or null when there is nothing to swap
+ * (offline/server gave no sticker — the placeholder stays until hydrate).
+ */
+export function reconcileSticker(tempId: string, server: ServerSticker | null, gameId: string, learnerId?: string | null): Sticker | null {
+  if (!server) return null;
+  const owner = learnerId ?? activeLearnerId();
+  const cur = load(owner);
+  const withoutTemp = cur.stickers.filter((s) => s.id !== tempId);
+  if (withoutTemp.some((s) => s.id === server.id)) {
+    save({ ...cur, stickers: withoutTemp }, owner);
+    notify();
+    return withoutTemp.find((s) => s.id === server.id) ?? null;
+  }
+  const canonical: Sticker = { id: server.id, emoji: server.emoji, name: server.name, gameId, earnedAt: new Date().toISOString() };
+  save({ ...cur, stickers: [...withoutTemp, canonical].slice(-100) }, owner);
+  notify();
+  return canonical;
+}
+
+/**
+ * Adopt a server-awarded sticker into the local store (activities/missions
+ * claim without an optimistic placeholder). Dedups by canonical id.
+ */
+export function adoptServerSticker(server: ServerSticker, gameId: string, learnerId?: string | null): Sticker {
+  const owner = learnerId ?? activeLearnerId();
+  const cur = load(owner);
+  const existing = cur.stickers.find((s) => s.id === server.id);
+  if (existing) return existing;
+  const canonical: Sticker = { id: server.id, emoji: server.emoji, name: server.name, gameId, earnedAt: new Date().toISOString() };
+  save({ ...cur, stickers: [...cur.stickers, canonical].slice(-100) }, owner);
+  notify();
+  return canonical;
+}
+
+/**
+ * One-time adoption of the retired shared store (`learnzzy.rewards.v1`) into
+ * a learner's namespaced collection — so stickers earned before signup are not
+ * lost. Runs only when the learner's own store is empty; the legacy key is
+ * left untouched for other devices/profiles. Server data still wins on
+ * hydrate.
+ */
+export function adoptLegacyStore(learnerId: string): RewardsState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const owned = load(learnerId);
+    if (owned.stickers.length > 0 || owned.totalStars > 0) return null;
+    const legacy = load(null);
+    if (legacy.stickers.length === 0 && legacy.totalStars === 0) return null;
+    const adopted: RewardsState = {
+      totalStars: legacy.totalStars,
+      stickers: legacy.stickers.map((s) => ({ ...s, pending: false })).slice(-100),
+    };
+    save(adopted, learnerId);
+    notify();
+    return adopted;
+  } catch {
+    return null;
+  }
+}
+
+/** Merge server truth into the local store (server wins on conflicts). */
+export function hydrateFromServer(
+  server: { totalStars: number; stickerIds: string[] },
+  learnerId?: string | null
+): RewardsState {
+  const owner = learnerId ?? activeLearnerId();
+  const cur = load(owner);
+  const byId = new Map(cur.stickers.map((s) => [s.id, s]));
+  for (const id of server.stickerIds ?? []) {
+    if (!byId.has(id)) {
+      const def: StickerDef | null = stickerById(id);
+      if (def) {
+        byId.set(id, { id: def.id, emoji: def.emoji, name: def.name, gameId: "learnzzy", earnedAt: new Date().toISOString() });
+      }
+    } else {
+      const s = byId.get(id)!;
+      if (s.pending) byId.set(id, { ...s, pending: false });
+    }
+  }
+  const next: RewardsState = { totalStars: server.totalStars, stickers: [...byId.values()].slice(-100) };
+  save(next, owner);
+  try {
+    localStorage.setItem(`${HYDRATED_PREFIX}${owner ?? "anon"}`, new Date().toISOString());
+  } catch {}
+  notify();
+  return next;
 }
 
 export function useRewards() {
   const [state, setState] = React.useState<RewardsState>({ totalStars: 0, stickers: [] });
 
   React.useEffect(() => {
-    setState(load());
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === KEY) setState(load());
+    const owner = activeLearnerId();
+    const key = keyFor(owner);
+    setState(load(owner));
+    // One server hydration per learner per device (server is truth).
+    let cancelled = false;
+    try {
+      const hydrated = localStorage.getItem(`${HYDRATED_PREFIX}${owner ?? "anon"}`);
+      if (owner && !hydrated) {
+        fetch(`/api/learners/${encodeURIComponent(owner)}/rewards`, { cache: "no-store" })
+          .then((r) => r.json())
+          .then((b) => {
+            if (!cancelled && b?.success && b.data) setState(hydrateFromServer(b.data, owner));
+          })
+          .catch(() => {});
+      }
+    } catch {}
+    const reload = (e: StorageEvent) => {
+      if (!e.key || e.key === key || e.key === LEGACY_KEY) setState(load(activeLearnerId()));
     };
-    const onFocus = () => setState(load());
-    window.addEventListener("storage", onStorage);
+    const onFocus = () => setState(load(activeLearnerId()));
+    const onCustom = () => setState(load(activeLearnerId()));
+    window.addEventListener("storage", reload);
     window.addEventListener("focus", onFocus);
-    // Also poll for same-window updates via custom event
-    const onCustom = () => setState(load());
     window.addEventListener("learnzzy:rewards", onCustom as EventListener);
     return () => {
-      window.removeEventListener("storage", onStorage);
+      cancelled = true;
+      window.removeEventListener("storage", reload);
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("learnzzy:rewards", onCustom as EventListener);
     };
@@ -147,10 +240,7 @@ export function useRewards() {
 
   const award = React.useCallback((gameId: string, stars = 3) => {
     const r = addReward(gameId, stars);
-    try {
-      window.dispatchEvent(new CustomEvent("learnzzy:rewards"));
-    } catch {}
-    setState(load());
+    setState(load(activeLearnerId()));
     return r;
   }, []);
 

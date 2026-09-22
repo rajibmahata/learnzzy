@@ -20,7 +20,7 @@ test("play home shows daily curiosity and learner tab", async ({ page }) => {
 
 test("numbers category lists its activities", async ({ page }) => {
   await page.goto("/learn/numbers");
-  await expect(page.getByRole("heading", { name: /numbers & math/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /numbers & math/i }).last()).toBeVisible();
   for (const name of ["Count Together", "Big to Small", "Before & After", "More or Less", "Number Names", "Count by Tens"]) {
     await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
   }
@@ -44,6 +44,33 @@ test("word family activity loads with picture + choices", async ({ page }) => {
   const options = page.getByRole("button", { name: /^answer /i });
   await expect(options.first()).toBeVisible({ timeout: 15000 });
   await expect(page.getByRole("button", { name: /read aloud/i })).toBeVisible();
+});
+
+test("words category exposes the full phonics activity set", async ({ page }) => {
+  await page.goto("/learn/words");
+  await expect(page.getByRole("heading", { name: /words & phonics/i }).last()).toBeVisible();
+  for (const name of ["Word Families", "Read & Match", "Jumble Time", "Build the Word", "Family Baskets", "Listen & Choose", "Rhyme Detectives"]) {
+    await expect(page.getByText(name, { exact: true })).toBeVisible();
+  }
+});
+
+test("word builder renders letter tiles and clear control", async ({ page }) => {
+  await page.goto("/learn/words/word-builder");
+  await expect(page.getByRole("group", { name: /letter choices/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("button", { name: /clear/i })).toBeVisible();
+  const tile = page.getByRole("group", { name: /letter choices/i }).getByRole("button").first();
+  const box = await tile.boundingBox();
+  expect(box && box.width >= 40 && box.height >= 40).toBeTruthy();
+});
+
+test("word sorting and listening use their dedicated controls", async ({ page }) => {
+  await page.goto("/learn/words/word-sort");
+  await expect(page.getByRole("group", { name: /word family baskets/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("button", { name: /basket -/i }).first()).toBeVisible();
+
+  await page.goto("/learn/words/word-listen");
+  await expect(page.getByRole("button", { name: /play the word aloud/i })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("group", { name: /word choices/i })).toBeVisible();
 });
 
 test("memory activity completes a full round", async ({ page }) => {

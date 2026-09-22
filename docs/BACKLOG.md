@@ -65,6 +65,8 @@ Remaining backlog items are production-hardening or explicitly listed in
 granular tracking; the paragraph above is a progress snapshot, not a claim
 that every sub-item acceptance criterion is closed.
 
+Current verified extension (2026-09-22): Words & Phonics (19 families, 30 activities) + Mini Mission Engine (5 templates, 20/20 Playwright) + Child Identity/Session/Stickers + Living Reward World (53 world events, 254/254) + Stitch Game Section (Number Adventure ff9f32f + Fly Away 1120c83d, explicit Next Level, 780×1768). Unit tests 254/254 green; typecheck/lint pass; Stitch HTML/screenshots under `.stitch/1495487808742926612/`. Broader browser, live-Mongo, TTS, device validation remain open.
+
 Priority:
 
 ```text
@@ -139,6 +141,14 @@ EPIC 33  Deployment
 EPIC 34  Post-MVP Expansion
 EPIC 35  Agentic Academic Engine (LZ-330–LZ-339, DONE 2026-09-17 except live-Mongo E2E/TTS binaries/Playwright/Stitch)
 EPIC 36  Living Wonder Visual Upgrade (LZ-340–LZ-345, DONE 2026-09-18 except parent-journey screenshot/physical devices; pixel parity intentionally not claimed per DEC-187; Docker image build verified)
+EPIC 36c Words & Phonics First-Class Track (LZ-351, DONE 2026-09-19 except broader browser/device QA)
+EPIC 36d Mini Mission Engine (DONE 2026-09-19 except live-Mongo/device/TTS/Stitch QA)
+EPIC 36e Child Identity, Session Resume & Unique Sticker Rewards (DONE 2026-09-20 except live-Mongo/device/TTS/Stitch QA)
+EPIC 36f Integrated Child Onboarding & Learner Identity (DONE 2026-09-20 except live-Mongo/device/TTS/Stitch QA)
+EPIC 36g Fix Session / Welcome / Game Navigation (DONE 2026-09-20 except Playwright Home→Welcome→Play coverage)
+EPIC 36h Unified Game Progression, Feedback & Celebration (DONE 2026-09-20 — 6/6 core games + ActivityPlayer/MissionPlayer, `useSkillLevel` per-game)
+EPIC 36i Living Reward World (DONE 2026-09-21 — 53 world events, full-viewport cinematic, 6 plays + missions, worldBoost)
+EPIC 36j Stitch Game Section — Number Adventure & Fly Away (DONE 2026-09-22 — Stitch 1495487808742926612 ff9f32f/1120c83d, explicit Next Level)
 ```
 
 ---
@@ -2164,9 +2174,231 @@ progress/insights and the advisory-only academic engine; MCP/gateway
 untouched (fail-closed). Acceptance: pre-existing skill/adaptive suites
 green; LEARN→REVIEW staging via instruction + hints before scoring.
 
-Remaining (NOT DONE): Playwright `/learn` pass (4–5/6–7/8–9 + 320px),
+Remaining (NOT DONE): broader Playwright `/learn` pass beyond the focused Words
+mobile-320 coverage,
 live-Mongo E2E (KI-019), TTS binaries (KI-020), physical devices, Stitch
 validation of category/activity surfaces.
+
+---
+
+# 43c. EPIC 36c - Words & Phonics First-Class Track (2026-09-19)
+
+Words & Phonics expands the generic Learning Playground without introducing a
+parallel game engine. The shared `src/lib/words.ts` data model owns 19 seeded
+word families, family validation, age-band complexity, and deterministic session
+mixing. The registry and `/play` expose seven activities: word family/missing
+letter, picture match, jumble, builder, family sorting, listening, and rhyme
+discovery.
+
+## P1
+
+### LZ-351 - Words & Phonics Engine
+
+**Status: DONE (2026-09-19)**
+
+Added five deterministic generators (`word-jumble`, `word-builder`, `word-sort`,
+`word-listen`, `word-discovery`), three generic player kinds (`build-order`,
+`sort-choice`, `listen-choice`), reusable letter-tile/basket/listening controls,
+registry metadata, seven `/play` tiles, and `tests/words-phonics.test.ts`.
+Existing word-family and picture-match generators now use the same family data.
+Acceptance: 213/213 unit tests, typecheck, lint, production build, and focused
+mobile-320 Playwright coverage 4/4.
+
+Remaining: broader `/learn/words` Playwright coverage, live-Mongo E2E (KI-019),
+neural TTS assets (KI-020), physical devices, and Stitch validation.
+
+---
+
+# 43d. EPIC 36d - Mini Mission Engine (2026-09-19)
+
+The Mini Mission Engine adds deterministic 3-10 minute learning adventures on
+top of the existing activity and progression systems. It does not replace the
+generic activity registry, five shipped games, server scoring, or MCP safety
+boundaries.
+
+## P1
+
+### LZ-352 - Deterministic Mini Missions
+
+**Status: DONE (2026-09-19)**
+
+Added five approved mission templates, deterministic age-band planning, shared
+primitive rendering, server-owned validation, server-derived rewards, mission attempts and evidence,
+learner/parent projections, Mongo indexes, Today's Adventure, and the mobile
+mission route. Added unit coverage for validation/planning and 20/20 Playwright
+coverage across mobile-320, mobile, tablet, and desktop. `MISSION_ENGINE.md`
+documents the contract.
+
+Remaining: live-Mongo E2E, physical devices, neural TTS binaries, and Stitch
+validation.
+
+---
+
+# 43e. EPIC 36e - Child Identity, Session Resume & Unique Sticker Rewards (2026-09-20)
+
+Four connected experiences on the existing learner/progression architecture —
+no second session system, no duplicate reward store, `learnerId` authoritative
+throughout.
+
+## P1
+
+### LZ-353 - Identity & Resume
+
+**Status: DONE (2026-09-20)**
+
+`learnzzy.activeLearnerId` canonical pointer + device learner list,
+`ChildSelector` on `/welcome` ("Who's playing today?"), welcome-back greeting
+on home, per-learner session ids, `learnerId` stamped on every game event
+(per-event wins, batch fallback; `sessions.learnerId` bound on first sight).
+Docs: `CHILD_SESSION.md`.
+
+### LZ-354 - Server-Authoritative Unique Stickers
+
+**Status: DONE (2026-09-20)**
+
+~50-emoji catalog (`src/lib/stickers.ts`, 8 categories, rarity organizes
+only), `POST .../rewards/claim` selecting unowned stickers (unique
+`rewardClaims.claimId` index; `$addToSet`; collection-complete instead of
+duplicates), progress `completionId` idempotency, milestones 5/10/25/50
+derived from count, per-learner device cache with server hydration, reconcile
+in all 6 games + activities + missions, server-backed Sticker Garden with
+silhouettes, parent recent achievement. Legacy shared rewards key retired;
+legacy rewards POST delegates to claim (also fixing historic star
+double-count). Docs: `REWARD_SYSTEM.md`, `STICKER_SYSTEM.md`.
+
+### LZ-355 - Celebration consistency
+
+**Status: DONE (2026-09-20)**
+
+`Celebration` gains per-character praise lines, calm voice (never blocking),
+`prefers-reduced-motion` support, milestone + count display — same component
+and congratulations pattern across games, activities, and missions.
+
+### LZ-356 - Picture Puzzle clarity + levels
+
+**Status: DONE (2026-09-20)**
+
+Phaser scene: golden selection ring, pulsing empty homes while a piece is
+selected, green placed-glow (all reduced-motion safe). React: global-level
+difficulty (4/6/9 pieces, same rule as addition) with LEVEL badge, live
+"🧩 X of N pieces home" status, 1️⃣-2️⃣ guidance, per-placement "Nice!" and
+per-picture "Great job!", final Celebration unchanged. Unit + e2e coverage.
+
+Remaining: live-Mongo E2E (claim uniqueness/isolation/idempotency specs exist
+and skip gracefully offline), physical devices, admin catalog UI, Stitch
+validation of selector/garden/celebration surfaces.
+
+---
+
+# 43f. EPIC 36f - Integrated Child Onboarding & Learner Identity (2026-09-20)
+
+Single-page progressive onboarding on the existing setup/learner/session/parent-link systems:
+displayName + nickname (+ideas), 10-character companion picker (roster 8→12:
+fox, panda, butterfly, lion) + companion naming, age (bands unchanged),
+optional parent link (existing code/approve/revoke flow), welcome finale with
+one-time sticker. `PATCH /api/learners/[id]` allowlist keeps `learnerId`
+stable. Parent views show name/nickname/companion.
+
+## P1
+
+### LZ-357 - Onboarding single page + identity model + PATCH
+
+**Status: DONE (2026-09-20)**
+
+`CHILD_ONBOARDING.md`, `LEARNER_IDENTITY.md`, `PARENT_LINK.md`,
+`SESSION_MODEL.md`. One scrollable `/welcome` with progressive unlock (locked
+teasers, gentle scroll, shared guarded create). Unit (identity helpers,
+12-character roster) + single-page Playwright flow + create/PATCH API specs
+(DB-gated where server persistence is required). Full suite green; missions
+20/20.
+
+Remaining: live-Mongo onboarding E2E, QR pairing (no infra), admin catalog UI,
+Stitch validation of the onboarding page (narrow + wide).
+
+---
+
+# 43g. EPIC 36g - Fix Session / Welcome / Game Navigation (2026-09-20)
+
+Home → Welcome → Play with preserved `gameId` via `?next=` (sanitized), fixed
+`ChildSelector` Continue bug (`/` → `next`), updated all Home entry points
+(Tiles, Gallery, bubbles, sketch, discover, footer, `HomeContinue`) and
+`LearnerSetup` post-creation to use `next` with shared guarded create. No new
+learner/session architecture; authoritative `learnerId` isolation preserved.
+
+## P1
+
+### LZ-358 - Welcome next routing + Home entry points
+
+**Status: DONE (2026-09-20)**
+
+Welcome now `useSearchParams` + `Suspense` with sanitized `next`; ChildSelector
+and LearnerSetup accept `next` and navigate there; Home entry points all use
+`/welcome?next=/play/<game>`; `HomeContinue` also via welcome. Verified
+typecheck, 248 unit tests, build; manual Home→Welcome→Play for all 5 games,
+2-learner isolation, returning learner.
+
+Remaining: Playwright Home→Welcome→Play coverage for all games + Stitch
+validation of updated Home links.
+
+---
+
+# 43h. EPIC 36h - Unified Game Progression, Feedback & Celebration (2026-09-20)
+
+Shared `GameResult` + `createRoundTransition` guard + `useRoundStatus` hook
+(single timer + `countdown` + `advanceNow`); per-game skill levels via
+`useSkillLevel` (not forced global) with `LEVEL {skill}` badge + difficulty
+`ceil(level/2)`; `RoundFeedback` (one banner) replaces 4 UIs; `Celebration`
+now shows `Level X ✓ Completed ↓ Level Y ★ Next`; `learnerSync` returns
+`{claim, promotion, skill}` and caches `gameLevels`; integrated into
+all 6 core games (Addition/Subtraction/Clean Up/Puzzle/Sketch/Discovery) +
+`ActivityPlayer`/`MissionPlayer` use same `GameResult` contract with server
+`completionId`/`claimId` idempotency and `maybeAdjustSkill`
+(3 @80%+ promote, 5 @<50% ease); Home game image boxes + titles now also link
+via `/welcome?next=` (previously only `Play Now` did).
+
+## P1
+
+### LZ-359 - Shared result contract + per-game levels + unified UI
+
+**Status: DONE (2026-09-20) — 6/6 core games**
+
+Shared contract `lib/gameFlow.ts` + `lib/useRoundStatus.ts` + `lib/useSkillLevel.ts`
++ `WonderBits/RoundFeedback` + `Celebration` levelProgress + `learnerSync`
+extension. All 6 core games now show per-game `LEVEL` and `RoundFeedback`
+(`Great job!` + balloon / `Try again!` + sad, same for Discovery) + `Celebration`
+level progress; `Sketch` double-award fixed; `ActivityPlayer` hook order fixed;
+Home image boxes + titles also link. Verified typecheck, 248 unit tests,
+build; manual per-game levels differ and `Next` never before `feedback`.
+
+Remaining: Playwright for unified `Next` + level-progression + Home image box + Stitch validation.
+
+---
+
+# 43i. EPIC 36i - Living Reward World (2026-09-21)
+
+Data-driven living world on top of server-authoritative rewards, no second system. `src/lib/worldRewards.ts` 53 `WorldRewardEvent` configs covering every sticker category (jungle walk `rex/9 animals`, ocean sail `boat/dolphin`, sky fly `butterfly/bird`, garden grow `sunflower`, space launch `rocket`, magical `rainbow` etc.) + smart `CATEGORY_FALLBACK` keeping child's actual emoji. `src/components/child/WorldReward.tsx` full-viewport cinematic (`fixed inset-0`, environment gradients, RIGHT→LEFT walk/sail/fly `translateX±55vw` with dust/waves/sparkles, 3–8s, `prefers-reduced-motion` safe). Integrated into all 6 plays + `MissionPlayer` (Celebration fallback); `stickers.ts` `rex` added; `personalizedSessionPlanner` `worldBoost ≤0.35`; `tests/worldRewards.test.ts` 6 tests.
+
+## P1
+
+### LZ-360 - World event catalog + cinematic + missions
+
+**Status: DONE (2026-09-21)**
+
+53 configs, `WorldReward` full-viewport, 6 plays + missions, `worldBoost`, per-learner `learnzzy.rewards.v1.{id}` + `rewardClaims.claimId` unique + `completionId` preserved. Verified typecheck, 254/254, build green; Playwright world-reward visual pending.
+
+---
+
+# 43j. EPIC 36j - Stitch Game Section — Number Adventure & Fly Away (2026-09-22)
+
+Fetch Stitch project `1495487808742926612` screens `ff9f32f8720b4cd79c61ae60c0ee43dd` (Number Adventure — Addition) + `1120c83d47414ff09ad1245b5b84998c` (Fly Away — Subtraction) via `stitch_get_screen` + `curl.exe -L` to `.stitch/1495487808742926612/{id}/screen.html` + `screenshot.png` (780×1768 mobile). Restyle `src/app/play/addition/AdditionPlay.tsx` (quest sub-header, stepper trail, `COUNT THEM!` prompt + `Read aloud`, two pill apple groups + count badges + `add` plus + `arrow_downward`, tactile 4-pad grid, feedback bar + **prominent Next** `Next Level →` / `Complete Level 🎉` + progress `h-2`) + `src/app/play/subtraction/SubtractionPlay.tsx` (`Sunny Meadow` gradient, `Sunny Sky` chip, `↗ −2 Flew Away` pill, dashed trails, `Bye bye! 💨` birds, wooden perch with numbered birds + `Still Perched!`, math strip, `+1 Star` footer) + same prominent Next Level (progress + `arrow_forward`, cancels 10s auto-next). Deterministic `useGameRounds`/`validate`/`reportGameCompletion`/`WorldReward` unchanged, no second session.
+
+## P1
+
+### LZ-361 - Stitch screens ff9f32f + 1120c83d + explicit Next Level
+
+**Status: DONE (2026-09-22)**
+
+Both screens downloaded and rendered; addition `COUNT THEM!` + subtraction `Sunny Meadow` match Stitch visuals while keeping `AdditionStage`/`SubtractionStage` logic; explicit `w-full h-14 bg-primary` Next Level button appears after `feedback !== "idle"` (with `countdown` progress + `LEVEL • Round X of 5`) and calls `goNext` (cancels auto-next, advances round or `WorldReward` on completion). Verified typecheck, 254/254; build env network-dependent (fonts `ENOTFOUND` previously hung, now `curl.exe -L` proven).
 
 ---
 

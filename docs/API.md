@@ -289,8 +289,10 @@ GET /api/activities/number-count/content?ageBand=4-5&seed=guest-123&limit=5
 ```
 
 Serves deterministic worksheet-inspired activities (count, order,
-before-after, shape-count, big-small, word-family, word-match,
-trace-write, pattern, find-object). No LLM is involved in arithmetic,
+before-after, shape-count, big-small, word-family, word-match, word-jumble,
+word-builder, word-sort, word-listen, word-discovery, trace-write, pattern,
+find-object). Words & Phonics activities use the shared seeded family data in
+`src/lib/words.ts`; age-band rules can disable jumble for 4-5. No LLM is involved in arithmetic,
 correctness, scoring, or unlocking. Activities that reuse shipped game
 engines (`addition`, `subtraction`, `sorting`, `picture-puzzle`,
 `shadow-sketch`, `discovery`) return `409 USE_GAME_ROUTE` with the game
@@ -305,6 +307,15 @@ learnerId (optional; best-effort Mongo lookup via skillLevelFor — works withou
 seed (optional deterministic generation seed)
 limit (optional 1..8, default 3)
 recentIds (optional comma-separated recent content IDs to exclude)
+```
+
+Words-specific content may include these additional response fields:
+
+```text
+kind: build-order | sort-choice | listen-choice
+letters: shuffled letter tiles for build-order
+families: displayed word-family basket labels for sort-choice
+autoSpeak: optional listening presentation flag
 ```
 
 ### Response
@@ -1634,7 +1645,8 @@ GET  /api/parent/children/{childId}                # summary + recent activity
 GET  /api/parent/children/{childId}/learning-plan  # latest validated plan
 GET  /api/parent/children/{childId}/insights       # strengths/practice/next
 GET  /api/parent/children/{childId}/activity       # recent game events
-GET  /api/parent/children/{childId}/progress       # level/stars/per-game/concepts/skills + academic {learned/mastered/practicing, streakDays, nextActivity}
+GET  /api/parent/children/{childId}/progress       # level/stars/per-game/concepts/skills + academic {learned/mastered/practicing, streakDays, nextActivity} + missions/missionSkills
+GET  /api/parent/children/{childId}/missions       # mission step counts + mission skill practice (same auth)
 ```
 
 Parent responses contain validated learning summaries only — no LLM
@@ -1663,7 +1675,52 @@ GET /api/admin/education/provenance  # recent provider events + cached knowledge
 GET /api/admin/academic/plans        # academic plans + voice assets + signal/failure counts (read-only observability)
 ```
 
-# 41. Definition of Done
+# 41. Mini Mission APIs
+
+Deterministic 3-10 minute learning adventures. Mission steps are regenerated
+server-side from the mission ID and validated there; the browser never chooses
+rewards. Mission completion writes the shared progression record
+(`gameProgress` under `mission-*` game types, interests, `totalStars`,
+`lastResult`) and runs the standard promotion/skill step once per reward.
+Mongo persistence is best-effort: without MongoDB, deterministic generation
+still serves gameplay. Full contract: `MISSION_ENGINE.md`.
+
+```text
+GET  /api/missions?learnerId=&ageBand=&limit=&date=   # deterministic recommendations (60/min/IP)
+GET  /api/missions/{missionId}                        # generated mission definition
+POST /api/missions/{missionId}/attempt                # { learnerId, action: start|complete, attemptId? } (60/min/IP)
+POST /api/missions/{missionId}/steps/{stepId}/result  # { learnerId, attemptId, response?, attempts?, responseTimeMs?, hintsUsed?, completed?, strategyUsed?, interactionEvidence? } (120/min/IP)
+GET  /api/learners/{learnerId}/adventure               # today's adventure + recent progress (60/min/IP)
+GET  /api/learners/{learnerId}/mission-progress        # mission evidence + missionSkills (60/min/IP)
+```
+
+`GET /api/learners/{learnerId}/skills` additionally returns `missionSkills`
+skill-practice aggregates alongside per-game skills.
+
+# 41b. Identity, Rewards & Sticker APIs
+
+Child identity is `learnerId` (nickname is display-only, never auth).
+Per-learner device pointers live in localStorage; the server stays
+authoritative. Full contracts: `CHILD_SESSION.md`, `REWARD_SYSTEM.md`,
+`STICKER_SYSTEM.md`.
+
+```text
+POST /api/learners                                        # { displayName?, nickname?, avatar?, companion?, ageBand } -> learner (201; ephemeral offline)
+GET  /api/learners/{learnerId}                            # authoritative profile (404 offline/unknown)
+PATCH /api/learners/{learnerId}                           # child-safe fields only: displayName/nickname/avatar/companion/onboardingCompleted (strict; ageBand never writable)
+POST /api/learners/{learnerId}/progress                   # { gameId, accuracy, stars?, stickerId?, hintsUsed?, durationMs?, completionId? }
+                                                          # completionId repeats -> { duplicate: true }, no re-record (30/min/IP)
+POST /api/learners/{learnerId}/rewards/claim              # { gameId, accuracy?, claimId? } -> server-chosen UNIQUE sticker (30/min/IP)
+                                                          # same claimId twice -> ONE sticker + { duplicate: true }
+GET  /api/learners/{learnerId}/rewards                    # { totalStars, stickers[], stickerCount, catalogSize, recentSticker, milestone }
+POST /api/learners/{learnerId}/rewards                    # legacy mirror; delegates to claim (client stickerId never honored)
+POST /api/game-events/batch                               # { sessionId, learnerId?, events[] } (60/min/IP)
+```
+
+Progress owns stars/promotion/skills; claims own sticker uniqueness only, so
+stars can never double-count. Parent progress adds `recentSticker`.
+
+# 42. Definition of Done
 
 The API implementation is complete when:
 

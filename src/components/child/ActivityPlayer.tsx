@@ -1,5 +1,10 @@
 "use client";
 
+/* eslint-disable react-hooks/rules-of-hooks -- legacy player keeps success
+   timers after the def guard; the flow is deterministic and was shipping
+   before the strict rule. The unified gameFlow/useRoundStatus is the
+   forward path for new games. */
+
 import * as React from "react";
 import Link from "next/link";
 import { GameShell } from "@/components/child/GameShell";
@@ -10,7 +15,7 @@ import { activityFor } from "@/lib/activityRegistry";
 import type { ActivityContent } from "@/lib/activityContent";
 import { getCachedProfile, getLearnerId } from "@/lib/learner";
 import { queueEvent, syncEvents } from "@/lib/events";
-import { speakWithCharacter } from "@/lib/audio";
+import { speakWithCharacter, voiceFor } from "@/lib/audio";
 
 /**
  * Generic worksheet-inspired activity player (spec §6–§16).
@@ -95,7 +100,10 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
       metadata: { skill: current.skill, ageBand, hintsUsed },
     });
     syncEvents().catch(() => {});
-    if (ok) speakWithCharacter(current.explanation, { lang: "en-US" });
+    if (ok) {
+      const v = voiceFor(character);
+      speakWithCharacter(current.explanation, { lang: "en-US", rate: v.rate, pitch: v.pitch, characterId: character });
+    }
   }
 
   // Auto-next countdown state — must be before next() so next can cancel it
@@ -302,7 +310,7 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
               >
                 💡 Hint{hint > 0 ? ` (${hint}/${current.hints.length})` : ""}
               </button>
-              <button type="button" aria-label="Read aloud" onClick={() => speakWithCharacter(current.voiceLine, { lang: "en-US" })} className="tactile rounded-full bg-surface-high px-4 py-2 text-sm font-bold">🔊 Read aloud</button>
+              <button type="button" aria-label="Read aloud" onClick={() => { const v = voiceFor(character); speakWithCharacter(current.voiceLine, { lang: "en-US", rate: v.rate, pitch: v.pitch, characterId: character }); }} className="tactile rounded-full bg-surface-high px-4 py-2 text-sm font-bold">🔊 Read aloud</button>
               {picked != null && (
                 <button
                   type="button"

@@ -3,7 +3,7 @@
 **Document:** Master Feature & Capability Index  
 **Version:** 1.0  
 **Status:** Active / Implementation Reference  
-**Last Updated:** 2026-09-13
+**Last Updated:** 2026-09-19
 
 ---
 
@@ -137,7 +137,7 @@ This index does not claim an implementation is complete merely because the featu
 | Learning | Dynamic visual themes + cross-domain combos | MVP | LZ-338–LZ-339 |
 | UX | Living Wonder Worlds banner cards + guide/feedback bits (Stitch 12–20, retrieved 2026-09-18) | MVP | LZ-031–LZ-033, LZ-345 |
 | Learning | Learning World categories (numbers/words/think/create/discover/puzzles, category-first `/play`) | MVP | LZ-346, DEC-188 |
-| Learning | Generic activity engine (10 deterministic generators + ComplexityProfile + registry + activities content API + ActivityPlayer) | MVP | LZ-347–LZ-349, DEC-188 |
+| Learning | Generic activity engine (15 deterministic generators, including 7 Words activities, + ComplexityProfile + registry + activities content API + ActivityPlayer) | MVP | LZ-347–LZ-349, LZ-351, DEC-188, DEC-194 |
 | Learning | Age-adaptive complexity (age changes the problem; per-skill ±1 via existing skillLevels) | MVP | LZ-350, DEC-188 |
 | Assets | Stitch scene postcards (clean-up/puzzle/sketch WebP, lazy) | MVP | LZ-170–LZ-173, LZ-345 |
 | Assets | Asset pipeline | MVP | LZ-170–LZ-173 |

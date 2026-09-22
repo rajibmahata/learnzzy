@@ -9,7 +9,7 @@ import { StarCounter } from "@/components/child/StarCounter";
 import { GAMES } from "@/games/registry";
 import { shuffledForWindow } from "@/lib/windowSeed";
 import { useRewards } from "@/lib/rewards";
-import { getCachedProfile } from "@/lib/learner";
+import { getCachedProfile, greetingName } from "@/lib/learner";
 import { LearningJourney } from "@/components/learner/LearningJourney";
 import { GamePlan } from "@/components/learner/GamePlan";
 import { ContinueLearning } from "@/components/learner/ContinueLearning";
@@ -172,7 +172,7 @@ export default function PlayHome() {
                   <span className="w-2 h-2 rounded-full bg-tertiary animate-ping" />
                 </div>
                 <p className="font-extrabold leading-snug text-on-surface text-base md:text-lg">
-                  “Hi{learner?.nickname ? ` ${learner.nickname}` : ""}! Tap any floating world or friend to jump into an adventure! ✨”
+                  “Hi{greetingName(learner) !== "Explorer" ? ` ${greetingName(learner)}` : ""}! Tap any floating world or friend to jump into an adventure! ✨”
                 </p>
                 <p className="text-on-surface-variant text-xs md:text-sm flex items-center gap-1.5 mt-1">
                   <span className="material-symbols-outlined text-[18px] text-primary">pan_tool</span>
@@ -185,10 +185,12 @@ export default function PlayHome() {
               aria-label="Hear Pip and Teddy"
               onClick={() => {
                 const v = CHARACTER_VOICES.puppy ?? CHARACTER_VOICES.teddy;
-                speakWithCharacter(`Hi${learner?.nickname ? ` ${learner.nickname}` : ""}! Tap any floating world or friend to jump into an adventure!`, {
+                const n = greetingName(learner);
+                speakWithCharacter(`Hi${n !== "Explorer" ? ` ${n}` : ""}! Tap any floating world or friend to jump into an adventure!`, {
                   lang: "en-US",
                   rate: v.rate,
                   pitch: v.pitch,
+                  characterId: "puppy",
                 });
                 window.dispatchEvent(new CustomEvent("wonder:companion:trigger", { detail: { companion: "Teddy" } }));
               }}
@@ -239,7 +241,7 @@ export default function PlayHome() {
         {/* All Games — Complete, Organized by Wonder World — Child-Friendly 3D */}
         <section aria-labelledby="more-title" className="mt-6 bg-white/70 backdrop-blur-md rounded-2xl p-4 md:p-5 border-2 border-white/80 shadow-[0_8px_24px_rgba(180,160,130,0.12)]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
-            <h2 id="more-title" className="text-headline-md font-extrabold flex items-center gap-2">🎲 All Wonder Adventures <span className="bg-primary-fixed text-primary text-xs px-2.5 py-1 rounded-full">25 Activities • All Included</span></h2>
+            <h2 id="more-title" className="text-headline-md font-extrabold flex items-center gap-2">🎲 All Wonder Adventures <span className="bg-primary-fixed text-primary text-xs px-2.5 py-1 rounded-full">30 Activities • All Included</span></h2>
             <span className="hidden lg:inline text-xs font-bold text-on-surface-variant bg-white/80 px-3 py-1 rounded-full border">Organized by World • Every game included • 3D Wonderland</span>
           </div>
           <p className="text-sm text-on-surface-variant mb-4">Every Learnzzy activity — now all visible on one magical map. Tap any tile to play; each adapts to age 4–5, 6–7, 8–9 in the 3D wonderland.</p>
@@ -267,13 +269,18 @@ export default function PlayHome() {
             </div>
           </div>
 
-          {/* Words & Phonics — 2 */}
+          {/* Words & Phonics — 7 */}
           <div className="mb-5">
-            <h3 className="flex items-center gap-2 font-extrabold text-sm uppercase tracking-wider text-primary mb-2"><span className="w-7 h-7 rounded-full bg-[#e0e7ff] flex items-center justify-center text-sm">🔤</span> Words & Phonics <span className="font-bold normal-case text-xs bg-[#e0e7ff] border border-[#adc6ff] px-2 py-0.5 rounded-full">2 games</span></h3>
+            <h3 className="flex items-center gap-2 font-extrabold text-sm uppercase tracking-wider text-primary mb-2"><span className="w-7 h-7 rounded-full bg-[#e0e7ff] flex items-center justify-center text-sm">🔤</span> Words & Phonics <span className="font-bold normal-case text-xs bg-[#e0e7ff] border border-[#adc6ff] px-2 py-0.5 rounded-full">7 games</span></h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {[
                 { href: "/learn/words/word-family", icon: "📖", title: "Word Families", blurb: "AN, EN, AT…" },
                 { href: "/learn/words/word-match", icon: "👀", title: "Read & Match", blurb: "Picture → word" },
+                { href: "/learn/words/word-jumble", icon: "🔀", title: "Jumble Time", blurb: "Unscramble!" },
+                { href: "/learn/words/word-builder", icon: "🧱", title: "Build the Word", blurb: "Tap letters" },
+                { href: "/learn/words/word-sort", icon: "🧺", title: "Family Baskets", blurb: "Sort by rhyme" },
+                { href: "/learn/words/word-listen", icon: "🔊", title: "Listen & Choose", blurb: "Hear it!" },
+                { href: "/learn/words/word-discovery", icon: "🔍", title: "Rhyme Detectives", blurb: "Find pattern" },
               ].map((t) => (
                 <Link key={t.href} href={t.href} className="tactile group flex flex-col items-center gap-1 rounded-2xl border-2 p-4 text-center bg-white border-[#adc6ff]/60 shadow-[0_4px_0_#adc6ff] hover:shadow-[0_6px_0_#adc6ff] hover:-translate-y-0.5 transition-all">
                   <span className="text-4xl leading-none group-hover:scale-110 transition-transform">{t.icon}</span>
@@ -360,7 +367,7 @@ export default function PlayHome() {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-on-surface-variant">
-            <span className="inline-flex items-center gap-1 bg-white/90 px-3 py-1 rounded-full border shadow-sm">✨ 25/25 Activities Included</span>
+            <span className="inline-flex items-center gap-1 bg-white/90 px-3 py-1 rounded-full border shadow-sm">✨ 30/30 Activities Included</span>
             <span className="inline-flex items-center gap-1 bg-white/90 px-3 py-1 rounded-full border shadow-sm">🎨 Stitch 3D Wonderland • Soft • Rounded • Child-Friendly</span>
             <span className="inline-flex items-center gap-1 bg-white/90 px-3 py-1 rounded-full border shadow-sm">🔊 Calm Female Companion Voice</span>
           </div>
