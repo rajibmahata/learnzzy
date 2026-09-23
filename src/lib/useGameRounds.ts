@@ -78,8 +78,10 @@ export function useGameRounds<T>(opts: {
         if (cancelled) return;
         const withId = final.filter((m) => m.contentId).length;
         if (typeof window !== "undefined" && withId > 0) {
-          const ids = final.flatMap((round) => round.contentId ? [round.contentId] : []);
-          window.localStorage.setItem(recentKey, JSON.stringify([...recentIds, ...ids].slice(-12)));
+          const ids = final.flatMap((round) => (round.contentId ? [round.contentId] : []));
+          // Larger recent window → server exclusion prevents same questions
+          // resurfacing for longer (fixes "same 5 questions" feel).
+          window.localStorage.setItem(recentKey, JSON.stringify([...recentIds, ...ids].slice(-40)));
         }
         setSource(withId === opts.total ? "pool" : withId > 0 ? "mixed" : "local");
         setRounds(final);
@@ -136,7 +138,7 @@ function readRecentIds(key: string): string[] {
   try {
     const raw = window.localStorage.getItem(key);
     const ids = raw ? JSON.parse(raw) : [];
-    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string").slice(-12) : [];
+    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === "string").slice(-40) : [];
   } catch {
     return [];
   }

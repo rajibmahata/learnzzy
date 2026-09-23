@@ -91,11 +91,11 @@ function TrackPath({ track, currentLevel }: { track: LearningTrackJourney; curre
       role="button"
       tabIndex={0}
       aria-label={`Play ${track.title} Global Level ${currentLevel} — tap image or title to play`}
-      onClick={() => (window.location.href = trackHref)}
+      onClick={() => window.location.assign(trackHref)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          window.location.href = trackHref;
+          window.location.assign(trackHref);
         }
       }}
       className={`rounded-2xl overflow-hidden border-2 border-white shadow-[0_6px_0_rgba(180,160,130,0.15)] bg-gradient-to-br ${bg} group cursor-pointer hover:shadow-[0_8px_0_rgba(180,160,130,0.2)] hover:-translate-y-0.5 transition-all`}

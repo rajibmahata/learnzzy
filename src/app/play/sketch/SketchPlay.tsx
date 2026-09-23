@@ -21,6 +21,7 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 import { getCachedProfile } from "@/lib/learner";
+import { bumpGlobalLevel } from "@/lib/levelUp";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Starlight wand palette (Stitch sketch): same six ink slots, Stitch color
@@ -156,17 +157,12 @@ export default function SketchPlay() {
   }
 
   const handleContinueHarder = React.useCallback(() => {
-    const next = Math.min(100, globalLevel + 1);
-    try {
-      const raw = localStorage.getItem("learnzzy.learner.v1");
-      if (raw) { const p = JSON.parse(raw); if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next })); }
-      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
-    } catch {}
+    const next = bumpGlobalLevel(globalLevel, 1);
     const params = new URLSearchParams(searchParams.toString());
     params.set("level", String(next));
     router.push(`/play/sketch?${params.toString()}`);
     setRound(0); setDone(false); setReward(null); setResult("idle");
-  }, [globalLevel, reload, router, searchParams]);
+  }, [globalLevel, router, searchParams]);
 
   if (done) {
     if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="bunny" variantSeed={reward.sticker.id} continueLabel="Continue → Next Level" onReplay={() => { setRound(0); setDone(false); setReward(null); setResult("idle"); reload(); }} onContinue={handleContinueHarder} />;
@@ -185,7 +181,7 @@ export default function SketchPlay() {
 
   if (!sketch) {
     return (
-      <GameShell title="Shadow Sketch" stars={totalStars}>
+    <GameShell title="Shadow Sketch" stars={totalStars} progress={{ current: round + 1, total: GAME_ROUNDS }} level={globalLevel}>
         <div className="flex flex-1 flex-col items-center justify-center py-16 text-center" role="status">
           <p aria-hidden className="text-5xl">🌈</p>
           <p className="mt-3 text-instruction">Getting your adventure ready...</p>

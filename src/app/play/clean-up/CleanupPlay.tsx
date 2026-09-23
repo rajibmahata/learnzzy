@@ -18,6 +18,7 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 import { getCachedProfile } from "@/lib/learner";
+import { bumpGlobalLevel } from "@/lib/levelUp";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function CleanupPlay() {
@@ -85,17 +86,12 @@ export default function CleanupPlay() {
   }
 
   const handleContinueHarder = React.useCallback(() => {
-    const next = Math.min(100, globalLevel + 1);
-    try {
-      const raw = localStorage.getItem("learnzzy.learner.v1");
-      if (raw) { const p = JSON.parse(raw); if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next })); }
-      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
-    } catch {}
+    const next = bumpGlobalLevel(globalLevel, 1);
     const params = new URLSearchParams(searchParams.toString());
     params.set("level", String(next));
     router.push(`/play/clean-up?${params.toString()}`);
     setRound(0); setCollected([]); setDone(false); setReward(null);
-  }, [globalLevel, reload, router, searchParams]);
+  }, [globalLevel, router, searchParams]);
 
   if (done) {
     if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="puppy" variantSeed={reward.sticker.id} continueLabel="Continue → Next Level" onReplay={() => { setRound(0); setCollected([]); setDone(false); setReward(null); reload(); }} onContinue={handleContinueHarder} />;
@@ -114,7 +110,7 @@ export default function CleanupPlay() {
 
   if (!scene) {
     return (
-      <GameShell title="Clean Up" stars={totalStars}>
+    <GameShell title="Clean Up" stars={totalStars} progress={{ current: round + 1, total: GAME_ROUNDS }} level={globalLevel}>
         <div className="flex flex-1 flex-col items-center justify-center py-16 text-center" role="status">
           <p aria-hidden className="text-5xl">🌈</p>
           <p className="mt-3 text-instruction">Getting your adventure ready...</p>

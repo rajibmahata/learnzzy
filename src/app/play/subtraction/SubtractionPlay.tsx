@@ -20,6 +20,7 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 import { getCachedProfile } from "@/lib/learner";
+import { bumpGlobalLevel } from "@/lib/levelUp";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SubtractionPlay() {
@@ -134,15 +135,7 @@ export default function SubtractionPlay() {
   }
 
   const handleContinueHarder = React.useCallback(() => {
-    const next = Math.min(100, globalLevel + 1);
-    try {
-      const raw = localStorage.getItem("learnzzy.learner.v1");
-      if (raw) {
-        const p = JSON.parse(raw);
-        if (p && typeof p.level === "number") localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next }));
-      }
-      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
-    } catch {}
+    const next = bumpGlobalLevel(globalLevel, 1);
     const params = new URLSearchParams(searchParams.toString());
     params.set("level", String(next));
     router.push(`/play/subtraction?${params.toString()}`);
@@ -154,7 +147,7 @@ export default function SubtractionPlay() {
     setFeedback("idle");
     setDone(false);
     setReward(null);
-  }, [globalLevel, reload, router, searchParams]);
+  }, [globalLevel, router, searchParams]);
 
   if (done) {
     const isTryAgain = mistakeRounds.current.size > 0;
@@ -199,7 +192,7 @@ export default function SubtractionPlay() {
 
   if (!content) {
     return (
-      <GameShell title="Fly Away" stars={totalStars}>
+    <GameShell title="Fly Away" stars={totalStars} progress={{ current: round + 1, total: GAME_ROUNDS }} level={globalLevel}>
         <div className="flex flex-1 flex-col items-center justify-center py-16 text-center" role="status">
           <p aria-hidden className="text-5xl">
             🌈

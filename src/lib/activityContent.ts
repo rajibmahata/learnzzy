@@ -959,6 +959,70 @@ function genKnowledgeCheckWords(seed: string, c: ComplexityProfile): ActivityCon
   return { ...genWordListen(seed + "-kc-wl", c), templateId: "knowledge-check-words", skill: "phonics" };
 }
 
+function genDivisionShare(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`divshare:${seed}`));
+  const groups = 2 + Math.floor(rng() * 2); // 2-3 sharers
+  const per = 1 + Math.floor(rng() * (c.ageBand === "4-5" ? 3 : 5));
+  const total = groups * per;
+  const answer = String(per);
+  const near = [per - 1, per + 1, per + 2].filter((x) => x >= 0 && x !== per).map(String);
+  const { options, answerIndex } = uniqueOptions(answer, near.length ? near : ["0", "1"], rng);
+  return {
+    contentId: `divshare-${seed}-${total}-${groups}`,
+    templateId: "division-share", skill: "division", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: `Share ${total} 🍎 among ${groups} friends!`,
+    instruction: "How many does each friend get? Share equally.",
+    visual: Array.from({ length: total }, () => "🍎"), visualLabel: `${total} shared by ${groups}`,
+    options, answer, answerIndex,
+    hints: [`Try giving one to each friend, round by round.`, `${groups} groups of what makes ${total}?`],
+    explanation: `Yes! ${total} shared by ${groups} = ${per} each.`,
+    voiceLine: `Share the apples equally!`,
+  };
+}
+
+function genMeasurement(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`measure:${seed}`));
+  const a = 2 + Math.floor(rng() * 5);
+  const b = a + (rng() < 0.5 ? 1 + Math.floor(rng() * 3) : -(1 + Math.floor(rng() * Math.min(2, a - 1))));
+  const askLonger = rng() < 0.5;
+  const answer = askLonger ? (a >= b ? "1" : "2") : (a <= b ? "1" : "2");
+  const { options, answerIndex } = uniqueOptions(answer, answer === "1" ? ["2"] : ["1"], rng);
+  return {
+    contentId: `measure-${seed}-${a}-${b}-${askLonger ? "long" : "short"}`,
+    templateId: "measurement", skill: "measurement", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: askLonger ? "Which tower is TALLER?" : "Which tower is SHORTER?",
+    instruction: "Look at both towers, then tap 1 or 2.",
+    visual: [`tower1:${a}`, `tower2:${b}`], visualLabel: `compare ${a} vs ${b}`,
+    options, answer, answerIndex,
+    hints: ["Count the blocks in each tower.", "Point top to bottom — which is taller?"],
+    explanation: `Yes! Tower ${answer} is ${askLonger ? "taller" : "shorter"}.`,
+    voiceLine: askLonger ? "Which tower is taller?" : "Which tower is shorter?",
+  };
+}
+
+function genScienceObserve(seed: string, c: ComplexityProfile): ActivityContent {
+  const rng = mulberry32(hashSeed(`sciobs:${seed}`));
+  const pairs = [["🌱", "🪨"], ["🐟", "⭐"], ["🍃", "🧸"]] as const;
+  const [living, nonliving] = pick(rng, pairs);
+  const askLiving = rng() < 0.5;
+  const target = askLiving ? living : nonliving;
+  const visual = shuffle(rng, [living, nonliving, pick(rng, [living, nonliving, "🌸", "🐦"])]);
+  const idx = visual.indexOf(target);
+  const answer = String(idx + 1);
+  const { options, answerIndex } = uniqueOptions(answer, ["1", "2", "3"].filter((x) => x !== answer), rng);
+  return {
+    contentId: `sciobs-${seed}-${askLiving ? "living" : "nonliving"}`,
+    templateId: "science-observe", skill: "observation", ageBand: c.ageBand, difficulty: c.difficulty,
+    kind: "single-choice", prompt: askLiving ? "Which one is LIVING?" : "Which one was never alive?",
+    instruction: "Living things grow and need water. Tap the position number.",
+    visual, visualLabel: "observe living vs nonliving",
+    options, answer, answerIndex,
+    hints: ["Does it grow? Does it need water?", "Living: plant, fish, leaf. Non-living: rock, star, toy."],
+    explanation: `Yes! ${target} — number ${answer}.`,
+    voiceLine: askLiving ? "Which one is living?" : "Which one was never alive?",
+  };
+}
+
 export type GeneratorId =
   | "number-count" | "number-order" | "number-before-after" | "shape-count"
   | "big-small" | "word-family" | "word-match" | "trace-write" | "pattern" | "find-object"
@@ -966,7 +1030,8 @@ export type GeneratorId =
   | "memory" | "trace-number-name" | "shape-match" | "shape-pattern"
   | "word-jumble" | "word-builder" | "word-sort" | "word-listen" | "word-discovery"
   | "color-detective" | "animal-safari" | "butterfly-garden" | "robot-path" | "fruit-sorting" | "draw-a-monster"
-  | "knowledge-check-numbers" | "knowledge-check-words";
+  | "knowledge-check-numbers" | "knowledge-check-words"
+  | "division-share" | "measurement" | "science-observe";
 
 const GENERATORS: Record<GeneratorId, (seed: string, c: ComplexityProfile) => ActivityContent> = {
   "number-count": genCount,
@@ -1008,6 +1073,9 @@ const GENERATORS: Record<GeneratorId, (seed: string, c: ComplexityProfile) => Ac
   "draw-a-monster": genDrawAMonster,
   "knowledge-check-numbers": genKnowledgeCheckNumbers,
   "knowledge-check-words": genKnowledgeCheckWords,
+  "division-share": genDivisionShare,
+  "measurement": genMeasurement,
+  "science-observe": genScienceObserve,
 };
 
 export function isGeneratorId(v: string): v is GeneratorId {

@@ -212,7 +212,7 @@ export default function DiscoverPlay() {
 
   if (!step) {
     return (
-      <GameShell title="Discovery World" stars={totalStars}>
+    <GameShell title="Discovery World" stars={totalStars} progress={{ current: stepIdx + 1, total: steps.length }}>
         <div className="flex flex-1 flex-col items-center justify-center py-16 text-center" role="status">
           <p aria-hidden className="text-5xl">🌈</p>
           <p className="mt-3 text-instruction">Getting your adventure ready...</p>

@@ -90,11 +90,64 @@ export function initialCreatureState(learnerId: string, stickerId: string): Crea
   return states[seed % states.length]!;
 }
 
-function hashSeed(s: string): number {
+export function hashSeed(s: string): number {
   let h = 2166136261;
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
   return h >>> 0;
 }
+
+// --- Living Forest World upgrade (additive) ---
+// Depth scale: distant 0.55 → foreground 1.1, smooth interpolation by y%.
+export function depthScaleFor(y: number): number {
+  const clamped = Math.max(0, Math.min(100, y));
+  return 0.55 + (clamped / 100) * 0.55;
+}
+
+// Expand a single unlocked rabbit into a small population with individual variation.
+// Deterministic per learner so forest is stable across visits.
+export function expandRabbitPopulation(base: LivingCreature, learnerId: string): LivingCreature[] {
+  if (base.species !== "rabbit") return [base];
+  const variants: LivingCreature[] = [];
+  for (let i = 0; i < 3; i++) {
+    const seed = hashSeed(`${learnerId}:rabbit:${i}`);
+    variants.push({
+      ...base,
+      stickerId: i === 0 ? base.stickerId : `${base.stickerId}#cub${i}`,
+      displayName: i === 0 ? base.displayName : `${base.displayName} ${i + 1}`,
+      x: 8 + (seed % 80),
+      y: 62 + (seed % 22),
+      direction: (seed % 2 ? 1 : -1) as 1 | -1,
+      state: (["HOPPING", "IDLE", "LOOKING"] as CreatureState[])[seed % 3]!,
+    });
+  }
+  return variants;
+}
+
+export type FlockBirdState = "FLYING" | "CIRCLING" | "LANDING" | "PERCHED" | "HOPPING" | "LOOKING" | "TAKING_OFF" | "DISAPPEARING" | "RETURNING";
+
+export interface FlockBird {
+  id: string;
+  x: number;
+  y: number;
+  vx: number;
+  state: FlockBirdState;
+  timer: number;
+  size: number;
+}
+
+export type AmbientEventKind =
+  | "rabbit-cross"
+  | "bird-flock"
+  | "butterfly-pass"
+  | "squirrel-branch"
+  | "deer-distant"
+  | "leaves-wind"
+  | "fish-jump"
+  | "fireflies"
+  | "rainbow";
+
+export type WowMomentKind = "butterfly-swarm" | "bird-wave" | "rainbow" | "firefly-wave" | "pond-splash" | "dino-cross";
+
 
 // Forest progression — environment unlocks as child learns
 export function forestLevel(stickerCount: number): { level: number; title: string; unlockedHabitats: Habitat[] } {

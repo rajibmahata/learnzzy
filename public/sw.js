@@ -4,12 +4,43 @@
  * blank screen and games that never load. Navigations go to network first
  * (falling back to cache only when offline); immutable hashed assets stay
  * cache-first for speed. */
-const CACHE = "learnzzy-shell-v3";
-const SHELL = ["/", "/play", "/manifest.json", "/icons/icon.svg", "/assets/apple.svg", "/assets/bird.svg", "/icons/icon-192.png", "/icons/icon-512.png"];
+const CACHE = "learnzzy-shell-v4";
+// Precache the shell + primary child routes so first offline open still works.
+const SHELL = [
+  "/",
+  "/play",
+  "/play/addition",
+  "/play/subtraction",
+  "/play/clean-up",
+  "/play/puzzle",
+  "/play/sketch",
+  "/play/discover",
+  "/play/complete",
+  "/stickers",
+  "/welcome",
+  "/manifest.json",
+  "/icons/icon.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/assets/apple.svg",
+  "/assets/bird.svg",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()).catch(() => {})
+    caches
+      .open(CACHE)
+      .then((c) =>
+        // addAll fails entirely if one URL 404s — add individually so a
+        // missing optional asset never blocks the offline shell.
+        Promise.all(
+          SHELL.map((url) =>
+            c.add(new Request(url, { cache: "reload" })).catch(() => undefined)
+          )
+        )
+      )
+      .then(() => self.skipWaiting())
+      .catch(() => {})
   );
 });
 

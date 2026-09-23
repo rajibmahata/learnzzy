@@ -1,14 +1,14 @@
 # Curriculum Validation Report
-Generated: 2026-09-22T11:35:12.640Z
+Generated: 2026-09-23T02:29:11.923Z
 Frameworks: 7
 Stages: 6
 Subjects: 6
-Outcomes: 10
-Mapped: 10
+Outcomes: 13
+Mapped: 13
 Coverage: 100%
 Invalid mappings: 0
 Missing outcomes: none
-Missing skills: none
+Missing skills: time (planned)
 Problems: none
 Details:
 - cbse-math-count-10 (M-1): COVERED via counting
@@ -21,3 +21,6 @@ Details:
 - cambridge-computing-sequence (1C1): COVERED via sequencing (AI-enriched)
 - ib-inquiry (IB-1): COVERED via discovery (AI-enriched)
 - cisce-evs-nature (EVS-1): COVERED via discovery (AI-enriched)
+- cbse-math-division (M-5): COVERED via division
+- cbse-math-measure (M-6): COVERED via measurement
+- cambridge-science-observe (1S2): COVERED via observation + science-observe assessment

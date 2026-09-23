@@ -1,6 +1,6 @@
 import fs from "node:fs";
 const report = `# Game Catalog Validation
-Activities: 46
+Activities: 49
 Mechanics: 18
 Fails: 0
 `;

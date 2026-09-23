@@ -152,7 +152,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
   if (error || !mission || !current) return <GameShell title="Today's Adventure" stars={0}><div className="safe-panel mx-auto mt-8 max-w-game p-8 text-center"><p>{error ?? "Mission unavailable."}</p><Link href="/play" className="mt-4 inline-block underline">Back to adventures</Link></div></GameShell>;
 
   return (
-    <GameShell title={mission.title} stars={done ? (earnedStars ?? correct) : correct}>
+    <GameShell title={mission.title} stars={done ? (earnedStars ?? correct) : correct} progress={{ current: index + 1, total: mission.steps.length }}>
       <div className="mx-auto flex w-full max-w-game flex-col gap-3 px-4 pb-24 pt-4">
         <div className="flex items-center justify-between gap-2">
           <span className="rounded-full bg-primary px-4 py-1.5 text-sm font-black text-white">MINI MISSION</span>
@@ -168,7 +168,7 @@ export function MissionPlayer({ missionId }: { missionId: string }) {
               variantSeed={missionSticker.id}
               onReplay={() => {
                 // Replay handled by parent route; go home to pick next.
-                window.location.href = "/play";
+                window.location.assign("/play");
               }}
             />
           ) : (

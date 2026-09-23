@@ -20,6 +20,7 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 import { getCachedProfile } from "@/lib/learner";
+import { bumpGlobalLevel } from "@/lib/levelUp";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const COPY = {
@@ -145,24 +146,11 @@ export default function AdditionPlay() {
   }
 
   const handleContinueHarder = React.useCallback(() => {
-    // Continue → next level, harder: bump GLOBAL level and navigate via REST ?level=
-    // so /play/addition?level=1 → Continue → /play/addition?level=2 and difficulty increases.
-    const next = Math.min(100, globalLevel + 1);
-    try {
-      const raw = localStorage.getItem("learnzzy.learner.v1");
-      if (raw) {
-        const p = JSON.parse(raw);
-        if (p && typeof p.level === "number") {
-          localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next }));
-        }
-      }
-      localStorage.setItem("learnzzy.globalLevel.v1", String(next));
-    } catch {}
-    // Reset transient state before navigation
+    // Continue → next level via the canonical writer (profile + legacy keys stay in sync).
+    const next = bumpGlobalLevel(globalLevel, 1);
     mistakeRounds.current.clear();
     hintOpens.current = 0;
     gameStart.current = Date.now();
-    // REST navigation — validated by typecheck, preserves learner isolation
     const params = new URLSearchParams(searchParams.toString());
     params.set("level", String(next));
     router.push(`/play/addition?${params.toString()}`);
@@ -172,7 +160,7 @@ export default function AdditionPlay() {
     setFeedback("idle");
     setDone(false);
     setReward(null);
-  }, [globalLevel, reload, router, searchParams]);
+  }, [globalLevel, router, searchParams]);
 
   if (done) {
     const isTryAgain = mistakeRounds.current.size > 0;
@@ -259,7 +247,7 @@ export default function AdditionPlay() {
     feedback === "correct" ? praise : feedback === "retry" ? retryLine : story.setup;
 
   return (
-    <GameShell title="Number Adventure" stars={totalStars}>
+    <GameShell title="Number Adventure" stars={totalStars} progress={{ current: round + 1, total: GAME_ROUNDS }} level={globalLevel}>
       {/* Single authoritative progression: LEVEL + stepper — GameHeader already provides 🏠 Number Adventure ⭐ 🔊 */}
       <div className="flex flex-col items-center gap-1 py-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-black text-white shadow-[0_3px_0_#004395]">

@@ -28,15 +28,21 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // Allow pinch-zoom (WCAG 1.4.4). Child controls are large enough that
+  // blocking zoom is unnecessary and hurts adult/parent accessibility.
+  maximumScale: 5,
   viewportFit: "cover",
   themeColor: "#f8f9ff",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={jakarta.className}>
+    <html lang="en" className={jakarta.className} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Material Symbols: display=swap + preconnect so cold/offline start
+            never blocks paint. Plus Jakarta Sans is self-hosted via next/font. */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
@@ -49,7 +55,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Skip to content
             </a>
             <main id="main">{children}</main>
-            <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}` }} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}` +
+                  `try{var l=localStorage.getItem('learnzzy.locale');if(l&&document.documentElement.lang!==l){document.documentElement.lang=l}}catch(e){}`,
+              }}
+            />
           </ToastProvider>
         </ErrorBoundary>
       </body>

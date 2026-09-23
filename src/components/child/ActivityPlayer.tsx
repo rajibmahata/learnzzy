@@ -40,6 +40,8 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
   const startedAt = React.useRef(Date.now());
   const { award } = useRewards();
   const [reward, setReward] = React.useState<{ stars: number; sticker: Sticker } | null>(null);
+  // Local reset nonce — reload the activity without a full page refresh.
+  const [runNonce, setRunNonce] = React.useState(0);
 
   const profile = getCachedProfile();
   const ageBand = normalizeAgeBand(profile?.ageBand);
@@ -79,7 +81,7 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
     load();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
+  }, [activityId, runNonce]);
 
   if (!def) {
     return (
@@ -193,8 +195,21 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [picked, done]);
 
+  function restartActivity() {
+    setIndex(0);
+    setPicked(null);
+    setHint(0);
+    setHintsUsed(0);
+    setAttempts(0);
+    setCorrect(0);
+    setDone(false);
+    setReward(null);
+    startedAt.current = Date.now();
+    setRunNonce((n) => n + 1);
+  }
+
   return (
-    <GameShell title={def.title} stars={correct}>
+    <GameShell title={def.title} stars={correct} progress={items.length > 0 ? { current: index + 1, total: items.length } : undefined} level={globalLevel}>
       <div className="mx-auto flex w-full max-w-game flex-col gap-3 px-4 pb-24 pt-4">
         {/* GLOBAL LEVEL — visible on every exercise, same across all games */}
         <div className="flex items-center justify-center gap-2">
@@ -216,11 +231,11 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
           <div className="safe-panel p-8 text-center">
             <p className="text-headline-md">Hmm, the activity did not load.</p>
             <p className="text-on-surface-variant">Check your connection and try again — your stars are safe.</p>
-            <button type="button" onClick={() => window.location.reload()} className="tactile-button mt-4 bg-primary px-6 py-3 text-white">Try again</button>
+            <button type="button" onClick={restartActivity} className="tactile-button mt-4 bg-primary px-6 py-3 text-white">Try again</button>
           </div>
         ) : done ? (
           reward?.sticker ? (
-            <WorldReward sticker={reward.sticker} character={character as import("@/lib/characters").CharacterId} variantSeed={reward.sticker.id} onReplay={() => window.location.reload()} />
+            <WorldReward sticker={reward.sticker} character={character as import("@/lib/characters").CharacterId} variantSeed={reward.sticker.id} onReplay={restartActivity} />
           ) : (
             <div className="safe-panel p-8 text-center">
               <p aria-hidden className="text-5xl">🌟</p>
@@ -228,7 +243,7 @@ export function ActivityPlayer({ activityId }: { activityId: string }) {
               <p className="text-on-surface-variant">{correct} of {items.length} — {hintsUsed === 0 ? "no hints needed!" : `${hintsUsed} hint${hintsUsed > 1 ? "s" : ""} used, good thinking!`}</p>
               <div className="mt-4 flex gap-2">
                 <Link href="/play" className="tactile-button flex-1 bg-surface-high px-4 py-3 text-center">🏠 Home</Link>
-                <button type="button" onClick={() => window.location.reload()} className="tactile-button flex-1 bg-primary px-4 py-3 text-white">Play again</button>
+                <button type="button" onClick={restartActivity} className="tactile-button flex-1 bg-primary px-4 py-3 text-white">Play again</button>
               </div>
             </div>
           )

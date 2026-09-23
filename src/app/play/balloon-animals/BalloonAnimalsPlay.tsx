@@ -13,6 +13,7 @@ import { getSessionId, queueEvent } from "@/lib/events";
 import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { getCachedProfile } from "@/lib/learner";
+import { bumpGlobalLevel } from "@/lib/levelUp";
 import { normalizeAgeBand } from "@/lib/complexity";
 
 export default function BalloonAnimalsPlay() {
@@ -28,11 +29,13 @@ export default function BalloonAnimalsPlay() {
   const profile = getCachedProfile();
   const ageBand = normalizeAgeBand(profile?.ageBand);
   const globalLevel = Math.max(1, Math.min(100, profile?.level ?? 1));
+  // Nonce re-derives rounds after a level-up without window.location.reload().
+  const [nonce, setNonce] = React.useState(0);
 
   const rounds = React.useMemo(() => {
-    const seed = `${profile?.learnerId ?? "guest"}-${globalLevel}-${ageBand}-animal`;
+    const seed = `${profile?.learnerId ?? "guest"}-${globalLevel}-${ageBand}-animal-${nonce}`;
     return Array.from({ length: GAME_ROUNDS }, (_, i) => createBalloonAnimalRound(seed, ageBand, i));
-  }, [ageBand, globalLevel, profile?.learnerId]);
+  }, [ageBand, globalLevel, profile?.learnerId, nonce]);
 
   const current = rounds[round];
   const [countdown, setCountdown] = React.useState<number | null>(null);
@@ -95,7 +98,7 @@ export default function BalloonAnimalsPlay() {
 
   if (done) {
     const isTryAgain = mistakeRounds.current.size > 0;
-    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="panda" variantSeed={reward.sticker.id} continueLabel={isTryAgain ? "Continue — Try Harder 💪" : "Continue → Next Level"} onReplay={() => { mistakeRounds.current.clear(); gameStart.current = Date.now(); setRound(0); setFeedback("idle"); setDone(false); setReward(null); setPoppedIds(new Set()); setShowWord(null); }} onContinue={() => { try { const raw = localStorage.getItem("learnzzy.learner.v1"); if (raw) { const p = JSON.parse(raw); const next = Math.min(100, (p.level ?? 1) + 1); localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next })); } } catch {} window.location.reload(); }} />;
+    if (reward?.sticker) return <WorldReward sticker={reward.sticker} character="panda" variantSeed={reward.sticker.id} continueLabel={isTryAgain ? "Continue — Try Harder 💪" : "Continue → Next Level"} onReplay={() => { mistakeRounds.current.clear(); gameStart.current = Date.now(); setRound(0); setFeedback("idle"); setDone(false); setReward(null); setPoppedIds(new Set()); setShowWord(null); }} onContinue={() => { bumpGlobalLevel(globalLevel, 1); mistakeRounds.current.clear(); gameStart.current = Date.now(); setRound(0); setFeedback("idle"); setDone(false); setReward(null); setPoppedIds(new Set()); setShowWord(null); setNonce((n) => n + 1); }} />;
     return <div className="mx-auto flex min-h-screen w-full max-w-game items-center justify-center px-4"><Celebration title={isTryAgain ? "Good try!" : "AMAZING!"} stars={reward?.stars ?? 3} sticker={reward?.sticker ?? null} character="panda" onReplay={() => { setRound(0); setFeedback("idle"); setDone(false); setReward(null); setPoppedIds(new Set()); }} /></div>;
   }
   if (!current) return <GameShell title="Balloon Burst — Animals" stars={totalStars}><div className="flex flex-1 flex-col items-center justify-center py-16 text-center" role="status"><p className="text-5xl">🌈</p><p className="mt-3 text-instruction">Getting balloons ready…</p></div></GameShell>;
@@ -103,7 +106,7 @@ export default function BalloonAnimalsPlay() {
   const guideLine = feedback === "correct" ? `✨ ${current.targetWord} — C-A-T! Cat burst!` : feedback === "retry" ? `Find the cat 🐱! Tap its balloon!` : `Find the cat! Pop the 🐱 balloon and learn C-A-T!`;
 
   return (
-    <GameShell title="Balloon Burst — Animals" stars={totalStars}>
+    <GameShell title="Balloon Burst — Animals" stars={totalStars} progress={{ current: round + 1, total: GAME_ROUNDS }} level={globalLevel}>
       <div className="flex items-center justify-center gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-black text-white shadow-[0_3px_0_#004395]">LEVEL {globalLevel}</span>
         <span className="text-xs font-bold text-on-surface-variant">Round {round + 1} of {GAME_ROUNDS} • {ageBand}</span>

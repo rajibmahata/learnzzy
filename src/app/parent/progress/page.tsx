@@ -45,6 +45,44 @@ const TREND_LABEL: Record<string, string> = {
   needs_practice: "Needs practice",
 };
 
+const SUBJECT_OF: Record<string, string> = {
+  addition: "Mathematics", subtraction: "Mathematics", counting: "Mathematics", division: "Mathematics", measurement: "Mathematics", geometry: "Mathematics",
+  phonics: "Literacy", "letter-recognition": "Literacy", "word-recognition": "Literacy",
+  observation: "Science", plants: "Science", sequencing: "Computing",
+};
+
+function CurriculumBlock({ skills }: { skills: SkillRow[] }) {
+  const [pref, setPref] = React.useState<string>(() => {
+    try { return localStorage.getItem("learnzzy.curriculumPref.v1") ?? "CBSE"; } catch { return "CBSE"; }
+  });
+  function choose(v: string) {
+    setPref(v);
+    try { localStorage.setItem("learnzzy.curriculumPref.v1", v); } catch {}
+  }
+  const rows = (skills ?? []).slice(0, 8).map((s) => ({
+    subject: SUBJECT_OF[s.gameId] ?? "General",
+    skill: s.name,
+    level: s.level,
+    pct: s.masteryPct,
+  }));
+  return (
+    <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Curriculum progress">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Curriculum · Subject → Skill → Level</p>
+        <label className="text-xs">Framework: <select value={pref} onChange={(e) => choose(e.target.value)} aria-label="Curriculum preference" className="rounded-full border px-2 py-1 text-xs font-bold">
+          {["CBSE", "ICSE", "Cambridge", "IB", "Pearson"].map((f) => <option key={f} value={f}>{f}</option>)}
+        </select></label>
+      </div>
+      <p className="mt-1 text-xs text-on-surface-variant">Preference {pref} · cross-curriculum learning supported</p>
+      <ul className="mt-2 flex flex-col gap-1 text-sm">
+        {rows.map((r) => (
+          <li key={`${r.subject}-${r.skill}`} className="flex items-center justify-between gap-2"><span>{r.subject} → {r.skill}</span><span className="text-xs font-black">L{r.level} · {r.pct}%</span></li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function ParentProgressPage() {
   const [rows, setRows] = React.useState<{ child: ChildSummary; progress: ProgressData }[] | null>(null);
 
@@ -105,6 +143,7 @@ export default function ParentProgressPage() {
                 {progress.practiceOpportunities?.length > 0 && <p className="mt-1 text-sm"><strong>Practice next:</strong> {progress.practiceOpportunities.join(" · ")}</p>}
               </div>
             )}
+            <CurriculumBlock skills={progress.skills} />
             {progress.academic && (
               <div className="mb-3 rounded-lg bg-surface-low p-3" aria-label="Learning progress">
                 <p className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Learning · streak {progress.academic.streakDays} {progress.academic.streakDays === 1 ? "day" : "days"}</p>

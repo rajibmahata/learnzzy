@@ -15,6 +15,9 @@ const OUTCOME_SKILL_MAP: Record<string, string[]> = {
   "cambridge-computing-sequence": ["sequencing"],
   "ib-inquiry": ["discovery"],
   "cisce-evs-nature": ["discovery"],
+  "cbse-math-division": ["division"],
+  "cbse-math-measure": ["measurement"],
+  "cambridge-science-observe": ["observation"],
 };
 
 export function calculateCoverage() {
@@ -41,7 +44,7 @@ export function calculateCoverage() {
 export function gapReport() {
   const cov = calculateCoverage();
   const missingOutcomes = cov.details.filter((d) => !d.covered).map((d) => d.outcome.id);
-  const missingSkills = ["multiplication", "division", "geometry"].filter((s) => !LEARNING_ACTIVITY_REGISTRY.some((a) => a.skill === s));
+  const missingSkills = ["time"].filter((s) => !LEARNING_ACTIVITY_REGISTRY.some((a) => a.skill === s));
   return {
     missingOutcomes,
     missingSkills,

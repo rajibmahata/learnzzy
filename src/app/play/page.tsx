@@ -16,6 +16,8 @@ import { ContinueLearning } from "@/components/learner/ContinueLearning";
 import { isSoundMuted, setSoundMuted, speakWithCharacter, CHARACTER_VOICES } from "@/lib/audio";
 import Link from "next/link";
 import { artForGame } from "@/lib/worlds";
+import { InstallPrompt } from "@/components/child/InstallPrompt";
+import { LocaleSwitcher } from "@/lib/locale";
 
 const CATEGORY_GAMES: Record<string, string[]> = {
   numbers: ["addition", "subtraction"],
@@ -35,23 +37,54 @@ export default function PlayHome() {
   const [soundOn, setSoundOn] = React.useState(true);
   const [showGate, setShowGate] = React.useState(false);
   const [gatePick, setGatePick] = React.useState<string | null>(null);
+  // Real wind-down session timer (defaults to 20 minutes per visit).
+  const [windDownLeft, setWindDownLeft] = React.useState<number | null>(null);
+  const [windExpired, setWindExpired] = React.useState(false);
+  const gateUnlockMs = 15 * 60 * 1000;
+  const sessionMs = 20 * 60 * 1000;
+
   React.useEffect(() => {
     setGames(shuffledForWindow(GAMES));
     const profile = getCachedProfile();
     setLearner(profile);
     setSoundOn(!isSoundMuted());
-    if (profile?.learnerId) {
-      fetch(`/api/learners/${profile.learnerId}/plan`).then((r) => r.json()).then((b) => {
-        if (b.success && Array.isArray(b.data?.items)) {
-          const levels: Record<string, number> = {};
-          for (const it of b.data.items) {
-            if (it?.gameId && typeof it.level === "number") levels[it.gameId] = it.level;
+    // Parent gate unlock remembered for 15 minutes (fewer re-gates for adults).
+    try {
+      const unlockedAt = Number(sessionStorage.getItem("learnzzy.gateUnlockedAt") || 0);
+      if (unlockedAt && Date.now() - unlockedAt < gateUnlockMs) setShowGate(false);
+    } catch {}
+    // Wind-down: one session clock per tab, restored across remounts.
+    try {
+      let startedAt = Number(sessionStorage.getItem("learnzzy.sessionStartedAt") || 0);
+      if (!startedAt || Date.now() - startedAt > sessionMs) {
+        startedAt = Date.now();
+        sessionStorage.setItem("learnzzy.sessionStartedAt", String(startedAt));
+      }
+      const tick = () => {
+        const left = Math.max(0, sessionMs - (Date.now() - startedAt));
+        setWindDownLeft(Math.ceil(left / 60000));
+        if (left <= 0) setWindExpired(true);
+      };
+      tick();
+      const id = setInterval(tick, 15000);
+      if (profile?.learnerId) {
+        fetch(`/api/learners/${profile.learnerId}/plan`).then((r) => r.json()).then((b) => {
+          if (b.success && Array.isArray(b.data?.items)) {
+            const levels: Record<string, number> = {};
+            for (const it of b.data.items) {
+              if (it?.gameId && typeof it.level === "number") levels[it.gameId] = it.level;
+            }
+            setPlanLevels(levels);
           }
-          setPlanLevels(levels);
-        }
-      }).catch(() => null);
+        }).catch(() => null);
+      }
+      return () => clearInterval(id);
+    } catch {
+      return undefined;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const hour = new Date().getHours();
   const daypart = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
   function categoryLevel(id: string): number | null {
@@ -61,7 +94,7 @@ export default function PlayHome() {
   function handleSurprise() {
     const pool = games.length > 0 ? games : GAMES;
     const pick = pool[Math.floor(Math.random() * pool.length)];
-    window.location.href = pick.href;
+    window.location.assign(pick.href);
   }
   function triggerCompanion(name: string) {
     window.dispatchEvent(new CustomEvent("wonder:companion:trigger", { detail: { companion: name } }));
@@ -133,6 +166,7 @@ export default function PlayHome() {
         </header>
 
         {/* Greeting */}
+        <InstallPrompt />
         <div className="mt-4 flex flex-col items-center text-center">
           <p className="inline-flex rounded-full bg-surface-high px-3 py-1 text-xs font-bold uppercase tracking-wider text-on-surface-variant">
             Play • Think • Learn
@@ -554,12 +588,31 @@ export default function PlayHome() {
               <span>No Ads or Micro-transactions</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-primary">hourglass_bottom</span>
-              <span>Wind-Down Timer: <strong>18 mins left</strong></span>
+              <span className="material-symbols-outlined text-[18px] text-primary" aria-hidden>hourglass_bottom</span>
+              <span>
+                Wind-Down Timer:{" "}
+                <strong>
+                  {windExpired ? "rest time 🌙" : windDownLeft !== null ? `${windDownLeft} min left` : "…"}
+                </strong>
+              </span>
             </div>
-            <button onClick={() => setShowGate(true)} className="text-primary hover:underline font-bold flex items-center gap-1">
-              <span className="material-symbols-outlined text-[18px]">insights</span> Learning Insights
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  const unlockedAt = Number(sessionStorage.getItem("learnzzy.gateUnlockedAt") || 0);
+                  if (unlockedAt && Date.now() - unlockedAt < gateUnlockMs) {
+                    window.location.assign("/parent/login");
+                    return;
+                  }
+                } catch {}
+                setShowGate(true);
+              }}
+              className="text-primary hover:underline font-bold flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[18px]" aria-hidden>insights</span> Learning Insights
             </button>
+            <LocaleSwitcher />
           </div>
         </footer>
 
@@ -577,7 +630,7 @@ export default function PlayHome() {
               </div>
               <p className="text-sm text-on-surface-variant">To ensure this area is for adults, please solve this quick math puzzle:</p>
               <div className="p-4 bg-surface-container-low rounded-xl text-center">
-                <span className="font-extrabold tracking-widest text-xl">7 + 5 = ?</span>
+                <span className="font-extrabold tracking-widest text-xl" data-gate-question>7 + 5 = ?</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {["11", "12", "14"].map((opt) => (
@@ -585,8 +638,11 @@ export default function PlayHome() {
                     key={opt}
                     onClick={() => {
                       if (opt === "12") {
+                        try {
+                          sessionStorage.setItem("learnzzy.gateUnlockedAt", String(Date.now()));
+                        } catch {}
                         setShowGate(false);
-                        window.location.href = "/parent/login";
+                        window.location.assign("/parent/login");
                       } else {
                         setGatePick(opt);
                         setTimeout(() => setGatePick(null), 500);
@@ -601,6 +657,37 @@ export default function PlayHome() {
             </div>
           </div>
         )}
+
+        {/* Wind-down gentle overlay — never a hard lock mid-play; soft rest cue */}
+        {windExpired ? (
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4" role="dialog" aria-label="Wind-down rest time">
+            <div className="max-w-sm w-full rounded-3xl bg-white p-6 text-center shadow-2xl border-2 border-secondary-fixed">
+              <p aria-hidden className="text-5xl">🌙</p>
+              <h2 className="mt-2 text-headline-md font-extrabold">Rest time!</h2>
+              <p className="mt-2 text-sm font-bold text-on-surface-variant">
+                Great playing today. Take a break — your stars and stickers are safe.
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      sessionStorage.setItem("learnzzy.sessionStartedAt", String(Date.now()));
+                    } catch {}
+                    setWindExpired(false);
+                    setWindDownLeft(20);
+                  }}
+                  className="tactile-button min-h-touch rounded-full bg-primary px-5 py-3 font-extrabold text-white shadow-[0_5px_0_#004395]"
+                >
+                  Keep playing a little more
+                </button>
+                <Link href="/parents" className="tactile-button flex min-h-touch items-center justify-center rounded-full bg-surface-high px-5 py-3 font-extrabold">
+                  👨‍👩‍👧 Grown-ups
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <nav aria-label="Playground" className="fixed inset-x-0 bottom-0 z-30 border-t border-surface-high bg-surface/95 px-2 pb-safe pt-2 backdrop-blur-xl sm:px-4">
           <div className="mx-auto flex max-w-game items-center justify-around gap-1 sm:gap-2">

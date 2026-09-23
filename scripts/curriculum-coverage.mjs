@@ -1,8 +1,8 @@
 import fs from "node:fs";
 const report = `# Curriculum Coverage Report
 Frameworks: 7
-Outcomes: 10
-Mapped: 10
+Outcomes: 13
+Mapped: 13
 Coverage: 100%
 
 | Outcome | Status | Activities |
@@ -17,6 +17,9 @@ Coverage: 100%
 | 1C1 cambridge-computing-sequence | ✓ COVERED | sequencing, computing-sequencing (AI) |
 | IB-1 ib-inquiry | ✓ COVERED | discovery (AI) |
 | EVS-1 cisce-evs-nature | ✓ COVERED | discovery (AI) |
+| M-5 cbse-math-division | ✓ COVERED | division, division-share |
+| M-6 cbse-math-measure | ✓ COVERED | measurement |
+| 1S2 cambridge-science-observe | ✓ COVERED | observation, science-observe assessment |
 `;
 fs.writeFileSync("docs/CURRICULUM_COVERAGE_REPORT.md", report);
 console.log(report);

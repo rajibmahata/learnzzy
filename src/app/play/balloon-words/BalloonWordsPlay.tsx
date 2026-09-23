@@ -14,6 +14,7 @@ import { useRewards, type Sticker } from "@/lib/rewards";
 import { reportGameCompletion } from "@/lib/learnerSync";
 import { LockedAdventure } from "@/components/child/LockedAdventure";
 import { getCachedProfile } from "@/lib/learner";
+import { bumpGlobalLevel } from "@/lib/levelUp";
 import { normalizeAgeBand } from "@/lib/complexity";
 
 export default function BalloonWordsPlay() {
@@ -29,11 +30,13 @@ export default function BalloonWordsPlay() {
   const profile = getCachedProfile();
   const ageBand = normalizeAgeBand(profile?.ageBand);
   const globalLevel = Math.max(1, Math.min(100, profile?.level ?? 1));
+  // Nonce re-derives rounds after a level-up without window.location.reload().
+  const [nonce, setNonce] = React.useState(0);
 
   const rounds = React.useMemo(() => {
-    const seed = `${profile?.learnerId ?? "guest"}-${globalLevel}-${ageBand}`;
+    const seed = `${profile?.learnerId ?? "guest"}-${globalLevel}-${ageBand}-${nonce}`;
     return Array.from({ length: GAME_ROUNDS }, (_, i) => createBalloonLetterRound(seed, ageBand, i));
-  }, [ageBand, globalLevel, profile?.learnerId]);
+  }, [ageBand, globalLevel, profile?.learnerId, nonce]);
 
   const current = rounds[round];
   const [countdown, setCountdown] = React.useState<number | null>(null);
@@ -135,16 +138,16 @@ export default function BalloonWordsPlay() {
             setPoppedIds(new Set());
           }}
           onContinue={() => {
-            // harder next — bump level via localStorage then reload
-            try {
-              const raw = localStorage.getItem("learnzzy.learner.v1");
-              if (raw) {
-                const p = JSON.parse(raw);
-                const next = Math.min(100, (p.level ?? 1) + 1);
-                localStorage.setItem("learnzzy.learner.v1", JSON.stringify({ ...p, level: next }));
-              }
-            } catch {}
-            window.location.reload();
+            // Harder next — bump canonical level and reset in place (no full reload).
+            bumpGlobalLevel(globalLevel, 1);
+            mistakeRounds.current.clear();
+            gameStart.current = Date.now();
+            setRound(0);
+            setFeedback("idle");
+            setDone(false);
+            setReward(null);
+            setPoppedIds(new Set());
+            setNonce((n) => n + 1);
           }}
         />
       );
@@ -158,7 +161,7 @@ export default function BalloonWordsPlay() {
 
   if (!current) {
     return (
-      <GameShell title="Balloon Burst — Letters" stars={totalStars}>
+    <GameShell title="Balloon Burst — Letters" stars={totalStars} progress={{ current: round + 1, total: GAME_ROUNDS }} level={globalLevel}>
         <div className="flex flex-1 flex-col items-center justify-center py-16 text-center" role="status">
           <p aria-hidden className="text-5xl">🌈</p>
           <p className="mt-3 text-instruction">Getting your balloons ready…</p>

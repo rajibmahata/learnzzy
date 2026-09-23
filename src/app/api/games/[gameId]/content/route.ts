@@ -110,13 +110,15 @@ export async function GET(req: Request, { params }: { params: { gameId: string }
     ? rawDiff === "medium" ? 2 : rawDiff === "hard" ? 3 : Number(rawDiff)
     : Number(rawLevel);
   const selectedLevel = Number.isInteger(requestedLevel) ? Math.max(1, Math.min(100, requestedLevel)) : 1;
+  // Storage bucket only (easy|medium|hard). Levels 4+ stay "hard" for pool
+  // lookup; complexity comes from LevelDoc.maxOperand below (not this bucket).
   const lvl: 1 | 2 | 3 = selectedLevel === 2 ? 2 : selectedLevel >= 3 ? 3 : 1;
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") ?? "5") || 5, 1), 10);
   const difficultyName = levelToDifficulty(lvl);
   const isMath = gameId === "addition" || gameId === "subtraction";
   const learnerId = url.searchParams.get("learnerId") ?? undefined;
   const ageBand = url.searchParams.get("ageBand") as "4-5" | "6-7" | "8-9" | null;
-  const recentIds = (url.searchParams.get("recent") ?? "").split(",").filter((id) => id.length > 0).slice(0, 20);
+  const recentIds = (url.searchParams.get("recent") ?? "").split(",").filter((id) => id.length > 0).slice(0, 40);
   const seedRaw = Number(url.searchParams.get("seed"));
   const seed = Number.isFinite(seedRaw) ? seedRaw : hashSeed(`${learnerId ?? "guest"}:${gameId}:${Date.now()}`);
 
